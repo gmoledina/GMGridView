@@ -1,7 +1,7 @@
 GM-GRID-VIEW (MIT license)
 --------------------------
 
-An iOS Grid-View allowing the user to sort the views in the scrollView. 
+An iOS Grid-View allowing the user to sort the views in the scrollView with a finger: the user can move the items with the finger to sort them and a delegate is notified to ensure the datasource is up-to-date. 
 This view is inspired by the UITableView and uses a delegate and a datasource to get the data and interact with it.
 
 Requirements:
@@ -22,3 +22,5 @@ ToDo's:
 - Adding a pinch on views to zoom them
 - Adding an animation flag on method definition (i.e: animated:(BOOL)animated)
 
+Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
+All comments are welcome!
