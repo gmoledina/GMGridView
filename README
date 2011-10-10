@@ -2,11 +2,11 @@ GM-GRID-VIEW (MIT license)
 --------------------------
 
 An iOS Grid-View allowing the user to sort the views in the scrollView. 
-This view is inspired by the UITableView and uses a delegate and a datasource in order to get the data and interact with it.
+This view is inspired by the UITableView and uses a delegate and a datasource to get the data and interact with it.
 
 Requirements:
 - iOS 5 (for NSMutableOrderedSet and to access the UIScrollView gestureRecognizers)
-- ARC
+- ARC (Automatic Reference Counting) enabled
 
 Features:
 - Works on both the iPhone and iPad
@@ -20,4 +20,5 @@ Features:
 ToDo's:
 - Not loading all views at once (using CATiledLayer ?)
 - Adding a pinch on views to zoom them
+- Adding an animation flag on method definition (i.e: animated:(BOOL)animated)
 
