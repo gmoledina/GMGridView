@@ -12,7 +12,7 @@ Features:
 - Works on both the iPhone and iPad
 - Works on both portrait and landscape orientation
 - Perform a long-touch on a view to be able to move it
-- Works great inside a scrollView
+- Moving of views works great inside the scrollview
 - Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
 - Two different animation styles ("Swap" or "Push")
 - Demo app provided
@@ -21,6 +21,7 @@ ToDo's:
 - Not loading all views at once (using CATiledLayer ?)
 - Adding a pinch on views to zoom them
 - Adding an animation flag on method definition (i.e: animated:(BOOL)animated)
+- UnitTests
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
 All comments are welcome!
