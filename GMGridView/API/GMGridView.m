@@ -109,7 +109,7 @@
         
         m_scrollView = [[UIScrollView alloc] initWithFrame:frame];
         m_scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        m_scrollView.backgroundColor = [UIColor yellowColor];
+        m_scrollView.backgroundColor = [UIColor clearColor];
         [m_scrollView.panGestureRecognizer requireGestureRecognizerToFail:m_panGesture];
         [self addSubview:m_scrollView];
         

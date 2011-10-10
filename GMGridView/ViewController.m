@@ -101,16 +101,16 @@
 {
     [super loadView];
     
-    GMGridView *draggableView = [[GMGridView alloc] initWithFrame:self.view.bounds];
-    draggableView.style = GMGridViewStyleSwap;
-    draggableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    draggableView.itemPadding = m_itemPadding;
-    [self.view addSubview:draggableView];
-    mw_gmGridView = draggableView;
+    GMGridView *gmGridView = [[GMGridView alloc] initWithFrame:self.view.bounds];
+    gmGridView.style = GMGridViewStyleSwap;
+    gmGridView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    gmGridView.itemPadding = m_itemPadding;
+    gmGridView.backgroundColor = [UIColor whiteColor];
+    [self.view addSubview:gmGridView];
+    mw_gmGridView = gmGridView;
     
     mw_gmGridView.delegate = self;
     mw_gmGridView.dataSource = self;
-    
     
     UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoDark];
     infoButton.frame = CGRectMake(self.view.bounds.size.width - 40, 
