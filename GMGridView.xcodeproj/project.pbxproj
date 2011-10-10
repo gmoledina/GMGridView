@@ -1,0 +1,289 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1691D7A11442CFA800F472BF /* GMGridView-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1691D7A01442CFA800F472BF /* GMGridView-Info.plist */; };
+		1691D7A41442CFC300F472BF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A31442CFC300F472BF /* main.m */; };
+		1691D7AA1442D01F00F472BF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A71442D01F00F472BF /* AppDelegate.m */; };
+		1691D7AB1442D01F00F472BF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A91442D01F00F472BF /* ViewController.m */; };
+		1691D7AE1442D02C00F472BF /* GMGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7AD1442D02C00F472BF /* GMGridView.m */; };
+		16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0B144156FE00E6E556 /* UIKit.framework */; };
+		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
+		16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0F144156FE00E6E556 /* CoreGraphics.framework */; };
+		16924B16144156FE00E6E556 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 16924B14144156FE00E6E556 /* InfoPlist.strings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1691D7A01442CFA800F472BF /* GMGridView-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GMGridView-Info.plist"; path = "GMGridView/GMGridView-Info.plist"; sourceTree = SOURCE_ROOT; };
+		1691D7A21442CFC300F472BF /* GMGridView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GMGridView-Prefix.pch"; path = "GMGridView/GMGridView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		1691D7A31442CFC300F472BF /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = GMGridView/main.m; sourceTree = SOURCE_ROOT; };
+		1691D7A61442D01F00F472BF /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = GMGridView/AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		1691D7A71442D01F00F472BF /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = GMGridView/AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		1691D7A81442D01F00F472BF /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = GMGridView/ViewController.h; sourceTree = SOURCE_ROOT; };
+		1691D7A91442D01F00F472BF /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = GMGridView/ViewController.m; sourceTree = SOURCE_ROOT; };
+		1691D7AC1442D02C00F472BF /* GMGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridView.h; path = GMGridView/API/GMGridView.h; sourceTree = SOURCE_ROOT; };
+		1691D7AD1442D02C00F472BF /* GMGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridView.m; path = GMGridView/API/GMGridView.m; sourceTree = SOURCE_ROOT; };
+		16924B07144156FE00E6E556 /* GMGridView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GMGridView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		16924B0B144156FE00E6E556 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		16924B0D144156FE00E6E556 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		16924B0F144156FE00E6E556 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		16924B04144156FE00E6E556 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */,
+				16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */,
+				16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		16924AFC144156FD00E6E556 = {
+			isa = PBXGroup;
+			children = (
+				16924B11144156FE00E6E556 /* Demo */,
+				16924B361442CA9400E6E556 /* API */,
+				16924B0A144156FE00E6E556 /* Frameworks */,
+				16924B08144156FE00E6E556 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		16924B08144156FE00E6E556 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				16924B07144156FE00E6E556 /* GMGridView.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		16924B0A144156FE00E6E556 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				16924B0B144156FE00E6E556 /* UIKit.framework */,
+				16924B0D144156FE00E6E556 /* Foundation.framework */,
+				16924B0F144156FE00E6E556 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		16924B11144156FE00E6E556 /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				1691D7A61442D01F00F472BF /* AppDelegate.h */,
+				1691D7A71442D01F00F472BF /* AppDelegate.m */,
+				1691D7A81442D01F00F472BF /* ViewController.h */,
+				1691D7A91442D01F00F472BF /* ViewController.m */,
+				16924B12144156FE00E6E556 /* Supporting Files */,
+			);
+			name = Demo;
+			path = DraggableGridView;
+			sourceTree = "<group>";
+		};
+		16924B12144156FE00E6E556 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1691D7A01442CFA800F472BF /* GMGridView-Info.plist */,
+				1691D7A21442CFC300F472BF /* GMGridView-Prefix.pch */,
+				1691D7A31442CFC300F472BF /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		16924B361442CA9400E6E556 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				1691D7AC1442D02C00F472BF /* GMGridView.h */,
+				1691D7AD1442D02C00F472BF /* GMGridView.m */,
+			);
+			name = API;
+			path = DraggableGridView/API;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		16924B06144156FE00E6E556 /* GMGridView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16924B28144156FE00E6E556 /* Build configuration list for PBXNativeTarget "GMGridView" */;
+			buildPhases = (
+				16924B03144156FE00E6E556 /* Sources */,
+				16924B04144156FE00E6E556 /* Frameworks */,
+				16924B05144156FE00E6E556 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GMGridView;
+			productName = DraggableGridView;
+			productReference = 16924B07144156FE00E6E556 /* GMGridView.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		16924AFE144156FD00E6E556 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = GMoledina.ca;
+			};
+			buildConfigurationList = 16924B01144156FD00E6E556 /* Build configuration list for PBXProject "GMGridView" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 16924AFC144156FD00E6E556;
+			productRefGroup = 16924B08144156FE00E6E556 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				16924B06144156FE00E6E556 /* GMGridView */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		16924B05144156FE00E6E556 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16924B16144156FE00E6E556 /* InfoPlist.strings in Resources */,
+				1691D7A11442CFA800F472BF /* GMGridView-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		16924B03144156FE00E6E556 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1691D7A41442CFC300F472BF /* main.m in Sources */,
+				1691D7AA1442D01F00F472BF /* AppDelegate.m in Sources */,
+				1691D7AB1442D01F00F472BF /* ViewController.m in Sources */,
+				1691D7AE1442D02C00F472BF /* GMGridView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		16924B14144156FE00E6E556 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+			);
+			name = InfoPlist.strings;
+			path = "/Users/gmoledina/Documents/iOS Projects/GMGridView/DraggableGridView";
+			sourceTree = "<absolute>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		16924B26144156FE00E6E556 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		16924B27144156FE00E6E556 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		16924B29144156FE00E6E556 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GMGridView/GMGridView-Prefix.pch";
+				INFOPLIST_FILE = "GMGridView/GMGridView-Info.plist";
+				PRODUCT_NAME = GMGridView;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		16924B2A144156FE00E6E556 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GMGridView/GMGridView-Prefix.pch";
+				INFOPLIST_FILE = "GMGridView/GMGridView-Info.plist";
+				PRODUCT_NAME = GMGridView;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		16924B01144156FD00E6E556 /* Build configuration list for PBXProject "GMGridView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16924B26144156FE00E6E556 /* Debug */,
+				16924B27144156FE00E6E556 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16924B28144156FE00E6E556 /* Build configuration list for PBXNativeTarget "GMGridView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16924B29144156FE00E6E556 /* Debug */,
+				16924B2A144156FE00E6E556 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 16924AFE144156FD00E6E556 /* Project object */;
+}
