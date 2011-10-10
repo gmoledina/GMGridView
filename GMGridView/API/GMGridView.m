@@ -3,7 +3,25 @@
 //  GMGridView
 //
 //  Created by Gulam Moledina on 11-10-09.
-//  Copyright (c) 2011 GMoledina.ca. All rights reserved.
+//  Copyright (C) 2011 by Gulam Moledina.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 //
 
 #import "GMGridView.h"
@@ -96,7 +114,7 @@
         [self addSubview:m_scrollView];
         
         self.itemPadding = 10;
-        self.style = DraggableGridViewStylePush;
+        self.style = GMGridViewStylePush;
         self.minimumPressDuration = 0.2;
         
         m_futurePosition = -1;
@@ -132,7 +150,7 @@
 #pragma mark Setters / getters
 //////////////////////////////////////////////////////////////
 
-- (void)setDataSource:(NSObject<DraggableGridViewDataSource> *)dataSource
+- (void)setDataSource:(NSObject<GMGridViewDataSource> *)dataSource
 {
     mw_dataSource = dataSource;
     [self reloadData];
@@ -254,7 +272,7 @@
     
     m_futurePosition = m_movingItem.tag;
         
-    [self.delegate draggableView:self didStartMovingView:m_movingItem];
+    [self.delegate GMGridView:self didStartMovingView:m_movingItem];
 }
 
 - (void)movingDidContinueToPoint:(CGPoint)point
@@ -278,7 +296,7 @@
         {
             switch (self.style) 
             {
-                case DraggableGridViewStylePush:
+                case GMGridViewStylePush:
                 {
                     if (position > m_futurePosition) 
                     {
@@ -302,7 +320,7 @@
                     }
                     break;
                 }
-                case DraggableGridViewStyleSwap:
+                case GMGridViewStyleSwap:
                 default:
                 {
                     UIView *v = [m_scrollView viewWithTag:position];
@@ -325,7 +343,7 @@
     [self updateIndexOfItem:m_movingItem toIndex:m_movingItem.tag - GMGV_POSITION_AND_TAG_OFFSET];
     m_futurePosition = -1;
     
-    [self.delegate draggableView:self didEndMovingView:m_movingItem];
+    [self.delegate GMGridView:self didEndMovingView:m_movingItem];
     
     [UIView animateWithDuration:0.2 animations:^() {
         m_movingItem.transform = CGAffineTransformIdentity;
@@ -347,13 +365,13 @@
     
     [m_orderedSubviews removeAllObjects];
     
-    NSUInteger numberItems = [self.dataSource numberOfItemsInDraggableView:self];
-    NSUInteger width       = [self.dataSource widthForItemsInDraggableView:self];
-    NSUInteger height      = [self.dataSource heightForItemsInDraggableView:self];
+    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
+    NSUInteger width       = [self.dataSource widthForItemsInGMGridView:self];
+    NSUInteger height      = [self.dataSource heightForItemsInGMGridView:self];
     
     for (int i = 0; i < numberItems; i++) 
     {        
-        UIView *itemView = [self.dataSource draggableView:self viewForItemAtIndex:i];
+        UIView *itemView = [self.dataSource GMGridView:self viewForItemAtIndex:i];
         itemView.frame = CGRectMake(0, 0, width, height);
         itemView.tag = i + GMGV_POSITION_AND_TAG_OFFSET;
 
@@ -371,7 +389,7 @@
     
     UIView *currentView = [m_orderedSubviews objectAtIndex:index];
     
-    UIView *view = [self.dataSource draggableView:self viewForItemAtIndex:index];
+    UIView *view = [self.dataSource GMGridView:self viewForItemAtIndex:index];
     view.frame = currentView.frame;
     view.tag = currentView.tag;
     view.alpha = 0;
@@ -394,7 +412,7 @@
 {
     NSAssert((index >= 0 && index <= [m_orderedSubviews count]), @"Invalid index specified");
     
-    UIView *view = [self.dataSource draggableView:self viewForItemAtIndex:index];
+    UIView *view = [self.dataSource GMGridView:self viewForItemAtIndex:index];
     view.frame = CGRectMake(-20, -20, m_itemSize.width, m_itemSize.height);
     view.tag = index + GMGV_POSITION_AND_TAG_OFFSET;
     
@@ -461,7 +479,7 @@
     if (index >= 0 && oldIndex != index && oldIndex < [m_orderedSubviews count]) 
     {
         [m_orderedSubviews moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:oldIndex] toIndex:index];
-        [self.delegate draggableView:self itemAtIndex:oldIndex movedToIndex:index];
+        [self.delegate GMGridView:self itemAtIndex:oldIndex movedToIndex:index];
     }
 }
 

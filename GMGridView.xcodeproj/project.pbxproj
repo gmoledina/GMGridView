@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1691D7A11442CFA800F472BF /* GMGridView-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1691D7A01442CFA800F472BF /* GMGridView-Info.plist */; };
 		1691D7A41442CFC300F472BF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A31442CFC300F472BF /* main.m */; };
 		1691D7AA1442D01F00F472BF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A71442D01F00F472BF /* AppDelegate.m */; };
 		1691D7AB1442D01F00F472BF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A91442D01F00F472BF /* ViewController.m */; };
@@ -15,7 +14,6 @@
 		16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0B144156FE00E6E556 /* UIKit.framework */; };
 		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
 		16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0F144156FE00E6E556 /* CoreGraphics.framework */; };
-		16924B16144156FE00E6E556 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 16924B14144156FE00E6E556 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -160,8 +158,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16924B16144156FE00E6E556 /* InfoPlist.strings in Resources */,
-				1691D7A11442CFA800F472BF /* GMGridView-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,17 +176,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		16924B14144156FE00E6E556 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-			);
-			name = InfoPlist.strings;
-			path = "/Users/gmoledina/Documents/iOS Projects/GMGridView/DraggableGridView";
-			sourceTree = "<absolute>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		16924B26144156FE00E6E556 /* Debug */ = {

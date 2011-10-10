@@ -3,19 +3,37 @@
 //  GMGridView
 //
 //  Created by Gulam Moledina on 11-10-09.
-//  Copyright (c) 2011 GMoledina.ca. All rights reserved.
+//  Copyright (C) 2011 by Gulam Moledina.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 //
 
 #import <UIKit/UIKit.h>
 
-@protocol DraggableGridViewDelegate;
-@protocol DraggableGridViewDataSource;
+@protocol GMGridViewDelegate;
+@protocol GMGridViewDataSource;
 
 typedef enum
 {
-    DraggableGridViewStylePush = 0,
-    DraggableGridViewStyleSwap
-} DraggableGridViewStyle;
+    GMGridViewStylePush = 0,
+    GMGridViewStyleSwap
+} GMGridViewStyle;
 
 
 //////////////////////////////////////////////////////////////
@@ -27,11 +45,11 @@ typedef enum
     
 }
 
-@property (nonatomic, weak) id<DraggableGridViewDataSource> dataSource;
-@property (nonatomic, weak) id<DraggableGridViewDelegate> delegate;
+@property (nonatomic, weak) id<GMGridViewDataSource> dataSource;
+@property (nonatomic, weak) id<GMGridViewDelegate> delegate;
 
 @property (nonatomic, assign) NSInteger itemPadding;
-@property (nonatomic, assign) DraggableGridViewStyle style;
+@property (nonatomic, assign) GMGridViewStyle style;
 @property (nonatomic) CFTimeInterval minimumPressDuration; // If set to 0, the scrollView will not be scrollable
 
 - (void)reloadData;
@@ -47,12 +65,12 @@ typedef enum
 #pragma mark Protocol DraggableGridViewDataSource
 //////////////////////////////////////////////////////////////
 
-@protocol DraggableGridViewDataSource
+@protocol GMGridViewDataSource
 
-- (NSInteger)numberOfItemsInDraggableView:(GMGridView *)draggableView;
-- (NSInteger)widthForItemsInDraggableView:(GMGridView *)draggableView;
-- (NSInteger)heightForItemsInDraggableView:(GMGridView *)draggableView;
-- (UIView *)draggableView:(GMGridView *)draggableView viewForItemAtIndex:(NSInteger)index;
+- (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
+- (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView;
+- (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView;
+- (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
 
 @end
 
@@ -61,10 +79,10 @@ typedef enum
 #pragma mark Protocol DraggableGridViewDelegate
 //////////////////////////////////////////////////////////////
 
-@protocol DraggableGridViewDelegate
+@protocol GMGridViewDelegate
 
-- (void)draggableView:(GMGridView *)draggableView didStartMovingView:(UIView *)view;
-- (void)draggableView:(GMGridView *)draggableView didEndMovingView:(UIView *)view;
-- (void)draggableView:(GMGridView *)draggableView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
+- (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
 
 @end
