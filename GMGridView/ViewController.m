@@ -14,6 +14,7 @@
 #define NUMBER_ITEMS_ON_LOAD 200
 
 //////////////////////////////////////////////////////////////
+#pragma mark -
 #pragma mark ViewController (privates methods)
 //////////////////////////////////////////////////////////////
 
@@ -35,6 +36,7 @@
 
 
 //////////////////////////////////////////////////////////////
+#pragma mark -
 #pragma mark ViewController implementation
 //////////////////////////////////////////////////////////////
 
@@ -103,7 +105,6 @@
     draggableView.style = GMGridViewStyleSwap;
     draggableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     draggableView.itemPadding = m_itemPadding;
-
     [self.view addSubview:draggableView];
     mw_gmGridView = draggableView;
     
@@ -125,6 +126,7 @@
 //////////////////////////////////////////////////////////////
 #pragma mark memory management
 //////////////////////////////////////////////////////////////
+
 //- (void)didReceiveMemoryWarning {
 //    [super didReceiveMemoryWarning];
 //}
@@ -170,8 +172,7 @@
     view.layer.shadowRadius = 8;
     
     UILabel *label = [[UILabel alloc] initWithFrame:view.frame];
-    NSString *message = (NSString *)[m_data objectAtIndex:index];
-    label.text = message;
+    label.text = (NSString *)[m_data objectAtIndex:index];
     label.textAlignment = UITextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
     label.textColor = [UIColor blackColor];
@@ -205,15 +206,12 @@
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark public methods
-//////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
 #pragma mark private methods
 //////////////////////////////////////////////////////////////
 
 - (void)addMoreItem
 {
+    // Example: adding object at the last position
     NSString *newItem = [NSString stringWithFormat:@"%d", (int)(arc4random() % 1000)];
     
     if (![m_data containsObject:newItem]) 
@@ -224,14 +222,18 @@
     }
     else
     {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Duplicate" message:[NSString stringWithFormat:@"Data already contains '%@'", newItem] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Duplicate" 
+                                                            message:[NSString stringWithFormat:@"Data already contains '%@'", newItem] 
+                                                           delegate:nil 
+                                                  cancelButtonTitle:@"OK" 
+                                                  otherButtonTitles:nil];
         [alertView show];
     }
 }
 
 - (void)removeItem
 {
+    // Example: removing last item
     if ([m_data count] > 0) 
     {
         NSInteger index = [m_data count] - 1;
@@ -243,6 +245,7 @@
 
 - (void)refreshItem
 {
+    // Example: reloading last item
     if ([m_data count] > 0) 
     {
         int index = [m_data count] - 1;
@@ -260,7 +263,11 @@
 - (void)presentInfo
 {
     NSString *info = @"Long-press an item and its color will change; letting you know that you can now move it around.";
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Info" message:info delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Info" 
+                                                        message:info 
+                                                       delegate:nil 
+                                              cancelButtonTitle:@"OK" 
+                                              otherButtonTitles:nil];
     
     [alertView show];
 }
@@ -278,10 +285,5 @@
             break;
     }
 }
-
-
-//////////////////////////////////////////////////////////////
-#pragma mark control events
-//////////////////////////////////////////////////////////////
 
 @end
