@@ -26,7 +26,7 @@
 
 #import "GMGridView.h"
 
-#define GMGV_POSITION_AND_TAG_OFFSET 50
+#define GMGV_TAG_OFFSET 50
 
 //////////////////////////////////////////////////////////////
 #pragma -
@@ -37,14 +37,14 @@
 {
     // Views
     UIScrollView *m_scrollView;
-    NSMutableOrderedSet *m_orderedSubviews;
     
     // Gestures
     UIPanGestureRecognizer *m_panGesture;
     UILongPressGestureRecognizer *m_longPressGesture;
     
     // General vars
-    NSInteger m_numberOfItemsInRow;
+    NSInteger m_numberOfItemsPerRow;
+    NSInteger m_numberTotalItems;
     CGSize m_itemSize;
     
     // Moving control vars
@@ -65,8 +65,11 @@
 
 // Helpers & more
 - (CGSize)relayoutItems;
+- (CGPoint)originForItemAtPosition:(NSInteger)position;
 - (NSInteger)itemPositionFromLocation:(CGPoint)location;
-
+- (NSArray *)itemSubviews;
+- (UIView *)itemSubViewForPosition:(NSInteger)position;
+- (NSInteger)positionForItemSubview:(UIView *)view;
 
 @end
 
@@ -97,9 +100,7 @@
 - (id)initWithFrame:(CGRect)frame 
 {
     if ((self = [super initWithFrame:frame])) 
-    {
-        m_orderedSubviews = [[NSMutableOrderedSet alloc] init];
-        
+    {        
         m_panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
         m_panGesture.delegate = self;
         [self addGestureRecognizer:m_panGesture];
@@ -193,7 +194,7 @@
             
             if (position >= 0) 
             {
-                UIView *item = [m_scrollView viewWithTag:position];
+                UIView *item = [m_scrollView viewWithTag:position+GMGV_TAG_OFFSET];
                 
                 if (CGRectContainsPoint(item.frame, location)) 
                 {                    
@@ -270,7 +271,7 @@
 {
     [self bringSubviewToFront:m_movingItem];
     
-    m_futurePosition = m_movingItem.tag;
+    m_futurePosition = m_movingItem.tag - GMGV_TAG_OFFSET;
         
     [self.delegate GMGridView:self didStartMovingView:m_movingItem];
 }
@@ -278,14 +279,15 @@
 - (void)movingDidContinueToPoint:(CGPoint)point
 {
     int position = [self itemPositionFromLocation:point];
-        
-    if (position >= 0 && position != m_futurePosition && (position - GMGV_POSITION_AND_TAG_OFFSET) < [m_orderedSubviews count]) 
+    int tag = position + GMGV_TAG_OFFSET;
+    
+    if (position >= 0 && position != m_futurePosition && position < m_numberTotalItems) 
     {
         BOOL positionTaken = NO;
         
-        for (UIView *v in m_orderedSubviews)
+        for (UIView *v in [self itemSubviews])
         {
-            if (v != m_movingItem && v.tag == position) 
+            if (v != m_movingItem && v.tag == tag) 
             {
                 positionTaken = YES;
                 break;
@@ -300,21 +302,23 @@
                 {
                     if (position > m_futurePosition) 
                     {
-                        for (UIView *v in m_orderedSubviews)
+                        for (UIView *v in [self itemSubviews])
                         {
-                            if (v.tag == position || (v.tag < position && v.tag >= m_futurePosition)) 
+                            if (v.tag == tag || (v.tag < tag && v.tag >= m_futurePosition + GMGV_TAG_OFFSET)) 
                             {
                                 v.tag = v.tag - 1;
+                                [m_scrollView sendSubviewToBack:v];
                             }
                         }
                     }
                     else
                     {
-                        for (UIView *v in m_orderedSubviews)
+                        for (UIView *v in [self itemSubviews])
                         {
-                            if (v.tag == position || (v.tag > position && v.tag <= m_futurePosition)) 
+                            if (v.tag == tag || (v.tag > tag && v.tag <= m_futurePosition + GMGV_TAG_OFFSET)) 
                             {
                                 v.tag = v.tag + 1;
+                                [m_scrollView sendSubviewToBack:v];
                             }
                         }
                     }
@@ -323,9 +327,10 @@
                 case GMGridViewStyleSwap:
                 default:
                 {
-                    UIView *v = [m_scrollView viewWithTag:position];
-                    v.tag = m_futurePosition;
-                    [self updateIndexOfItem:v toIndex:v.tag - GMGV_POSITION_AND_TAG_OFFSET];
+                    UIView *v = [m_scrollView viewWithTag:tag];
+                    v.tag = m_futurePosition + GMGV_TAG_OFFSET;
+                    [m_scrollView sendSubviewToBack:v];
+                    [self updateIndexOfItem:v toIndex:v.tag - GMGV_TAG_OFFSET];
                     break;
                 }
             }
@@ -339,8 +344,8 @@
 
 - (void)movingDidStopAtPoint:(CGPoint)point
 {
-    m_movingItem.tag = m_futurePosition;
-    [self updateIndexOfItem:m_movingItem toIndex:m_movingItem.tag - GMGV_POSITION_AND_TAG_OFFSET];
+    m_movingItem.tag = m_futurePosition + GMGV_TAG_OFFSET;
+    [self updateIndexOfItem:m_movingItem toIndex:m_movingItem.tag - GMGV_TAG_OFFSET];
     m_futurePosition = -1;
     
     [self.delegate GMGridView:self didEndMovingView:m_movingItem];
@@ -359,11 +364,11 @@
 
 - (void)reloadData
 {
-    [m_orderedSubviews enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop){
+    [[self itemSubviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop){
         [(UIView *)obj removeFromSuperview];
     }];
     
-    [m_orderedSubviews removeAllObjects];
+    //todo: clear lazy loaded
     
     NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
     NSUInteger width       = [self.dataSource widthForItemsInGMGridView:self];
@@ -373,73 +378,72 @@
     {        
         UIView *itemView = [self.dataSource GMGridView:self viewForItemAtIndex:i];
         itemView.frame = CGRectMake(0, 0, width, height);
-        itemView.tag = i + GMGV_POSITION_AND_TAG_OFFSET;
+        itemView.tag = i + GMGV_TAG_OFFSET;
 
         [m_scrollView addSubview:itemView];
-        [m_orderedSubviews addObject:itemView];
     }
     
     m_itemSize = CGSizeMake(width, height);
+    m_numberTotalItems = numberItems;
     [self setNeedsLayout];
 }
 
 - (void)reloadObjectAtIndex:(NSInteger)index
 {
-    NSAssert((index >= 0 && index < [m_orderedSubviews count]), @"Invalid index");
+    NSAssert((index >= 0 && index < m_numberTotalItems), @"Invalid index");
     
-    UIView *currentView = [m_orderedSubviews objectAtIndex:index];
+    UIView *currentView = [self itemSubViewForPosition:index];
     
     UIView *view = [self.dataSource GMGridView:self viewForItemAtIndex:index];
     view.frame = currentView.frame;
     view.tag = currentView.tag;
+    currentView.tag += m_numberTotalItems + 999;
     view.alpha = 0;
     [m_scrollView addSubview:view];
     
-    [m_orderedSubviews replaceObjectAtIndex:index withObject:view];
+    //todo clear lazy loaded data
     
-    [UIView animateWithDuration:0.3 animations:^{
+    [UIView animateWithDuration:0.3 delay:0 options:0 animations:^{
         currentView.alpha = 0;
         view.alpha = 1;
     } 
     completion:^(BOOL finished)
     {
          [currentView removeFromSuperview];
-         [self setNeedsLayout];
     }];
 }
 
 - (void)insertObjectAtIndex:(NSInteger)index
 {
-    NSAssert((index >= 0 && index <= [m_orderedSubviews count]), @"Invalid index specified");
+    NSAssert((index >= 0 && index <= m_numberTotalItems), @"Invalid index specified");
     
     UIView *view = [self.dataSource GMGridView:self viewForItemAtIndex:index];
-    view.frame = CGRectMake(-20, -20, m_itemSize.width, m_itemSize.height);
-    view.tag = index + GMGV_POSITION_AND_TAG_OFFSET;
+    CGPoint origin = [self originForItemAtPosition:index];
+    view.frame = CGRectMake(origin.x, origin.y, m_itemSize.width, m_itemSize.height);
+    view.tag = index + GMGV_TAG_OFFSET;
     
-    for (int i = index; i < [m_orderedSubviews count]; i++) 
+    for (int i = index; i < m_numberTotalItems; i++)
     {
-        UIView *oldView = [m_orderedSubviews objectAtIndex:i];
+        UIView *oldView = [self itemSubViewForPosition:i];
         oldView.tag = oldView.tag + 1;
     }
     
-    [m_orderedSubviews insertObject:view atIndex:index];
+    m_numberTotalItems++;
     [m_scrollView addSubview:view];
     [self setNeedsLayout];
 }
 
 - (void)removeObjectAtIndex:(NSInteger)index
 {
-    NSAssert((index >= 0 && index < [m_orderedSubviews count]), @"Invalid index specified");
+    NSAssert((index >= 0 && index < m_numberTotalItems), @"Invalid index specified");
     
-    UIView *view = (UIView *)[m_orderedSubviews objectAtIndex:index];
+    UIView *view = [self itemSubViewForPosition:index];
     
-    for (int i = index + 1; i < [m_orderedSubviews count]; i++) 
+    for (int i = index + 1; i < m_numberTotalItems; i++)
     {
-        UIView *oldView = [m_orderedSubviews objectAtIndex:i];
+        UIView *oldView = [self itemSubViewForPosition:i];
         oldView.tag = oldView.tag - 1;
     }
-    
-    [m_orderedSubviews removeObjectAtIndex:index];
     
     [UIView animateWithDuration:0.2 delay:0 options:0 animations:^{
         view.alpha = 0;
@@ -447,23 +451,23 @@
     completion:^(BOOL finished)
     {
          [view removeFromSuperview];
+         m_numberTotalItems--;
          [self setNeedsLayout];
     }];
 }
 
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2
 {
-    NSAssert((index1 >= 0 && index1 < [m_orderedSubviews count]), @"Invalid index1 specified");
-    NSAssert((index2 >= 0 && index2 < [m_orderedSubviews count]), @"Invalid index2 specified");
+    NSAssert((index1 >= 0 && index1 < m_numberTotalItems), @"Invalid index1 specified");
+    NSAssert((index2 >= 0 && index2 < m_numberTotalItems), @"Invalid index2 specified");
 
-    UIView *view1 = [m_orderedSubviews objectAtIndex:index1];
-    UIView *view2 = [m_orderedSubviews objectAtIndex:index2];
+    UIView *view1 = [self itemSubViewForPosition:index1];
+    UIView *view2 = [self itemSubViewForPosition:index2];
     
     NSInteger tempTag = view1.tag;
     view1.tag = view2.tag;
     view2.tag = tempTag;
     
-    [m_orderedSubviews exchangeObjectAtIndex:index1 withObjectAtIndex:index2];
     [self setNeedsLayout];
 }
 
@@ -472,31 +476,88 @@
 #pragma mark private methods
 //////////////////////////////////////////////////////////////
 
+- (NSArray *)itemSubviews
+{
+    // TODO: optimize (lazy loading)
+    
+    NSMutableArray *itemSubViews = [[NSMutableArray alloc] initWithCapacity:m_numberTotalItems];
+    
+    for (UIView * v in [m_scrollView subviews]) 
+    {
+        if (v.tag >= GMGV_TAG_OFFSET) 
+        {
+            [itemSubViews addObject:v];
+        }
+    }
+    
+    return itemSubViews;
+}
+
+- (UIView *)itemSubViewForPosition:(NSInteger)position
+{
+    UIView *view = nil;
+    
+    for (UIView *v in [self itemSubviews]) 
+    {
+        if (v.tag == position + GMGV_TAG_OFFSET) 
+        {
+            view = v;
+            break;
+        }
+    }
+    
+    return view;
+}
+
+- (NSInteger)positionForItemSubview:(UIView *)view
+{
+    NSInteger position = -1;
+    
+    for (UIView *v in [self itemSubviews]) 
+    {
+        if (v == view) 
+        {
+            position = v.tag - GMGV_TAG_OFFSET;
+            break;
+        }
+    }
+    
+    return position;
+}
+
+- (CGPoint)originForItemAtPosition:(NSInteger)position
+{
+    NSUInteger col = position % m_numberOfItemsPerRow;
+    NSUInteger row = position / m_numberOfItemsPerRow;
+    
+    CGFloat originX = col * (m_itemSize.width + self.itemPadding) + self.itemPadding;
+    CGFloat originY = row * (m_itemSize.height + self.itemPadding) + self.itemPadding;
+    
+    return CGPointMake(originX, originY);
+}
+
+
 - (void)updateIndexOfItem:(UIView *)view toIndex:(NSInteger)index
 {
-    NSUInteger oldIndex = [m_orderedSubviews indexOfObject:view];
+    NSUInteger oldIndex = [self positionForItemSubview:view];
     
-    if (index >= 0 && oldIndex != index && oldIndex < [m_orderedSubviews count]) 
+    if (index >= 0 && oldIndex != index && oldIndex < m_numberTotalItems) 
     {
-        [m_orderedSubviews moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:oldIndex] toIndex:index];
         [self.delegate GMGridView:self itemAtIndex:oldIndex movedToIndex:index];
     }
 }
+
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
     int col = (int) (location.x / (m_itemSize.width + self.itemPadding)); 
     int row = (int) (location.y / (m_itemSize.height + self.itemPadding));
     
-    int position = col + row * m_numberOfItemsInRow;
+    int position = col + row * m_numberOfItemsPerRow;
     
-    if (position >= [m_orderedSubviews count] || position < 0) 
+    if (position >= m_numberTotalItems || position < 0) 
     {
         position = -1;
-    }
-    else
-    {
-        position += GMGV_POSITION_AND_TAG_OFFSET;
     }
     
     return position;
@@ -511,27 +572,21 @@
         itemsPerRow++;
     }
     
-    m_numberOfItemsInRow = itemsPerRow;
-    int numberOfRowsInPage = ceil( [m_orderedSubviews count] / (1.0 * m_numberOfItemsInRow));
+    m_numberOfItemsPerRow = itemsPerRow;
+    int numberOfRowsInPage = ceil(m_numberTotalItems / (1.0 * m_numberOfItemsPerRow));
     
     [UIView animateWithDuration:0.3 delay:0
                         options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
                          
-                         for (UIView *view in m_orderedSubviews)
+                         for (UIView *view in [self itemSubviews])
                          {        
                              if (view != m_movingItem) 
                              {
-                                 NSInteger index = view.tag - GMGV_POSITION_AND_TAG_OFFSET;
+                                 NSInteger index = view.tag - GMGV_TAG_OFFSET;
+                                 CGPoint origin = [self originForItemAtPosition:index];
                                  
-                                 NSUInteger col = index % m_numberOfItemsInRow;
-                                 NSUInteger row = index / m_numberOfItemsInRow;
-                                 
-                                 CGFloat originX = col * (m_itemSize.width + self.itemPadding) + self.itemPadding;
-                                 CGFloat originY = row * (m_itemSize.height + self.itemPadding) + self.itemPadding;
-                                 
-                                 
-                                 view.frame = CGRectMake(originX, originY, m_itemSize.width, m_itemSize.height);
+                                 view.frame = CGRectMake(origin.x, origin.y, m_itemSize.width, m_itemSize.height);
                              }
                          }
                      }
@@ -541,6 +596,8 @@
     
     return CGSizeMake(self.bounds.size.width, ceil(numberOfRowsInPage * (m_itemSize.height + self.itemPadding) + self.itemPadding));
 }
+
+
 
 
 @end

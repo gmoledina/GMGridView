@@ -11,7 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 
-#define NUMBER_ITEMS_ON_LOAD 200
+#define NUMBER_ITEMS_ON_LOAD 10
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
@@ -85,7 +85,7 @@
         }
         else
         {
-            m_itemSize = CGSizeMake(120, 90);
+            m_itemSize = CGSizeMake(80, 65);
             m_itemPadding = 15;
         }
     }
