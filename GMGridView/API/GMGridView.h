@@ -5,23 +5,25 @@
 //  Created by Gulam Moledina on 11-10-09.
 //  Copyright (C) 2011 by Gulam Moledina.
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
 // 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 // 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+// 
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 #import <UIKit/UIKit.h>
@@ -38,7 +40,7 @@ typedef enum
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark Interface DraggableGridView
+#pragma mark Interface GMGridView
 //////////////////////////////////////////////////////////////
 
 @interface GMGridView : UIView
@@ -65,7 +67,7 @@ typedef enum
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark Protocol DraggableGridViewDataSource
+#pragma mark Protocol GMGridViewDataSource
 //////////////////////////////////////////////////////////////
 
 @protocol GMGridViewDataSource
@@ -75,6 +77,10 @@ typedef enum
 - (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView;
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
 - (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
+
+//@optional
+- (CGSize)GMGridView:(GMGridView *)gridView fullSizeForView:(UIView *)view;
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view;
 
 @end
 
@@ -92,12 +98,15 @@ typedef enum
 @end
 
 //////////////////////////////////////////////////////////////
-#pragma mark Protocol DraggableGridViewTransformationDelegate
+#pragma mark Protocol GMGridViewTransformationDelegate
 //////////////////////////////////////////////////////////////
 
 @protocol GMGridViewTransformationDelegate
 
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
-- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view inFullsize:(BOOL)fullSize;
+- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view;
+
+
 
 @end

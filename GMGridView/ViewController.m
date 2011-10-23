@@ -79,7 +79,7 @@
         
         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
         {
-            _itemSize = CGSizeMake(90, 80);
+            _itemSize = CGSizeMake(140, 110);
             _itemPadding = 10;
         }
         else
@@ -183,6 +183,28 @@
     return view;
 }
 
+- (CGSize)GMGridView:(GMGridView *)gridView fullSizeForView:(UIView *)view
+{
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
+    {
+        return CGSizeMake(310, 310);
+    }
+    else
+    {
+        return CGSizeMake(700, 700);
+    }
+}
+
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view
+{
+    UIView *fullView = [[UIView alloc] init];
+    fullView.backgroundColor = [UIColor yellowColor];
+    fullView.layer.masksToBounds = NO;
+    fullView.layer.cornerRadius = 8;
+
+    return fullView;
+}
+
 
 //////////////////////////////////////////////////////////////
 #pragma mark DraggableGridViewSortingDelegate
@@ -241,7 +263,7 @@
                      completion:nil];
 }
 
-- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view inFullsize:(BOOL)fullSize
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view
 {
     [UIView animateWithDuration:0.5 
                           delay:0 
@@ -253,6 +275,10 @@
                      completion:nil];
 }
 
+- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view
+{
+    
+}
 
 
 //////////////////////////////////////////////////////////////

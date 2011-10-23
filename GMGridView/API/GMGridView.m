@@ -5,23 +5,25 @@
 //  Created by Gulam Moledina on 11-10-09.
 //  Copyright (C) 2011 by Gulam Moledina.
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 // 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
 // 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 #import <Quartzcore/QuartzCore.h>
@@ -68,12 +70,13 @@
     GMGridViewCell *_transformingItem;
     CGFloat _lastRotation;
     CGFloat _lastScale;
+    BOOL _inFullSizeMode;
 }
 
 // Gestures
 - (void)sortingPanGestureUpdated:(UIPanGestureRecognizer *)panGesture;
 - (void)sortingLongPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture;
-- (void)tagGestureUpdated:(UITapGestureRecognizer *)tapGesture;
+- (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture;
 - (void)panGestureUpdated:(UIPanGestureRecognizer *)panGesture;
 - (void)pinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture;
 - (void)rotationGestureUpdated:(UIRotationGestureRecognizer *)rotationGesture;
@@ -86,8 +89,10 @@
 - (void)updateIndexOfItem:(UIView *)view toIndex:(NSInteger)index;
 
 // Transformation control
+- (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture;
 - (void)transformingGestureDidFinish;
 - (BOOL)isInTransformingState;
+- (void)exitFullSizePinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture;
 
 // Helpers & more
 - (CGSize)relayoutItems;
@@ -98,10 +103,7 @@
 - (GMGridViewCell *)createItemSubViewForPosition:(NSInteger)position;
 - (NSInteger)positionForItemSubview:(GMGridViewCell *)view;
 
-
-
 @end
-
 
 
 
@@ -136,7 +138,7 @@
         _scrollView.backgroundColor = [UIColor clearColor];
         [self addSubview:_scrollView];
         
-        _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tagGestureUpdated:)];
+        _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
         _tapGesture.delegate = self;
         _tapGesture.numberOfTapsRequired = 1;
         _tapGesture.numberOfTouchesRequired = 1;
@@ -194,20 +196,6 @@
     _scrollView.contentSize = [self relayoutItems];
     [_scrollView flashScrollIndicators];
 }
-
-
-//////////////////////////////////////////////////////////////
-#pragma mark Custom drawing
-//////////////////////////////////////////////////////////////
-
-//+ (Class)layerClass
-//{
-//    return [CATiledLayer class];
-//}
-
-//- (void)drawRect:(CGRect)rect 
-//{
-//}
 
 
 //////////////////////////////////////////////////////////////
@@ -438,15 +426,7 @@
         }
         case UIGestureRecognizerStateBegan:
         {
-            if (!_transformingItem) 
-            {
-                CGPoint locationTouch = [_pinchGesture locationOfTouch:0 inView:_scrollView];            
-                NSInteger positionTouch = [self itemPositionFromLocation:locationTouch];
-                _transformingItem = [self itemSubViewForPosition:positionTouch];
-                
-                [_scrollView bringSubviewToFront:_transformingItem];
-                [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
-            }
+            [self transformingGestureDidBeginWithGesture:panGesture];
             
             _scrollView.scrollEnabled = NO;
         }
@@ -471,8 +451,6 @@
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed:
         {
-            _lastScale = 1.0;
-            
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(transformingGestureDidFinish) object:nil];
             [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.1];
             
@@ -480,20 +458,11 @@
         }
         case UIGestureRecognizerStateBegan:
         {
-            if (!_transformingItem) 
-            {
-                CGPoint locationTouch = [_pinchGesture locationOfTouch:0 inView:_scrollView];            
-                NSInteger positionTouch = [self itemPositionFromLocation:locationTouch];
-                _transformingItem = [self itemSubViewForPosition:positionTouch];
-                
-                [_scrollView bringSubviewToFront:_transformingItem];
-                [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
-            }
+            [self transformingGestureDidBeginWithGesture:pinchGesture];
         }
         case UIGestureRecognizerStateChanged:
-        default:
         {
-            if ([_pinchGesture scale] >= 0.5 && [_pinchGesture scale] <= 3) 
+            if ([_pinchGesture scale] >= 0.5 && [_pinchGesture scale] <= 2.5) 
             {
                 CGFloat scale = ([_pinchGesture scale] - _lastScale) + 1;
                 
@@ -502,9 +471,17 @@
                 _transformingItem.transform = newTransform;
                 
                 _lastScale = [_pinchGesture scale];
+                
+                if ([_pinchGesture scale] >= 1.5) 
+                {
+                    [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - [_pinchGesture scale])];
+                }
             }
             
             break;
+        }
+        default:
+        {
         }
     }
 }
@@ -517,8 +494,6 @@
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed:
         {
-            _lastRotation = 0;
-            
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(transformingGestureDidFinish) object:nil];
             [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.1];
             
@@ -526,18 +501,9 @@
         }
         case UIGestureRecognizerStateBegan:
         {
-            if (!_transformingItem) 
-            {
-                CGPoint locationTouch = [_rotationGesture locationOfTouch:0 inView:_scrollView];            
-                NSInteger positionTouch = [self itemPositionFromLocation:locationTouch];
-                _transformingItem = [self itemSubViewForPosition:positionTouch];
-                
-                [_scrollView bringSubviewToFront:_transformingItem];
-                [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
-            }
+            [self transformingGestureDidBeginWithGesture:rotationGesture];
         }
         case UIGestureRecognizerStateChanged:
-        default:
         {
             CGFloat rotation = [rotationGesture rotation] - _lastRotation;
             CGAffineTransform currentTransform = [_transformingItem transform];
@@ -546,10 +512,143 @@
             _lastRotation = [rotationGesture rotation];
             break;
         }
+        default:
+        {
+        }
     }
 }
 
-- (void)tagGestureUpdated:(UITapGestureRecognizer *)tapGesture
+
+- (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture
+{
+    if (!_transformingItem) 
+    {
+        CGPoint locationTouch = [gesture locationOfTouch:0 inView:_scrollView];            
+        NSInteger positionTouch = [self itemPositionFromLocation:locationTouch];
+        _transformingItem = [self itemSubViewForPosition:positionTouch];
+        
+        
+        CGRect frameInMainView = [_scrollView convertRect:_transformingItem.frame toView:self];
+        
+        [_transformingItem removeFromSuperview];
+        _transformingItem.frame = frameInMainView;
+        [self addSubview:_transformingItem];
+        [self bringSubviewToFront:_transformingItem];
+        
+        if (!_transformingItem.fullSizeView) 
+        {
+            _transformingItem.fullSize = [self.dataSource GMGridView:self fullSizeForView:_transformingItem.contentView];
+            _transformingItem.fullSizeView = [self.dataSource GMGridView:self fullSizeViewForView:_transformingItem];
+        }
+        
+        [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
+    }
+}
+
+- (void)exitFullSizePinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture
+{
+    if([self isInTransformingState] && _inFullSizeMode)
+    {
+        switch (pinchGesture.state) 
+        {
+            case UIGestureRecognizerStateChanged:
+            {
+                if ([pinchGesture scale] < 1.0) 
+                {
+                    _inFullSizeMode = NO;
+                    [_transformingItem removeGestureRecognizer:pinchGesture];
+                    
+                    _transformingItem.frame = _transformingItem.fullSizeView.frame;
+                    
+                    [self transformingGestureDidFinish];
+                    break;
+                }
+            }
+            case UIGestureRecognizerStateEnded:
+            case UIGestureRecognizerStateCancelled:
+            case UIGestureRecognizerStateFailed:
+            case UIGestureRecognizerStateBegan:
+            default:
+            {
+                break;
+            }
+        }
+    }
+}
+
+- (BOOL)isInTransformingState
+{
+    return _transformingItem != nil;
+}
+
+- (void)transformingGestureDidFinish
+{
+    if ([self isInTransformingState]) 
+    {
+        if (_lastScale > 2) 
+        {
+            _lastRotation = 0;
+            _lastScale = 1.0;
+            
+            [self bringSubviewToFront:_transformingItem];
+            
+            UIPinchGestureRecognizer *pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(exitFullSizePinchGestureUpdated:)];
+            [_transformingItem addGestureRecognizer:pinch];
+            
+            _transformingItem.transform = CGAffineTransformIdentity;
+            [_transformingItem switchToFullSizeMode:YES];
+            
+            [UIView animateWithDuration:0.3 
+                             animations:^{
+                                 _transformingItem.frame = self.bounds;
+                             } 
+                             completion:^(BOOL finished){
+                                 _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                                 _inFullSizeMode = YES;
+                                 [self.transformDelegate GMGridView:self didEnterFullSizeForView:_transformingItem.contentView];
+                             }
+             ];
+        }
+        else
+        {
+            _lastRotation = 0;
+            _lastScale = 1.0;
+            
+            GMGridViewCell *transformingView = _transformingItem;
+            _transformingItem = nil;
+            
+            transformingView.transform = CGAffineTransformIdentity;
+            
+            CGRect frameInScroll = [self convertRect:transformingView.frame toView:_scrollView];
+            
+            [transformingView removeFromSuperview];
+            transformingView.frame = frameInScroll;
+            [_scrollView addSubview:transformingView];
+            
+            NSInteger position = [self positionForItemSubview:transformingView];
+            CGPoint origin = [self originForItemAtPosition:position];
+            
+            [transformingView switchToFullSizeMode:NO];
+            transformingView.autoresizingMask = UIViewAutoresizingNone;
+            
+            [UIView animateWithDuration:0.3 
+                             animations:^{
+                                 transformingView.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+                             } 
+                             completion:^(BOOL finished){
+                                 [self relayoutItems];
+                                 [self.transformDelegate GMGridView:self didEndTransformingView:transformingView.contentView];
+                             }
+             ];
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////
+#pragma mark 
+//////////////////////////////////////////////////////////////
+
+- (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture
 {
     CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
     NSInteger position = [self itemPositionFromLocation:locationTouch];
@@ -563,34 +662,6 @@
 //////////////////////////////////////////////////////////////
 #pragma mark Privates Movement control
 //////////////////////////////////////////////////////////////
-
-- (BOOL)isInTransformingState
-{
-    return _transformingItem != nil;
-}
-
-- (void)transformingGestureDidFinish
-{
-    if ([self isInTransformingState]) 
-    {
-        GMGridViewCell *transformingView = _transformingItem;
-        _transformingItem = nil;
-        
-        NSInteger position = [self positionForItemSubview:transformingView];
-        CGPoint origin = [self originForItemAtPosition:position];
-        
-        [UIView animateWithDuration:0.3 
-                         animations:^{
-                             transformingView.transform = CGAffineTransformIdentity;
-                             transformingView.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-                         } 
-                         completion:^(BOOL finished){
-                             [self relayoutItems];
-                             [self.transformDelegate GMGridView:self didEndTransformingView:transformingView.contentView inFullsize:NO];
-                         }
-         ];
-    }
-}
 
 - (void)sortingMoveDidStartAtPoint:(CGPoint)point
 {
@@ -621,7 +692,6 @@
     }
 }
 
-
 - (void)sortingMoveDidStopAtPoint:(CGPoint)point
 {
     [_sortMovingItem shake:NO];
@@ -636,7 +706,6 @@
                                       _sortMovingItem.frame.size.height);
     
     [_sortMovingItem removeFromSuperview];
-    
     _sortMovingItem.frame = frameInScroll;
     [_scrollView addSubview:_sortMovingItem];
      
@@ -657,7 +726,6 @@
                      }
      ];
 }
-
 
 - (void)sortingMoveDidContinueToPoint:(CGPoint)point
 {
@@ -754,7 +822,7 @@
 }
 
 - (void)reloadObjectAtIndex:(NSInteger)index
-{
+{    
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index");
     
     UIView *currentView = [self itemSubViewForPosition:index];
@@ -764,6 +832,7 @@
     cell.alpha = 0;
     [_scrollView addSubview:cell];
     
+    currentView.tag = GMGV_TAG_OFFSET - 1;
     
     [UIView animateWithDuration:0.3 
                           delay:0 
@@ -771,11 +840,14 @@
                      animations:^{
                          currentView.alpha = 0;
                          cell.alpha = 1;
+                         
                      } 
                      completion:^(BOOL finished){
                         [currentView removeFromSuperview];
                      }
      ];
+    
+    [_scrollView scrollRectToVisible:cell.frame animated:YES];
 }
 
 - (void)insertObjectAtIndex:(NSInteger)index
@@ -812,6 +884,8 @@
         oldView.tag = oldView.tag - 1;
     }
     
+    cell.tag = GMGV_TAG_OFFSET - 1;
+    
     [UIView animateWithDuration:0.2 
                           delay:0 
                         options:0 
@@ -824,6 +898,8 @@
                          [self setNeedsLayout];
                      }
      ];
+    
+    [_scrollView scrollRectToVisible:cell.frame animated:YES];
 }
 
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2
@@ -837,6 +913,20 @@
     NSInteger tempTag = view1.tag;
     view1.tag = view2.tag;
     view2.tag = tempTag;
+    
+    CGRect visibleRect = CGRectMake(_scrollView.contentOffset.x,
+                                    _scrollView.contentOffset.y, 
+                                    _scrollView.contentSize.width, 
+                                    _scrollView.contentSize.height);
+    
+    if (!CGRectIntersectsRect(view2.frame, visibleRect)) 
+    {
+        [_scrollView scrollRectToVisible:view1.frame animated:YES];
+    }
+    else if (!CGRectIntersectsRect(view1.frame, visibleRect)) 
+    {
+        [_scrollView scrollRectToVisible:view2.frame animated:YES];
+    }
     
     [self setNeedsLayout];
 }

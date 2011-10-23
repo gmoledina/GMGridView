@@ -1,23 +1,30 @@
-GM-GRID-VIEW (MIT license)
---------------------------
 
-An iOS Grid-View allowing the user to sort the views in the scrollView. 
-This view is inspired by the UITableView and uses a delegate and a datasource in order to get the data and interact with it.
+GM-GRID-VIEW
+-------------
+
+An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in fullsize by pinching them. 
+This view is inspired by the UITableView and uses a datasource and delegates in order to get the data and interact with it.
 
 Requirements:
-- iOS 5 (for NSMutableOrderedSet and to access the UIScrollView gestureRecognizers)
+- iOS 5 (to access the UIScrollView gestureRecognizers)
 - ARC
 
-Features:
+Features - General:
 - Works on both the iPhone and iPad
 - Works on both portrait and landscape orientation
-- Perform a long-touch on a view to be able to move it
-- Works great inside a scrollView
-- Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
-- Two different animation styles ("Swap" or "Push")
+- Gestures work great inside of the scrollView
 - Demo app provided
 
-ToDo's:
-- Not loading all views at once (using CATiledLayer ?)
-- Adding a pinch on views to zoom them
+Features - Sorting:
+- Perform a long-touch on a view to be able to move it
+- Two different animation styles ("Swap" or "Push")
+- Sorted view has a shake animation (can be disabled)
+- Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
 
+Features - Fullsize:
+- Pinch, rotate, drag views using 2 fingers
+- Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
+- Provide a different fullsize view (detailed view) for the view via the delegate
+- Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
+
+Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView

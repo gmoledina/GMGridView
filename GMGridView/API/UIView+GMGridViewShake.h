@@ -1,5 +1,5 @@
 //
-//  GMGridViewCell.h
+//  UIView+GMGridViewShake.h
 //  GMGridView
 //
 //  Created by Gulam Moledina on 11-10-22.
@@ -28,20 +28,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface GMGridViewCell : UIView
+@interface UIView (GMGridViewShake)
 
-@property (nonatomic, strong) UIView *contentView;
-@property (nonatomic, assign, getter=isInShakingMode) BOOL inShakingMode;
-
-@property (nonatomic, strong) UIView *fullSizeView;
-@property (nonatomic, assign) CGSize fullSize;
-@property (nonatomic, assign, getter = isInFullSizeMode) BOOL inFullSizeMode;
-
-
-- (id)initContentView:(UIView *)contentView;
-- (void)shake:(BOOL)on;
-
-- (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
-- (void)stepToFullsizeWithAlpha:(CGFloat)alpha;
+- (void)shakeStatus:(BOOL)enabled;
 
 @end
