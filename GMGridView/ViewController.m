@@ -10,20 +10,19 @@
 #import "GMGridView.h"
 #import <QuartzCore/QuartzCore.h>
 
-
-#define NUMBER_ITEMS_ON_LOAD 10
+#define NUMBER_ITEMS_ON_LOAD 250
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark ViewController (privates methods)
 //////////////////////////////////////////////////////////////
 
-@interface ViewController () <GMGridViewDataSource, GMGridViewDelegate>
+@interface ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate>
 {
-    __weak GMGridView *mw_gmGridView;
-    NSMutableOrderedSet *m_data;
-    CGSize m_itemSize;
-    CGFloat m_itemPadding;
+    __weak GMGridView *_gmGridView;
+    NSMutableArray *_data;
+    CGSize _itemSize;
+    CGFloat _itemPadding;
 }
 
 - (void)addMoreItem;
@@ -71,22 +70,22 @@
         self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:segmentedBarItem, nil];
         
                 
-        m_data = [[NSMutableOrderedSet alloc] init];
+        _data = [[NSMutableArray alloc] init];
         
         for (int i = 0; i < NUMBER_ITEMS_ON_LOAD; i ++) 
         {
-            [m_data addObject:[NSString stringWithFormat:@"%d", i]];
+            [_data addObject:[NSString stringWithFormat:@"%d", i]];
         }
         
         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
         {
-            m_itemSize = CGSizeMake(60, 50);
-            m_itemPadding = 10;
+            _itemSize = CGSizeMake(90, 80);
+            _itemPadding = 10;
         }
         else
         {
-            m_itemSize = CGSizeMake(80, 65);
-            m_itemPadding = 15;
+            _itemSize = CGSizeMake(230, 175);
+            _itemPadding = 15;
         }
     }
     
@@ -104,13 +103,15 @@
     GMGridView *gmGridView = [[GMGridView alloc] initWithFrame:self.view.bounds];
     gmGridView.style = GMGridViewStyleSwap;
     gmGridView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    gmGridView.itemPadding = m_itemPadding;
+    gmGridView.itemPadding = _itemPadding;
+    gmGridView.centerGrid = YES;
     gmGridView.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:gmGridView];
-    mw_gmGridView = gmGridView;
+    _gmGridView = gmGridView;
     
-    mw_gmGridView.delegate = self;
-    mw_gmGridView.dataSource = self;
+    _gmGridView.sortingDelegate = self;
+    _gmGridView.transformDelegate = self;
+    _gmGridView.dataSource = self;
     
     UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoDark];
     infoButton.frame = CGRectMake(self.view.bounds.size.width - 40, 
@@ -147,22 +148,22 @@
 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView
 {
-    return [m_data count];
+    return [_data count];
 }
 
 - (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView
 {
-    return m_itemSize.width;
+    return _itemSize.width;
 }
 
 - (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView
 {
-    return m_itemSize.height;
+    return _itemSize.height;
 }
 
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index
 {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, m_itemSize.width, m_itemSize.height)];
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _itemSize.width, _itemSize.height)];
     view.backgroundColor = [UIColor redColor];
     view.layer.masksToBounds = NO;
     view.layer.cornerRadius = 8;
@@ -172,7 +173,7 @@
     view.layer.shadowRadius = 8;
     
     UILabel *label = [[UILabel alloc] initWithFrame:view.frame];
-    label.text = (NSString *)[m_data objectAtIndex:index];
+    label.text = (NSString *)[_data objectAtIndex:index];
     label.textAlignment = UITextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
     label.textColor = [UIColor blackColor];
@@ -184,25 +185,74 @@
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark DraggableGridViewProtocol
+#pragma mark DraggableGridViewSortingDelegate
 //////////////////////////////////////////////////////////////
+
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index
+{
+    return YES;
+}
 
 - (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex
 {
-    [m_data moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:oldIndex] toIndex:newIndex];
+    [_data exchangeObjectAtIndex:oldIndex withObjectAtIndex:newIndex];
 }
 
 - (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view
 {
-    view.backgroundColor = [UIColor orangeColor];
-    view.layer.shadowOpacity = 0.7;
+    [UIView animateWithDuration:0.3 
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{
+                         view.backgroundColor = [UIColor orangeColor];
+                         view.layer.shadowOpacity = 0.7;
+                     } 
+                     completion:nil
+     ];
 }
 
 - (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view
 {
-    view.backgroundColor = [UIColor redColor];
-    view.layer.shadowOpacity = 0;
+    [UIView animateWithDuration:0.3 
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{  
+                         view.backgroundColor = [UIColor redColor];
+                         view.layer.shadowOpacity = 0;
+                     }
+                     completion:nil
+     ];
 }
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark DraggableGridViewTransformingDelegate
+//////////////////////////////////////////////////////////////
+
+- (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view
+{
+    [UIView animateWithDuration:0.5 
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{
+                         view.backgroundColor = [UIColor blueColor];
+                         view.layer.shadowOpacity = 0.7;
+                     } 
+                     completion:nil];
+}
+
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view inFullsize:(BOOL)fullSize
+{
+    [UIView animateWithDuration:0.5 
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{
+                         view.backgroundColor = [UIColor redColor];
+                         view.layer.shadowOpacity = 0;
+                     } 
+                     completion:nil];
+}
+
 
 
 //////////////////////////////////////////////////////////////
@@ -214,49 +264,33 @@
     // Example: adding object at the last position
     NSString *newItem = [NSString stringWithFormat:@"%d", (int)(arc4random() % 1000)];
     
-    if (![m_data containsObject:newItem]) 
-    {
-        [m_data addObject:newItem];
-        
-        [mw_gmGridView insertObjectAtIndex:[m_data count] - 1];
-    }
-    else
-    {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Duplicate" 
-                                                            message:[NSString stringWithFormat:@"Data already contains '%@'", newItem] 
-                                                           delegate:nil 
-                                                  cancelButtonTitle:@"OK" 
-                                                  otherButtonTitles:nil];
-        [alertView show];
-    }
+    [_data addObject:newItem];
+    [_gmGridView insertObjectAtIndex:[_data count] - 1];
 }
 
 - (void)removeItem
 {
     // Example: removing last item
-    if ([m_data count] > 0) 
+    if ([_data count] > 0) 
     {
-        NSInteger index = [m_data count] - 1;
+        NSInteger index = [_data count] - 1;
         
-        [mw_gmGridView removeObjectAtIndex:index];
-        [m_data removeObjectAtIndex:index];
+        [_gmGridView removeObjectAtIndex:index];
+        [_data removeObjectAtIndex:index];
     }
 }
 
 - (void)refreshItem
 {
     // Example: reloading last item
-    if ([m_data count] > 0) 
+    if ([_data count] > 0) 
     {
-        int index = [m_data count] - 1;
+        int index = [_data count] - 1;
         
         NSString *newMessage = [NSString stringWithFormat:@"%d", (arc4random() % 1000)];
         
-        if (![m_data containsObject:newMessage]) 
-        {
-            [m_data replaceObjectAtIndex:index withObject:newMessage];
-            [mw_gmGridView reloadObjectAtIndex:index];
-        }
+        [_data replaceObjectAtIndex:index withObject:newMessage];
+        [_gmGridView reloadObjectAtIndex:index];
     }
 }
 
@@ -277,11 +311,11 @@
     switch (control.selectedSegmentIndex) 
     {
         case 1:
-            mw_gmGridView.style = GMGridViewStylePush;
+            _gmGridView.style = GMGridViewStylePush;
             break;
         case 0:
         default:
-            mw_gmGridView.style = GMGridViewStyleSwap;
+            _gmGridView.style = GMGridViewStyleSwap;
             break;
     }
 }

@@ -26,8 +26,9 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol GMGridViewDelegate;
 @protocol GMGridViewDataSource;
+@protocol GMGridViewSortingDelegate;
+@protocol GMGridViewTransformationDelegate;
 
 typedef enum
 {
@@ -46,9 +47,11 @@ typedef enum
 }
 
 @property (nonatomic, weak) id<GMGridViewDataSource> dataSource;
-@property (nonatomic, weak) id<GMGridViewDelegate> delegate;
+@property (nonatomic, weak) id<GMGridViewSortingDelegate> sortingDelegate;
+@property (nonatomic, weak) id<GMGridViewTransformationDelegate> transformDelegate;
 
 @property (nonatomic, assign) NSInteger itemPadding;
+@property (nonatomic, assign) BOOL centerGrid;
 @property (nonatomic, assign) GMGridViewStyle style;
 @property (nonatomic) CFTimeInterval minimumPressDuration; // If set to 0, the scrollView will not be scrollable
 
@@ -71,18 +74,30 @@ typedef enum
 - (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView;
 - (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView;
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
+- (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
 
 @end
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark Protocol DraggableGridViewDelegate
+#pragma mark Protocol GMGridViewSortingDelegate
 //////////////////////////////////////////////////////////////
 
-@protocol GMGridViewDelegate
+@protocol GMGridViewSortingDelegate
 
 - (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view;
-- (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index;
+
+@end
+
+//////////////////////////////////////////////////////////////
+#pragma mark Protocol DraggableGridViewTransformationDelegate
+//////////////////////////////////////////////////////////////
+
+@protocol GMGridViewTransformationDelegate
+
+- (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view inFullsize:(BOOL)fullSize;
 
 @end
