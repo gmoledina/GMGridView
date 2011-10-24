@@ -201,7 +201,28 @@
     fullView.backgroundColor = [UIColor yellowColor];
     fullView.layer.masksToBounds = NO;
     fullView.layer.cornerRadius = 8;
-
+    
+    CGSize size = [self GMGridView:gridView fullSizeForView:view];
+    fullView.bounds = CGRectMake(0, 0, size.width, size.height);
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
+    label.text = @"Fullscreen View";
+    label.textAlignment = UITextAlignmentCenter;
+    label.backgroundColor = [UIColor clearColor];
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
+    {
+        label.font = [UIFont boldSystemFontOfSize:15];
+    }
+    else
+    {
+        label.font = [UIFont boldSystemFontOfSize:20];
+    }
+    
+    [fullView addSubview:label];
+    
+    
     return fullView;
 }
 
