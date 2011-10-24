@@ -48,20 +48,24 @@ typedef enum
     
 }
 
+// Delegates
 @property (nonatomic, weak) id<GMGridViewDataSource> dataSource;
 @property (nonatomic, weak) id<GMGridViewSortingDelegate> sortingDelegate;
 @property (nonatomic, weak) id<GMGridViewTransformationDelegate> transformDelegate;
 
-@property (nonatomic, assign) NSInteger itemPadding;
-@property (nonatomic, assign) BOOL centerGrid;
-@property (nonatomic, assign) GMGridViewStyle style;
-@property (nonatomic) CFTimeInterval minimumPressDuration; // If set to 0, the scrollView will not be scrollable
+// Customizing Options
+@property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
+@property (nonatomic) NSInteger itemPadding;                          // Default is 10
+@property (nonatomic) BOOL centerGrid;                                // Default is YES
+@property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
+@property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES
 
+// Actions
 - (void)reloadData;
 - (void)insertObjectAtIndex:(NSInteger)index;
 - (void)removeObjectAtIndex:(NSInteger)index;
-- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 - (void)reloadObjectAtIndex:(NSInteger)index;
+- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 
 @end
 
@@ -113,7 +117,5 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view;
-
-
 
 @end

@@ -102,7 +102,7 @@
 }
 
 //////////////////////////////////////////////////////////////
-#pragma mark 
+#pragma mark Setters / getters
 //////////////////////////////////////////////////////////////
 
 - (void)setContentView:(UIView *)contentView
@@ -146,20 +146,6 @@
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark 
-//////////////////////////////////////////////////////////////
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
-
-
-//////////////////////////////////////////////////////////////
 #pragma mark Public methods
 //////////////////////////////////////////////////////////////
 
@@ -168,7 +154,7 @@
     if ((on && !self.inShakingMode) || (!on && self.inShakingMode)) 
     {
         [self.contentView shakeStatus:on];
-        self.inShakingMode = on;
+        _inShakingMode = on;
     }
 }
 
@@ -182,7 +168,7 @@
         self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, self.fullSizeView.frame.origin.y, self.fullSize.width, self.fullSize.height);
         self.fullSizeView.center = center;
         
-        self.inFullSizeMode = YES;
+        _inFullSizeMode = YES;
         
         [UIView animateWithDuration:0.1 
                          animations:^{
@@ -199,7 +185,7 @@
     {
         self.fullSizeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
-        self.inFullSizeMode = NO;
+        _inFullSizeMode = NO;
         
         [UIView animateWithDuration:0.1 
                          animations:^{

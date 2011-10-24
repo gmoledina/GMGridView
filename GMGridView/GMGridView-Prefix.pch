@@ -1,5 +1,5 @@
 //
-// Prefix header for all source files of the 'DraggableGridView' target in the 'DraggableGridView' project
+// Prefix header for all source files of the 'GMGridView' target in the 'GMGridView' project
 //
 
 #import <Availability.h>

@@ -8,7 +8,7 @@ This view is inspired by the UITableView and uses a datasource and delegates in 
 Requirements:
 - iOS 5 (to access the UIScrollView gestureRecognizers)
 - ARC (Automatic Reference Counting)
-- Frameworks Foundation, UIKit, CoreGraphics and QuartzCore
+- Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
 
 Features - General:
 - Works on both the iPhone and iPad

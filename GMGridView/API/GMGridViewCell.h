@@ -31,15 +31,15 @@
 @interface GMGridViewCell : UIView
 
 @property (nonatomic, strong) UIView *contentView;
-@property (nonatomic, assign, getter=isInShakingMode) BOOL inShakingMode;
-
 @property (nonatomic, strong) UIView *fullSizeView;
 @property (nonatomic, assign) CGSize fullSize;
-@property (nonatomic, assign, getter = isInFullSizeMode) BOOL inFullSizeMode;
+
+@property (nonatomic, readonly, getter=isInShakingMode) BOOL inShakingMode;
+@property (nonatomic, readonly, getter=isInFullSizeMode) BOOL inFullSizeMode;
 
 
 - (id)initContentView:(UIView *)contentView;
-- (void)shake:(BOOL)on;
+- (void)shake:(BOOL)on; // shakes the contentView only, not the fullsize one
 
 - (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
 - (void)stepToFullsizeWithAlpha:(CGFloat)alpha;

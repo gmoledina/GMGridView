@@ -48,7 +48,7 @@
         
         self.transform = CGAffineTransformMakeRotation(-1 * rotation);
         
-        [UIView beginAnimations:@"earthquake" context:nil];
+        [UIView beginAnimations:nil context:nil];
         [UIView setAnimationRepeatAutoreverses:YES];
         [UIView setAnimationRepeatCount:MAXFLOAT];
         [UIView setAnimationDuration:0.17];

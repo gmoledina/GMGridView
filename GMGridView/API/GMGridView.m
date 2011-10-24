@@ -126,6 +126,7 @@
 @synthesize style = _style;
 @synthesize minimumPressDuration;
 @synthesize centerGrid;
+@synthesize showFullSizeViewWithAlphaWhenTransforming;
 
 @synthesize cacheStatusIsValid;
 @synthesize itemSubviewsCache;
@@ -154,6 +155,9 @@
         _tapGesture.numberOfTouchesRequired = 1;
         [_scrollView addGestureRecognizer:_tapGesture];
         
+        
+        // Transformation gestures :
+        
         _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
         _pinchGesture.delegate = self;
         [_scrollView addGestureRecognizer:_pinchGesture];
@@ -168,7 +172,8 @@
         [_panGesture setMinimumNumberOfTouches:2];
         [_scrollView addGestureRecognizer:_panGesture];
         
-        // Sorting gestures
+        // Sorting gestures :
+        
         _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
         _sortingPanGesture.delegate = self;
         [_scrollView addGestureRecognizer:_sortingPanGesture];
@@ -177,13 +182,15 @@
         _sortingLongPressGesture.numberOfTouchesRequired = 1;
         [_scrollView addGestureRecognizer:_sortingLongPressGesture];
 
+        
         // Gesture dependencies
         [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
         [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
         self.itemPadding = 10;
-        self.style = GMGridViewStylePush;
+        self.style = GMGridViewStyleSwap;
         self.minimumPressDuration = 0.2;
+        self.showFullSizeViewWithAlphaWhenTransforming = YES;
         
         _sortFuturePosition = GMGV_INVALID_POSITION;
         _itemSize = CGSizeZero;
@@ -318,9 +325,9 @@
             {
                 [self sortingMoveDidStartAtPoint:location];
             }
+            
             break;
         }
-            
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed:
@@ -330,9 +337,9 @@
                 CGPoint location = [longPressGesture locationInView:_scrollView];
                 [self sortingMoveDidStopAtPoint:location];
             }
+            
             break;
         }
-        
         default:
             break;
     }
@@ -374,8 +381,6 @@
             break;
     }
 }
-
-
 
 - (void)sortingAutoScrollMovementCheck
 {    
@@ -460,14 +465,16 @@
         case UIGestureRecognizerStateBegan:
         {
             [self transformingGestureDidBeginWithGesture:panGesture];
-            
             _scrollView.scrollEnabled = NO;
+            
+            break;
         }
         case UIGestureRecognizerStateChanged:
         {
             CGPoint translate = [panGesture translationInView:_scrollView];
             [_transformingItem setCenter:CGPointMake(_transformingItem.center.x + translate.x, _transformingItem.center.y + translate.y)];
             [panGesture setTranslation:CGPointZero inView:_scrollView];
+            
             break;
         }
         default:
@@ -492,6 +499,8 @@
         case UIGestureRecognizerStateBegan:
         {
             [self transformingGestureDidBeginWithGesture:pinchGesture];
+            
+            break;
         }
         case UIGestureRecognizerStateChanged:
         {
@@ -505,7 +514,7 @@
                 
                 _lastScale = [_pinchGesture scale];
                 
-                if ([_pinchGesture scale] >= 1.5) 
+                if (self.showFullSizeViewWithAlphaWhenTransforming && [_pinchGesture scale] >= 1.5) 
                 {
                     [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - [_pinchGesture scale])];
                 }
@@ -535,6 +544,8 @@
         case UIGestureRecognizerStateBegan:
         {
             [self transformingGestureDidBeginWithGesture:rotationGesture];
+            
+            break;
         }
         case UIGestureRecognizerStateChanged:
         {
@@ -543,6 +554,7 @@
             CGAffineTransform newTransform = CGAffineTransformRotate(currentTransform, rotation);
             _transformingItem.transform = newTransform;
             _lastRotation = [rotationGesture rotation];
+            
             break;
         }
         default:
@@ -590,10 +602,11 @@
                 {
                     _inFullSizeMode = NO;
                     [_transformingItem removeGestureRecognizer:pinchGesture];
-                    
+
                     _transformingItem.frame = _transformingItem.fullSizeView.frame;
                     
                     [self transformingGestureDidFinish];
+                    
                     break;
                 }
             }
@@ -688,7 +701,7 @@
     
     if (position != GMGV_INVALID_POSITION) 
     {
-        NSLog(@"Did tap at index %d", position);
+        NSLog(@"Did tap at index %d", position); // todo
     }
 }
 
@@ -1018,7 +1031,7 @@
     return subviews;
 }
 
-// TODO: validate if this method is used ( = viewWithTag)
+// TODO: validate the use of this method ( = viewWithTag)
 - (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position
 {
     GMGridViewCell *view = nil;
@@ -1102,7 +1115,6 @@
 {
     return CGSizeMake(self.bounds.size.width - _scrollView.contentInset.left - _scrollView.contentInset.right, 
                       ceil(_numberOfRowsInPage * (_itemSize.height + self.itemPadding) + self.itemPadding));
-    
 }
 
 - (void)relayoutItems
