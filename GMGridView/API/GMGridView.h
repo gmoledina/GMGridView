@@ -72,13 +72,16 @@ typedef enum
 
 @protocol GMGridViewDataSource
 
+// Populating subview items 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
 - (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView;
 - (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView;
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
+
+// Item moved - right place to update the data structure
 - (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
 
-//@optional
+// Fullsize
 - (CGSize)GMGridView:(GMGridView *)gridView fullSizeForView:(UIView *)view;
 - (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view;
 
@@ -91,8 +94,11 @@ typedef enum
 
 @protocol GMGridViewSortingDelegate
 
+// Sorting started/ended - indexes are not specified on purpose (not the right place to update data structure)
 - (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view;
+
+// Enable/Disable the shaking behavior of an item being moved
 - (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index;
 
 @end
@@ -103,6 +109,7 @@ typedef enum
 
 @protocol GMGridViewTransformationDelegate
 
+// Transformation (pinch, drag, rotate) of the an item
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view;

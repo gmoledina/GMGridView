@@ -7,7 +7,8 @@ This view is inspired by the UITableView and uses a datasource and delegates in 
 
 Requirements:
 - iOS 5 (to access the UIScrollView gestureRecognizers)
-- ARC
+- ARC (Automatic Reference Counting)
+- Frameworks Foundation, UIKit, CoreGraphics and QuartzCore
 
 Features - General:
 - Works on both the iPhone and iPad
@@ -22,9 +23,10 @@ Features - Sorting:
 - Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
 
 Features - Fullsize:
-- Pinch, rotate, drag views using 2 fingers
+- Pinch, rotate and drag views using 2 fingers
 - Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
 - Provide a different fullsize view (detailed view) for the view via the delegate
 - Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
+
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView

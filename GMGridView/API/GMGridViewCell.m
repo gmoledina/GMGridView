@@ -65,7 +65,7 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    if ([self initContentView:nil]) 
+    if ((self = [self initContentView:nil])) 
     {
         self.frame = frame;
     }
