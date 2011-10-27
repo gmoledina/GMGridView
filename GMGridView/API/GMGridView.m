@@ -484,7 +484,7 @@
 }
 
 - (void)pinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture
-{    
+{
     switch (pinchGesture.state) 
     {
         case UIGestureRecognizerStateEnded:
@@ -499,24 +499,30 @@
         case UIGestureRecognizerStateBegan:
         {
             [self transformingGestureDidBeginWithGesture:pinchGesture];
-            
-            break;
         }
         case UIGestureRecognizerStateChanged:
         {
-            if ([_pinchGesture scale] >= 0.5 && [_pinchGesture scale] <= 2.5) 
+            CGFloat currentScale = [[_transformingItem.layer valueForKeyPath:@"transform.scale"] floatValue];
+            
+            CGFloat scale = 1 - (_lastScale - [_pinchGesture scale]);
+            
+            const CGFloat kMaxScale = 3;
+            const CGFloat kMinScale = 0.5;
+            
+            scale = MIN(scale, kMaxScale / currentScale);
+            scale = MAX(scale, kMinScale / currentScale);
+            
+            if (scale >= 0.5 && scale <= 3) 
             {
-                CGFloat scale = ([_pinchGesture scale] - _lastScale) + 1;
-                
                 CGAffineTransform currentTransform = [_transformingItem transform];
                 CGAffineTransform newTransform = CGAffineTransformScale(currentTransform, scale, scale);
                 _transformingItem.transform = newTransform;
                 
                 _lastScale = [_pinchGesture scale];
                 
-                if (self.showFullSizeViewWithAlphaWhenTransforming && [_pinchGesture scale] >= 1.5) 
+                if (self.showFullSizeViewWithAlphaWhenTransforming && currentScale >= 1.5) 
                 {
-                    [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - [_pinchGesture scale])];
+                    [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - currentScale)];
                 }
             }
             
@@ -748,16 +754,19 @@
      
     [self updateIndexOfItem:_sortMovingItem toIndex:_sortFuturePosition];
     
+    CGPoint newOrigin = [self originForItemAtPosition:_sortFuturePosition];
+    CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
+    
     [UIView animateWithDuration:0.2 
                      animations:^{
                          _sortMovingItem.transform = CGAffineTransformIdentity;
-                         _sortMovingItem.frame = frameInScroll;
+                         _sortMovingItem.frame = newFrame;
                      }
                      completion:^(BOOL finished){
                          [self.sortingDelegate GMGridView:self didEndMovingView:_sortMovingItem.contentView];
                          _sortMovingItem = nil;
                          _sortFuturePosition = GMGV_INVALID_POSITION;
-                         [self relayoutItems];
+                         //[self relayoutItems];
                      }
      ];
 }
