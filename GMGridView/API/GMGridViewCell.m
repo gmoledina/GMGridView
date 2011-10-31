@@ -27,7 +27,7 @@
 //
 
 #import "GMGridViewCell.h"
-#import "UIView+GMGridViewShake.h"
+#import "UIView+GMGridViewAdditions.h"
 
 //////////////////////////////////////////////////////////////
 #pragma mark -

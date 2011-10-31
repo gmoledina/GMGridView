@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16026C0E1454628800093AFF /* UIView+GMGridViewShake.m in Sources */ = {isa = PBXBuildFile; fileRef = 16026C0D1454628800093AFF /* UIView+GMGridViewShake.m */; };
+		16026C0E1454628800093AFF /* UIView+GMGridViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 16026C0D1454628800093AFF /* UIView+GMGridViewAdditions.m */; };
 		16026C131454631600093AFF /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 16026C111454631600093AFF /* LICENSE */; };
 		16026C141454631600093AFF /* README in Resources */ = {isa = PBXBuildFile; fileRef = 16026C121454631600093AFF /* README */; };
 		16275EF2144D26C10041AF02 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16275EF1144D26C10041AF02 /* QuartzCore.framework */; };
@@ -19,11 +19,13 @@
 		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
 		16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0F144156FE00E6E556 /* CoreGraphics.framework */; };
 		16A0D030145342F8004D7BBC /* GMGridViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 16A0D02F145342F8004D7BBC /* GMGridViewCell.m */; };
+		16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */ = {isa = PBXBuildFile; fileRef = 16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */; };
+		16DF1A71145E3461006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 16DF1A70145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		16026C0C1454628800093AFF /* UIView+GMGridViewShake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIView+GMGridViewShake.h"; path = "GMGridView/API/UIView+GMGridViewShake.h"; sourceTree = SOURCE_ROOT; };
-		16026C0D1454628800093AFF /* UIView+GMGridViewShake.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+GMGridViewShake.m"; path = "GMGridView/API/UIView+GMGridViewShake.m"; sourceTree = SOURCE_ROOT; };
+		16026C0C1454628800093AFF /* UIView+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; name = "UIView+GMGridViewAdditions.h"; path = "GMGridView/API/UIView+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
+		16026C0D1454628800093AFF /* UIView+GMGridViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+GMGridViewAdditions.m"; path = "GMGridView/API/UIView+GMGridViewAdditions.m"; sourceTree = SOURCE_ROOT; };
 		16026C111454631600093AFF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		16026C121454631600093AFF /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		16275EF1144D26C10041AF02 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -42,6 +44,10 @@
 		16924B0F144156FE00E6E556 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		16A0D02E145342F8004D7BBC /* GMGridViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewCell.h; path = GMGridView/API/GMGridViewCell.h; sourceTree = SOURCE_ROOT; };
 		16A0D02F145342F8004D7BBC /* GMGridViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewCell.m; path = GMGridView/API/GMGridViewCell.m; sourceTree = SOURCE_ROOT; };
+		16DF1A6C145E3456006AA43C /* GMGridViewLayoutStrategies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewLayoutStrategies.h; path = GMGridView/API/GMGridViewLayoutStrategies.h; sourceTree = SOURCE_ROOT; };
+		16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewLayoutStrategies.m; path = GMGridView/API/GMGridViewLayoutStrategies.m; sourceTree = SOURCE_ROOT; };
+		16DF1A6F145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; name = "UIGestureRecognizer+GMGridViewAdditions.h"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
+		16DF1A70145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIGestureRecognizer+GMGridViewAdditions.m"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.m"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,8 +134,12 @@
 				1691D7AD1442D02C00F472BF /* GMGridView.m */,
 				16A0D02E145342F8004D7BBC /* GMGridViewCell.h */,
 				16A0D02F145342F8004D7BBC /* GMGridViewCell.m */,
-				16026C0C1454628800093AFF /* UIView+GMGridViewShake.h */,
-				16026C0D1454628800093AFF /* UIView+GMGridViewShake.m */,
+				16DF1A6C145E3456006AA43C /* GMGridViewLayoutStrategies.h */,
+				16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */,
+				16026C0C1454628800093AFF /* UIView+GMGridViewAdditions.h */,
+				16026C0D1454628800093AFF /* UIView+GMGridViewAdditions.m */,
+				16DF1A6F145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.h */,
+				16DF1A70145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m */,
 			);
 			name = API;
 			path = DraggableGridView/API;
@@ -203,7 +213,9 @@
 				1691D7AB1442D01F00F472BF /* ViewController.m in Sources */,
 				1691D7AE1442D02C00F472BF /* GMGridView.m in Sources */,
 				16A0D030145342F8004D7BBC /* GMGridViewCell.m in Sources */,
-				16026C0E1454628800093AFF /* UIView+GMGridViewShake.m in Sources */,
+				16026C0E1454628800093AFF /* UIView+GMGridViewAdditions.m in Sources */,
+				16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */,
+				16DF1A71145E3461006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

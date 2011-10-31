@@ -28,7 +28,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UIView (GMGridViewShake)
+@interface UIView (GMGridViewAdditions)
 
 - (void)shakeStatus:(BOOL)enabled;
 

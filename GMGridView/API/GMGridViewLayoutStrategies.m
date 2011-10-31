@@ -1,0 +1,231 @@
+//
+//  GMGridViewLayoutStrategy.m
+//  GMGridView
+//
+//  Created by Gulam Moledina on 11-10-28.
+//  Copyright (c) 2011 GMoledina.ca. All rights reserved.
+//
+//  Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
+// 
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+// 
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+// 
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
+//
+
+#import "GMGridViewLayoutStrategies.h"
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Factory implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutStrategyFactory
+
++ (id<GMGridViewLayoutStrategy>)strategyFromType:(GMGridViewLayoutStrategyType)type
+{
+    id<GMGridViewLayoutStrategy> strategy = nil;
+    
+    switch (type) {
+        case GMGridViewLayoutVertical:
+            strategy = [[GMGridViewLayoutVerticalStrategy alloc] init];
+            break;
+        case GMGridViewLayoutHorizontal:
+        default:
+            strategy = [[GMGridViewLayoutHorizontalStrategy alloc] init];
+            break;
+    }
+    
+    return strategy;
+}
+
+@end
+
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Strategy base class implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutStrategyBase
+
+@synthesize itemCount     = _itemCount;
+@synthesize itemSize      = _itemSize;
+@synthesize itemPadding   = _itemPadding;
+@synthesize contentBounds = _contentBounds;
+@synthesize contentSize   = _contentSize;
+
+@end
+
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Vertical strategy implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutVerticalStrategy
+
+@synthesize numberOfItemsPerRow = _numberOfItemsPerRow;
+
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andPadding:(NSInteger)padding insideOfBounds:(CGRect)bounds
+{
+    _itemCount     = count;
+    _itemSize      = itemSize;
+    _itemPadding   = padding;
+    _contentBounds = bounds;
+    
+    _numberOfItemsPerRow = 1;
+    
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemPadding) + self.itemPadding < self.contentBounds.size.width)
+    {
+        _numberOfItemsPerRow++;
+    }
+    
+    NSInteger numberOfRows = ceil(self.itemCount / (1.0 * self.numberOfItemsPerRow));
+    
+    _contentSize = CGSizeMake(ceil(self.numberOfItemsPerRow * (self.itemSize.width + self.itemPadding) + self.itemPadding), 
+                              ceil(numberOfRows * (self.itemSize.height + self.itemPadding) + self.itemPadding));
+}
+
+- (CGPoint)originForItemAtPosition:(NSInteger)position
+{
+    CGPoint origin = CGPointZero;
+        
+    if (self.numberOfItemsPerRow > 0 && position >= 0) 
+    {
+        NSUInteger col = position % self.numberOfItemsPerRow; 
+        NSUInteger row = position / self.numberOfItemsPerRow;
+        
+        origin = CGPointMake(col * (self.itemSize.width + self.itemPadding) + self.itemPadding,
+                             row * (self.itemSize.height + self.itemPadding) + self.itemPadding);
+    }
+    
+    return origin;
+}
+
+- (NSInteger)itemPositionFromLocation:(CGPoint)location
+{
+    int col = (int) (location.x / (self.itemSize.width + self.itemPadding)); 
+    int row = (int) (location.y / (self.itemSize.height + self.itemPadding));
+    
+    int position = col + row * self.numberOfItemsPerRow;
+    
+    if (position >= [self itemCount] || position < 0) 
+    {
+        position = GMGV_INVALID_POSITION;
+    }
+    else
+    {
+        CGPoint itemOrigin = [self originForItemAtPosition:position];
+        CGRect itemFrame = CGRectMake(itemOrigin.x, 
+                                      itemOrigin.y, 
+                                      self.itemSize.width + self.itemPadding, 
+                                      self.itemSize.height + self.itemPadding);
+        
+        if (!CGRectContainsPoint(itemFrame, location)) 
+        {
+            position = GMGV_INVALID_POSITION;
+        }
+    }
+    
+    return position;
+}
+
+@end
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Horizontal strategy implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutHorizontalStrategy
+
+@synthesize numberOfItemsPerColumn = _numberOfItemsPerColumn;
+
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andPadding:(NSInteger)padding insideOfBounds:(CGRect)bounds
+{
+    _itemCount     = count;
+    _itemSize      = itemSize;
+    _itemPadding   = padding;
+    _contentBounds = bounds;
+    
+    _numberOfItemsPerColumn = 1;
+    
+    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemPadding) + self.itemPadding < self.contentBounds.size.height)
+    {
+        _numberOfItemsPerColumn++;
+    }
+    
+    NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
+            
+    _contentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemPadding) + self.itemPadding), 
+                              ceil(self.numberOfItemsPerColumn * (self.itemSize.height + self.itemPadding) + self.itemPadding));
+}
+
+- (CGPoint)originForItemAtPosition:(NSInteger)position
+{
+    CGPoint origin = CGPointZero;
+    
+    if (self.numberOfItemsPerColumn > 0 && position >= 0) 
+    {
+        NSUInteger col = position / self.numberOfItemsPerColumn; 
+        NSUInteger row = position % self.numberOfItemsPerColumn;
+        
+        origin = CGPointMake(col * (self.itemSize.width + self.itemPadding) + self.itemPadding,
+                             row * (self.itemSize.height + self.itemPadding) + self.itemPadding);
+    }
+    
+    return origin;
+}
+
+- (NSInteger)itemPositionFromLocation:(CGPoint)location
+{
+    int col = (int) (location.x / (self.itemSize.width + self.itemPadding)); 
+    int row = (int) (location.y / (self.itemSize.height + self.itemPadding));
+    
+    int position = row + col * self.numberOfItemsPerColumn;
+    
+    if (position >= [self itemCount] || position < 0) 
+    {
+        position = GMGV_INVALID_POSITION;
+    }
+    else
+    {
+        CGPoint itemOrigin = [self originForItemAtPosition:position];
+        CGRect itemFrame = CGRectMake(itemOrigin.x, 
+                                      itemOrigin.y, 
+                                      self.itemSize.width + self.itemPadding, 
+                                      self.itemSize.height + self.itemPadding);
+        
+        if (!CGRectContainsPoint(itemFrame, location)) 
+        {
+            position = GMGV_INVALID_POSITION;
+        }
+    }
+    
+    return position;
+}
+
+@end
+
+
+
+
+
+
+
+
+
+

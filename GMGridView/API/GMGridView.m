@@ -29,10 +29,12 @@
 #import <Quartzcore/QuartzCore.h>
 #import "GMGridView.h"
 #import "GMGridViewCell.h"
+#import "GMGridViewLayoutStrategies.h"
+#import "UIGestureRecognizer+GMGridViewAdditions.h"
 
 
-#define GMGV_TAG_OFFSET 50
-#define GMGV_INVALID_POSITION -1
+static const CGFloat kDefaultAnimationDuration = 0.3;
+static const NSUInteger kTagOffset = 50;
 
 
 //////////////////////////////////////////////////////////////
@@ -56,8 +58,6 @@
     UIPanGestureRecognizer       *_panGesture;
     
     // General vars
-    NSInteger _numberOfItemsPerRow;
-    NSInteger _numberOfRowsInPage;
     NSInteger _numberTotalItems;
     CGSize    _itemSize;
     
@@ -75,7 +75,7 @@
 }
 
 
-@property (nonatomic, assign) BOOL cacheStatusIsValid;
+@property (nonatomic, readonly) BOOL itemsSubviewsCacheIsValid;
 @property (nonatomic, strong) NSArray *itemSubviewsCache;
 
 
@@ -102,13 +102,11 @@
 
 // Helpers & more
 - (void)relayoutItems;
-- (CGPoint)originForItemAtPosition:(NSInteger)position;
-- (NSInteger)itemPositionFromLocation:(CGPoint)location;
 - (NSArray *)itemSubviews;
 - (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position;
 - (GMGridViewCell *)createItemSubViewForPosition:(NSInteger)position;
 - (NSInteger)positionForItemSubview:(GMGridViewCell *)view;
-- (CGSize)computeContentSize;
+- (void)setSubviewsCacheAsInvalid;
 
 @end
 
@@ -122,13 +120,14 @@
 @implementation GMGridView
 
 @synthesize sortingDelegate = _sortingDelegate, dataSource = _dataSource, transformDelegate = _transformDelegate;
+@synthesize layoutStrategy = _layoutStrategy;
 @synthesize itemPadding = _itemPadding;
 @synthesize style = _style;
 @synthesize minimumPressDuration;
 @synthesize centerGrid;
 @synthesize showFullSizeViewWithAlphaWhenTransforming;
 
-@synthesize cacheStatusIsValid;
+@synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
 
 //////////////////////////////////////////////////////////////
@@ -187,6 +186,10 @@
         [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
         [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
+        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+        
+        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
+        
         self.itemPadding = 10;
         self.style = GMGridViewStyleSwap;
         self.minimumPressDuration = 0.2;
@@ -210,21 +213,17 @@
 {
     [super layoutSubviews];
     
-    NSUInteger itemsPerRow = 1;
-    
-    while ((itemsPerRow+1) * (_itemSize.width + self.itemPadding) + self.itemPadding < self.bounds.size.width)
-    {
-        itemsPerRow++;
-    }
-    
-    _numberOfItemsPerRow = itemsPerRow;
-    _numberOfRowsInPage  = ceil(_numberTotalItems / (1.0 * _numberOfItemsPerRow));
+    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
+        
+    _scrollView.contentSize = [self.layoutStrategy contentSize];
     
     if (self.centerGrid)
     {
-        int extraSpace = self.bounds.size.width - (_numberOfItemsPerRow * (_itemSize.width + self.itemPadding)) - self.itemPadding;
-        extraSpace /= 2;
-        _scrollView.contentInset = UIEdgeInsetsMake(0, extraSpace, 0, extraSpace);
+        int extraSpace = (self.bounds.size.width - _scrollView.contentSize.width) / 2;
+        if (extraSpace > 0) 
+        {
+            _scrollView.contentInset = UIEdgeInsetsMake(0, extraSpace, 0, extraSpace);
+        }
     }
     else
     {
@@ -233,7 +232,6 @@
     
     [self relayoutItems];
     
-    _scrollView.contentSize = [self computeContentSize];
     [_scrollView flashScrollIndicators];
 }
 
@@ -246,6 +244,12 @@
 {
     _dataSource = dataSource;
     [self reloadData];
+}
+
+- (void)setLayoutStrategy:(id<GMGridViewLayoutStrategy>)layoutStrategy
+{
+    _layoutStrategy = layoutStrategy;
+    [self setNeedsLayout];
 }
 
 - (void)setItemPadding:(NSInteger)itemPadding
@@ -280,11 +284,11 @@
     if (gestureRecognizer == _tapGesture) 
     {
         CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
-        valid = [self itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
+        valid = [self.layoutStrategy itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
-        valid = (_sortMovingItem != nil);
+        valid = (_sortMovingItem != nil && [_sortingLongPressGesture hasRecognizedValidGesture]);
     }
     else if(gestureRecognizer == _rotationGesture || gestureRecognizer == _pinchGesture || gestureRecognizer == _panGesture)
     {
@@ -293,8 +297,8 @@
             CGPoint locationTouch1 = [gestureRecognizer locationOfTouch:0 inView:_scrollView];
             CGPoint locationTouch2 = [gestureRecognizer locationOfTouch:1 inView:_scrollView];
             
-            NSInteger positionTouch1 = [self itemPositionFromLocation:locationTouch1];
-            NSInteger positionTouch2 = [self itemPositionFromLocation:locationTouch2];
+            NSInteger positionTouch1 = [self.layoutStrategy itemPositionFromLocation:locationTouch1];
+            NSInteger positionTouch2 = [self.layoutStrategy itemPositionFromLocation:locationTouch2];
             
             valid = [self isInTransformingState] || ((positionTouch1 == positionTouch2) && (positionTouch1 != GMGV_INVALID_POSITION));
         }
@@ -317,13 +321,16 @@
     {
         case UIGestureRecognizerStateBegan:
         {
-            CGPoint location = [longPressGesture locationInView:_scrollView];
-            
-            NSInteger position = [self itemPositionFromLocation:location];
-            
-            if (position != GMGV_INVALID_POSITION) 
-            {
-                [self sortingMoveDidStartAtPoint:location];
+            if (!_sortMovingItem) 
+            { 
+                CGPoint location = [longPressGesture locationInView:_scrollView];
+                
+                NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
+                
+                if (position != GMGV_INVALID_POSITION) 
+                {
+                    [self sortingMoveDidStartAtPoint:location];
+                }
             }
             
             break;
@@ -332,6 +339,8 @@
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed:
         {
+            [_sortingPanGesture end];
+            
             if (_sortMovingItem) 
             {                
                 CGPoint location = [longPressGesture locationInView:_scrollView];
@@ -440,6 +449,144 @@
         {
             [self performSelector:@selector(sortingAutoScrollMovementCheck) withObject:nil afterDelay:0.5];
         }
+    }
+}
+
+
+- (void)sortingMoveDidStartAtPoint:(CGPoint)point
+{
+    NSInteger position = [self.layoutStrategy itemPositionFromLocation:point];
+    
+    GMGridViewCell *item = [self itemSubViewForPosition:position];
+    
+    [_scrollView bringSubviewToFront:item];
+    _sortMovingItem = item;
+    
+    CGRect frameInMainView = [_scrollView convertRect:_sortMovingItem.frame toView:self];
+    
+    [_sortMovingItem removeFromSuperview];
+    _sortMovingItem.frame = frameInMainView;
+    [self addSubview:_sortMovingItem];
+    
+    _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
+    
+    [self.sortingDelegate GMGridView:self didStartMovingView:_sortMovingItem.contentView];
+    
+    if ([self.sortingDelegate GMGridView:self shouldAllowShakingBehaviorWhenMovingView:_sortMovingItem.contentView atIndex:position]) 
+    {
+        [_sortMovingItem shake:YES];
+    }
+}
+
+- (void)sortingMoveDidStopAtPoint:(CGPoint)point
+{
+    [_sortMovingItem shake:NO];
+    
+    _sortMovingItem.tag = _sortFuturePosition + kTagOffset;
+    
+    CGRect frameInScroll = [self convertRect:_sortMovingItem.frame toView:_scrollView];
+    
+    [_sortMovingItem removeFromSuperview];
+    _sortMovingItem.frame = frameInScroll;
+    [_scrollView addSubview:_sortMovingItem];
+    
+    [self updateIndexOfItem:_sortMovingItem toIndex:_sortFuturePosition];
+    
+    CGPoint newOrigin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
+    CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
+    
+    [UIView animateWithDuration:0.2 
+                     animations:^{
+                         _sortMovingItem.transform = CGAffineTransformIdentity;
+                         _sortMovingItem.frame = newFrame;
+                     }
+                     completion:^(BOOL finished){
+                         [self.sortingDelegate GMGridView:self didEndMovingView:_sortMovingItem.contentView];
+                         _sortMovingItem = nil;
+                         _sortFuturePosition = GMGV_INVALID_POSITION;
+                     }
+     ];
+}
+
+- (void)sortingMoveDidContinueToPoint:(CGPoint)point
+{
+    int position = [self.layoutStrategy itemPositionFromLocation:point];
+    int tag = position + kTagOffset;
+    
+    if (position != GMGV_INVALID_POSITION && position != _sortFuturePosition && position < _numberTotalItems) 
+    {
+        BOOL positionTaken = NO;
+        
+        for (UIView *v in [self itemSubviews])
+        {
+            if (v != _sortMovingItem && v.tag == tag) 
+            {
+                positionTaken = YES;
+                break;
+            }
+        }
+        
+        if (positionTaken)
+        {
+            switch (self.style) 
+            {
+                case GMGridViewStylePush:
+                {
+                    if (position > _sortFuturePosition) 
+                    {
+                        for (UIView *v in [self itemSubviews])
+                        {
+                            if ((v.tag == tag || (v.tag < tag && v.tag >= _sortFuturePosition + kTagOffset)) && v != _sortMovingItem ) 
+                            {
+                                v.tag = v.tag - 1;
+                                [_scrollView sendSubviewToBack:v];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (UIView *v in [self itemSubviews])
+                        {
+                            if ((v.tag == tag || (v.tag > tag && v.tag <= _sortFuturePosition + kTagOffset)) && v != _sortMovingItem) 
+                            {
+                                v.tag = v.tag + 1;
+                                [_scrollView sendSubviewToBack:v];
+                            }
+                        }
+                    }
+                    
+                    [self relayoutItems];
+                    
+                    break;
+                }
+                case GMGridViewStyleSwap:
+                default:
+                {
+                    if (_sortMovingItem) 
+                    {
+                        //UIView *v = [self itemSubViewForPosition:position];
+                        UIView *v = [_scrollView viewWithTag:tag];
+                        v.tag = _sortFuturePosition + kTagOffset;
+                        CGPoint origin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
+                        
+                        [UIView animateWithDuration:kDefaultAnimationDuration 
+                                              delay:0
+                                            options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState
+                                         animations:^{
+                                             v.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+                                         }
+                                         completion:nil
+                         ];
+                        
+                        [self updateIndexOfItem:v toIndex:v.tag - kTagOffset];
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        
+        _sortFuturePosition = position;
     }
 }
 
@@ -575,7 +722,7 @@
     if (!_transformingItem) 
     {
         CGPoint locationTouch = [gesture locationOfTouch:0 inView:_scrollView];            
-        NSInteger positionTouch = [self itemPositionFromLocation:locationTouch];
+        NSInteger positionTouch = [self.layoutStrategy itemPositionFromLocation:locationTouch];
         _transformingItem = [self itemSubViewForPosition:positionTouch];
         
         
@@ -650,7 +797,7 @@
             _transformingItem.transform = CGAffineTransformIdentity;
             [_transformingItem switchToFullSizeMode:YES];
             
-            [UIView animateWithDuration:0.3 
+            [UIView animateWithDuration:kDefaultAnimationDuration 
                              animations:^{
                                  _transformingItem.frame = self.bounds;
                              } 
@@ -678,12 +825,12 @@
             [_scrollView addSubview:transformingView];
             
             NSInteger position = [self positionForItemSubview:transformingView];
-            CGPoint origin = [self originForItemAtPosition:position];
+            CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
             
             [transformingView switchToFullSizeMode:NO];
             transformingView.autoresizingMask = UIViewAutoresizingNone;
             
-            [UIView animateWithDuration:0.3 
+            [UIView animateWithDuration:kDefaultAnimationDuration 
                              animations:^{
                                  transformingView.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
                              } 
@@ -697,13 +844,13 @@
 }
 
 //////////////////////////////////////////////////////////////
-#pragma mark 
+#pragma mark Tap
 //////////////////////////////////////////////////////////////
 
 - (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture
 {
     CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
-    NSInteger position = [self itemPositionFromLocation:locationTouch];
+    NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
     
     if (position != GMGV_INVALID_POSITION) 
     {
@@ -712,140 +859,148 @@
 }
 
 //////////////////////////////////////////////////////////////
-#pragma mark Privates Movement control
+#pragma mark private methods
 //////////////////////////////////////////////////////////////
 
-- (void)sortingMoveDidStartAtPoint:(CGPoint)point
+- (void)setSubviewsCacheAsInvalid
 {
-    NSInteger position = [self itemPositionFromLocation:point];
+    _itemsSubviewsCacheIsValid = NO;
+}
+
+- (GMGridViewCell *)createItemSubViewForPosition:(NSInteger)position
+{
+    UIView *contentView = [self.dataSource GMGridView:self viewForItemAtIndex:position];
     
-    GMGridViewCell *item = (GMGridViewCell *)[_scrollView viewWithTag:position + GMGV_TAG_OFFSET];
+    GMGridViewCell *cell = [[GMGridViewCell alloc] initContentView:contentView];
+    CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
     
-    [_scrollView bringSubviewToFront:item];
-    _sortMovingItem = item;
+    cell.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+    cell.tag = position + kTagOffset;
     
-    CGRect frameInMainView = [_scrollView convertRect:_sortMovingItem.frame toView:self];
+    return cell;
+}
+
+- (NSArray *)itemSubviews
+{
+    NSArray *subviews = nil;
     
-    [_sortMovingItem removeFromSuperview];
-    _sortMovingItem.frame = frameInMainView;
-    [self addSubview:_sortMovingItem];
-    
-    _sortFuturePosition = _sortMovingItem.tag - GMGV_TAG_OFFSET;
-    
-    [self.sortingDelegate GMGridView:self didStartMovingView:_sortMovingItem.contentView];
-    
-    if ([self.sortingDelegate GMGridView:self shouldAllowShakingBehaviorWhenMovingView:_sortMovingItem.contentView atIndex:position]) 
+    if (self.itemsSubviewsCacheIsValid) 
     {
-        [_sortMovingItem shake:YES];
+        subviews = [self.itemSubviewsCache copy];
+    }
+    else
+    {
+        NSMutableArray *itemSubViews = [[NSMutableArray alloc] initWithCapacity:_numberTotalItems];
+        
+        for (UIView * v in [_scrollView subviews]) 
+        {
+            if ([v isKindOfClass:[GMGridViewCell class]]) 
+            {
+                [itemSubViews addObject:v];
+            }
+        }
+        
+        subviews = itemSubViews;
+        /*
+         
+        // Should we order the subviews cache ? If so, we'll have to update it whenever the indexes change; not just a cache then 
+        subviews = [itemSubViews sortedArrayUsingComparator:^(id obj1, id obj2){
+            
+            GMGridViewCell *cell1 = (GMGridViewCell *)obj1;
+            GMGridViewCell *cell2 = (GMGridViewCell *)obj2;
+            
+            if (cell1.tag > cell2.tag) 
+            {
+                return NSOrderedDescending;
+            }
+            else if (cell1.tag < cell2.tag)
+            {
+                return NSOrderedAscending;
+            }
+            else
+            {
+                return NSOrderedSame;
+            }
+        }];
+         
+        */
+        
+        self.itemSubviewsCache = [subviews copy];
+        _itemsSubviewsCacheIsValid = YES;
+    }
+    
+    return subviews;
+}
+
+- (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position
+{
+    GMGridViewCell *view = nil;
+    
+    for (GMGridViewCell *v in [self itemSubviews]) 
+    {
+        if (v.tag == position + kTagOffset) 
+        {
+            view = v;
+            break;
+        }
+    }
+    
+    return view;
+}
+
+- (NSInteger)positionForItemSubview:(GMGridViewCell *)view
+{
+    NSInteger position = GMGV_INVALID_POSITION;
+    
+    for (GMGridViewCell *v in [self itemSubviews]) 
+    {
+        if (v == view) 
+        {
+            position = v.tag - kTagOffset;
+            break;
+        }
+    }
+    
+    return position;
+}
+
+- (void)updateIndexOfItem:(GMGridViewCell *)view toIndex:(NSInteger)index
+{
+    NSUInteger oldIndex = [self positionForItemSubview:view];
+    
+    if (index >= 0 && oldIndex != index && oldIndex < _numberTotalItems) 
+    {
+        [self.dataSource GMGridView:self itemAtIndex:oldIndex movedToIndex:index];
     }
 }
 
-- (void)sortingMoveDidStopAtPoint:(CGPoint)point
-{
-    [_sortMovingItem shake:NO];
-    
-    _sortMovingItem.tag = _sortFuturePosition + GMGV_TAG_OFFSET;
-    
-    CGRect frameInScroll = [self convertRect:_sortMovingItem.frame toView:_scrollView];
-    
-    [_sortMovingItem removeFromSuperview];
-    _sortMovingItem.frame = frameInScroll;
-    [_scrollView addSubview:_sortMovingItem];
-     
-    [self updateIndexOfItem:_sortMovingItem toIndex:_sortFuturePosition];
-    
-    CGPoint newOrigin = [self originForItemAtPosition:_sortFuturePosition];
-    CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
-    
-    [UIView animateWithDuration:0.2 
+- (void)relayoutItems
+{    
+    [UIView animateWithDuration:kDefaultAnimationDuration 
+                          delay:0
+                        options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
-                         _sortMovingItem.transform = CGAffineTransformIdentity;
-                         _sortMovingItem.frame = newFrame;
+                         
+                         for (UIView *view in [self itemSubviews])
+                         {        
+                             if (view != _sortMovingItem && view != _transformingItem) 
+                             {
+                                 NSInteger index = view.tag - kTagOffset;
+                                 CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
+                                 CGRect newFrame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+                                 
+                                 // IF statement added for performance reasons (Time Profiling in instruments)
+                                 if (!CGRectEqualToRect(newFrame, view.frame)) 
+                                 {
+                                     view.frame = newFrame;
+                                 }
+                             }
+                         }
                      }
-                     completion:^(BOOL finished){
-                         [self.sortingDelegate GMGridView:self didEndMovingView:_sortMovingItem.contentView];
-                         _sortMovingItem = nil;
-                         _sortFuturePosition = GMGV_INVALID_POSITION;
-                         //[self relayoutItems];
+                     completion:^(BOOL finished) {
+                         
                      }
      ];
-}
-
-- (void)sortingMoveDidContinueToPoint:(CGPoint)point
-{
-    int position = [self itemPositionFromLocation:point];
-    int tag = position + GMGV_TAG_OFFSET;
-    
-    if (position != GMGV_INVALID_POSITION && position != _sortFuturePosition && position < _numberTotalItems) 
-    {
-        BOOL positionTaken = NO;
-        
-        for (UIView *v in [self itemSubviews])
-        {
-            if (v != _sortMovingItem && v.tag == tag) 
-            {
-                positionTaken = YES;
-                break;
-            }
-        }
-        
-        if (positionTaken)
-        {
-            switch (self.style) 
-            {
-                case GMGridViewStylePush:
-                {
-                    if (position > _sortFuturePosition) 
-                    {
-                        for (UIView *v in [self itemSubviews])
-                        {
-                            if ((v.tag == tag || (v.tag < tag && v.tag >= _sortFuturePosition + GMGV_TAG_OFFSET)) && v != _sortMovingItem ) 
-                            {
-                                v.tag = v.tag - 1;
-                                [_scrollView sendSubviewToBack:v];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (UIView *v in [self itemSubviews])
-                        {
-                            if ((v.tag == tag || (v.tag > tag && v.tag <= _sortFuturePosition + GMGV_TAG_OFFSET)) && v != _sortMovingItem) 
-                            {
-                                v.tag = v.tag + 1;
-                                [_scrollView sendSubviewToBack:v];
-                            }
-                        }
-                    }
-                    
-                    [self relayoutItems];
-                    
-                    break;
-                }
-                case GMGridViewStyleSwap:
-                default:
-                {
-                    UIView *v = [_scrollView viewWithTag:tag];
-                    v.tag = _sortFuturePosition + GMGV_TAG_OFFSET;
-                    CGPoint origin = [self originForItemAtPosition:_sortFuturePosition];
-                    
-                    [UIView animateWithDuration:0.3 
-                                          delay:0
-                                        options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState
-                                     animations:^{
-                                            v.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-                                     }
-                                     completion:nil
-                     ];
-                    
-                    [self updateIndexOfItem:v toIndex:v.tag - GMGV_TAG_OFFSET];
-                    break;
-                }
-            }
-        }
-        
-        _sortFuturePosition = position;
-    }
 }
 
 
@@ -859,7 +1014,7 @@
         [(UIView *)obj removeFromSuperview];
     }];
     
-    self.cacheStatusIsValid = NO;
+    [self setSubviewsCacheAsInvalid];
     
     NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
     NSUInteger width       = [self.dataSource widthForItemsInGMGridView:self];
@@ -868,6 +1023,8 @@
     _itemSize = CGSizeMake(width, height);
     _numberTotalItems = numberItems;
     
+    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
+    
     for (int i = 0; i < numberItems; i++) 
     {        
         GMGridViewCell *cell = [self createItemSubViewForPosition:i];
@@ -875,8 +1032,7 @@
         [_scrollView addSubview:cell];
     }
     
-    self.cacheStatusIsValid = NO;
-    
+    [self setSubviewsCacheAsInvalid];
     [self setNeedsLayout];
 }
 
@@ -890,11 +1046,10 @@
     cell.frame = currentView.frame;
     cell.alpha = 0;
     [_scrollView addSubview:cell];
-    self.cacheStatusIsValid = NO;
     
-    currentView.tag = GMGV_TAG_OFFSET - 1;
+    currentView.tag = kTagOffset - 1;
     
-    [UIView animateWithDuration:0.3 
+    [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0 
                         options:0 
                      animations:^{
@@ -903,11 +1058,12 @@
                          
                      } 
                      completion:^(BOOL finished){
-                        [currentView removeFromSuperview];
+                         [currentView removeFromSuperview];
                      }
      ];
     
     [_scrollView scrollRectToVisible:cell.frame animated:YES];
+    [self setSubviewsCacheAsInvalid];
 }
 
 - (void)insertObjectAtIndex:(NSInteger)index
@@ -915,8 +1071,6 @@
     NSAssert((index >= 0 && index <= _numberTotalItems), @"Invalid index specified");
     
     GMGridViewCell *cell = [self createItemSubViewForPosition:index];
-    CGPoint origin = [self originForItemAtPosition:index];
-    cell.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     
     for (int i = index; i < _numberTotalItems; i++)
     {
@@ -926,12 +1080,14 @@
     
     _numberTotalItems++;
     [_scrollView addSubview:cell];
-    self.cacheStatusIsValid = NO;
     
-    _scrollView.contentSize = [self computeContentSize];
+    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
+    _scrollView.contentSize = [self.layoutStrategy contentSize];
+    
     [_scrollView scrollRectToVisible:cell.frame animated:YES];
     
     [self setNeedsLayout];
+    [self setSubviewsCacheAsInvalid];
 }
 
 - (void)removeObjectAtIndex:(NSInteger)index
@@ -946,7 +1102,7 @@
         oldView.tag = oldView.tag - 1;
     }
     
-    cell.tag = GMGV_TAG_OFFSET - 1;
+    cell.tag = kTagOffset - 1;
     
     [UIView animateWithDuration:0.2 
                           delay:0 
@@ -957,7 +1113,7 @@
                      completion:^(BOOL finished){
                          [cell removeFromSuperview];
                          _numberTotalItems--;
-                         self.cacheStatusIsValid = NO;
+                         [self setSubviewsCacheAsInvalid];
                          [self setNeedsLayout];
                      }
      ];
@@ -969,7 +1125,7 @@
 {
     NSAssert((index1 >= 0 && index1 < _numberTotalItems), @"Invalid index1 specified");
     NSAssert((index2 >= 0 && index2 < _numberTotalItems), @"Invalid index2 specified");
-
+    
     GMGridViewCell *view1 = [self itemSubViewForPosition:index1];
     GMGridViewCell *view2 = [self itemSubViewForPosition:index2];
     
@@ -995,166 +1151,6 @@
         [_scrollView scrollRectToVisible:view2.frame animated:YES];
     }
 }
-
-
-//////////////////////////////////////////////////////////////
-#pragma mark private methods
-//////////////////////////////////////////////////////////////
-
-- (GMGridViewCell *)createItemSubViewForPosition:(NSInteger)position
-{
-    UIView *contentView = [self.dataSource GMGridView:self viewForItemAtIndex:position];
-    
-    GMGridViewCell *cell = [[GMGridViewCell alloc] initContentView:contentView];
-    cell.frame = CGRectMake(0, 0, _itemSize.width, _itemSize.height);
-    cell.tag = position + GMGV_TAG_OFFSET;
-    
-    return cell;
-}
-
-- (NSArray *)itemSubviews
-{
-    NSArray *subviews = nil;
-    
-    if (self.cacheStatusIsValid) 
-    {
-        subviews = [self.itemSubviewsCache copy];
-    }
-    else
-    {
-        NSMutableArray *itemSubViews = [[NSMutableArray alloc] initWithCapacity:_numberTotalItems];
-        
-        for (UIView * v in [_scrollView subviews]) 
-        {
-            if (v.tag >= GMGV_TAG_OFFSET && [v isKindOfClass:[GMGridViewCell class]]) 
-            {
-                [itemSubViews addObject:v];
-            }
-        }
-        
-        subviews = itemSubViews;
-        self.itemSubviewsCache  = [subviews copy];
-        self.cacheStatusIsValid = YES;
-    }
-    
-    return subviews;
-}
-
-// TODO: validate the use of this method ( = viewWithTag)
-- (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position
-{
-    GMGridViewCell *view = nil;
-    
-    for (GMGridViewCell *v in [self itemSubviews]) 
-    {
-        if (v.tag == position + GMGV_TAG_OFFSET) 
-        {
-            view = v;
-            break;
-        }
-    }
-    
-    return view;
-}
-
-- (NSInteger)positionForItemSubview:(GMGridViewCell *)view
-{
-    NSInteger position = GMGV_INVALID_POSITION;
-    
-    for (GMGridViewCell *v in [self itemSubviews]) 
-    {
-        if (v == view) 
-        {
-            position = v.tag - GMGV_TAG_OFFSET;
-            break;
-        }
-    }
-    
-    return position;
-}
-
-- (CGPoint)originForItemAtPosition:(NSInteger)position
-{
-    NSUInteger col = position % _numberOfItemsPerRow;
-    NSUInteger row = position / _numberOfItemsPerRow;
-    
-    CGFloat originX = col * (_itemSize.width + self.itemPadding) + self.itemPadding;
-    CGFloat originY = row * (_itemSize.height + self.itemPadding) + self.itemPadding;
-    
-    return CGPointMake(originX, originY);
-}
-
-
-- (void)updateIndexOfItem:(GMGridViewCell *)view toIndex:(NSInteger)index
-{
-    NSUInteger oldIndex = [self positionForItemSubview:view];
-    
-    if (index >= 0 && oldIndex != index && oldIndex < _numberTotalItems) 
-    {
-        [self.dataSource GMGridView:self itemAtIndex:oldIndex movedToIndex:index];
-    }
-}
-
-
-- (NSInteger)itemPositionFromLocation:(CGPoint)location
-{
-    int col = (int) (location.x / (_itemSize.width + self.itemPadding)); 
-    int row = (int) (location.y / (_itemSize.height + self.itemPadding));
-    
-    int position = col + row * _numberOfItemsPerRow;
-    
-    if (position >= _numberTotalItems || position < 0) 
-    {
-        position = GMGV_INVALID_POSITION;
-    }
-    else
-    {
-        UIView *item = [_scrollView viewWithTag:position+GMGV_TAG_OFFSET];
-        
-        if (!CGRectContainsPoint(item.frame, location))
-        {
-            position = GMGV_INVALID_POSITION;
-        }
-    }
-    
-    return position;
-}
-
-- (CGSize)computeContentSize
-{
-    return CGSizeMake(self.bounds.size.width - _scrollView.contentInset.left - _scrollView.contentInset.right, 
-                      ceil(_numberOfRowsInPage * (_itemSize.height + self.itemPadding) + self.itemPadding));
-}
-
-- (void)relayoutItems
-{    
-    [UIView animateWithDuration:0.3 
-                          delay:0
-                        options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState
-                     animations:^{
-                         
-                         for (UIView *view in [self itemSubviews])
-                         {        
-                             if (view != _sortMovingItem && view != _transformingItem) 
-                             {
-                                 NSInteger index = view.tag - GMGV_TAG_OFFSET;
-                                 CGPoint origin = [self originForItemAtPosition:index];
-                                 CGRect newFrame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-                                 
-                                 if (!CGRectEqualToRect(newFrame, view.frame)) 
-                                 {
-                                     view.frame = newFrame;
-                                 }
-                             }
-                         }
-                     }
-                     completion:^(BOOL finished) {
-                         
-                     }
-     ];
-}
-
-
 
 
 @end

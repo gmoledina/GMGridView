@@ -27,9 +27,9 @@
 //
 
 #import <Quartzcore/QuartzCore.h>
-#import "UIView+GMGridViewShake.h"
+#import "UIView+GMGridViewAdditions.h"
 
-@interface UIView (GMGridViewShake_Privates)
+@interface UIView (GMGridViewAdditions_Privates)
 
 - (void)shakeEnded:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context;
 
@@ -38,7 +38,7 @@
 
 
 
-@implementation UIView (GMGridViewShake)
+@implementation UIView (GMGridViewAdditions)
 
 - (void)shakeStatus:(BOOL)enabled
 {

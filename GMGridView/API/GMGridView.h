@@ -31,6 +31,7 @@
 @protocol GMGridViewDataSource;
 @protocol GMGridViewSortingDelegate;
 @protocol GMGridViewTransformationDelegate;
+@protocol GMGridViewLayoutStrategy;
 
 typedef enum
 {
@@ -52,6 +53,9 @@ typedef enum
 @property (nonatomic, weak) id<GMGridViewDataSource> dataSource;
 @property (nonatomic, weak) id<GMGridViewSortingDelegate> sortingDelegate;
 @property (nonatomic, weak) id<GMGridViewTransformationDelegate> transformDelegate;
+
+// Layout Strategy
+@property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy;
 
 // Customizing Options
 @property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
