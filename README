@@ -1,4 +1,3 @@
-
 GM-GRID-VIEW
 -------------
 
@@ -28,5 +27,9 @@ Features - Fullsize:
 - Provide a different fullsize view (detailed view) for the view via the delegate
 - Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
 
+COMING SOON :
+- Different layouting strategies !
+- More demo content
+- Changing the zoom scale dynamically (when pinching to go fullscreen)
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
