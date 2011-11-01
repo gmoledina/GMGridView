@@ -10,7 +10,7 @@
 #import "GMGridView.h"
 #import <QuartzCore/QuartzCore.h>
 
-#define NUMBER_ITEMS_ON_LOAD 25
+#define NUMBER_ITEMS_ON_LOAD 250
 
 //////////////////////////////////////////////////////////////
 #pragma mark -

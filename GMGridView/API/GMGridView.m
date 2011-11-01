@@ -188,8 +188,8 @@ static const NSUInteger kTagOffset = 50;
         [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
         [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
-        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
-        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
+        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
         
         self.itemSpacing = 10;
         self.style = GMGridViewStyleSwap;
