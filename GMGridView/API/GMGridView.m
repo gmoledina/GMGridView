@@ -101,6 +101,7 @@ static const NSUInteger kTagOffset = 50;
 - (void)exitFullSizePinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture;
 
 // Helpers & more
+- (void)recomputeSize;
 - (void)relayoutItems;
 - (NSArray *)itemSubviews;
 - (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position;
@@ -121,10 +122,11 @@ static const NSUInteger kTagOffset = 50;
 
 @synthesize sortingDelegate = _sortingDelegate, dataSource = _dataSource, transformDelegate = _transformDelegate;
 @synthesize layoutStrategy = _layoutStrategy;
-@synthesize itemPadding = _itemPadding;
+@synthesize itemSpacing = _itemSpacing;
 @synthesize style = _style;
 @synthesize minimumPressDuration;
-@synthesize centerGrid;
+@synthesize centerGrid = _centerGrid;
+@synthesize minEdgeInsets = _minEdgeInsets;
 @synthesize showFullSizeViewWithAlphaWhenTransforming;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
@@ -186,14 +188,14 @@ static const NSUInteger kTagOffset = 50;
         [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
         [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
-        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
         
-        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
-        
-        self.itemPadding = 10;
+        self.itemSpacing = 10;
         self.style = GMGridViewStyleSwap;
         self.minimumPressDuration = 0.2;
         self.showFullSizeViewWithAlphaWhenTransforming = YES;
+        self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
         
         _sortFuturePosition = GMGV_INVALID_POSITION;
         _itemSize = CGSizeZero;
@@ -213,23 +215,7 @@ static const NSUInteger kTagOffset = 50;
 {
     [super layoutSubviews];
     
-    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
-        
-    _scrollView.contentSize = [self.layoutStrategy contentSize];
-    
-    if (self.centerGrid)
-    {
-        int extraSpace = (self.bounds.size.width - _scrollView.contentSize.width) / 2;
-        if (extraSpace > 0) 
-        {
-            _scrollView.contentInset = UIEdgeInsetsMake(0, extraSpace, 0, extraSpace);
-        }
-    }
-    else
-    {
-        _scrollView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
-    }
-    
+    [self recomputeSize];
     [self relayoutItems];
     
     [_scrollView flashScrollIndicators];
@@ -252,9 +238,15 @@ static const NSUInteger kTagOffset = 50;
     [self setNeedsLayout];
 }
 
-- (void)setItemPadding:(NSInteger)itemPadding
+- (void)setItemSpacing:(NSInteger)itemSpacing
 {
-    _itemPadding = itemPadding;
+    _itemSpacing = itemSpacing;
+    [self setNeedsLayout];
+}
+
+- (void)setMinEdgeInsets:(UIEdgeInsets)minEdgeInsets
+{
+    _minEdgeInsets = minEdgeInsets;
     [self setNeedsLayout];
 }
 
@@ -469,6 +461,7 @@ static const NSUInteger kTagOffset = 50;
     [self addSubview:_sortMovingItem];
     
     _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
+    _sortMovingItem.tag = 0;
     
     [self.sortingDelegate GMGridView:self didStartMovingView:_sortMovingItem.contentView];
     
@@ -564,8 +557,7 @@ static const NSUInteger kTagOffset = 50;
                 {
                     if (_sortMovingItem) 
                     {
-                        //UIView *v = [self itemSubViewForPosition:position];
-                        UIView *v = [_scrollView viewWithTag:tag];
+                        UIView *v = [self itemSubViewForPosition:position];
                         v.tag = _sortFuturePosition + kTagOffset;
                         CGPoint origin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
                         
@@ -974,6 +966,38 @@ static const NSUInteger kTagOffset = 50;
     }
 }
 
+- (void)recomputeSize
+{
+    CGRect actualBounds = CGRectMake(0, 
+                                     0, 
+                                     self.bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
+                                     self.bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
+    
+    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andSpacing:self.itemSpacing insideOfBounds:actualBounds];
+    
+    _scrollView.contentSize = [self.layoutStrategy contentSize];
+    
+    if (self.centerGrid)
+    {
+        NSInteger widthSpace, heightSpace;        
+        NSInteger top, left, bottom, right;
+        
+        widthSpace  = (self.bounds.size.width  - _scrollView.contentSize.width)  / 2;
+        heightSpace = (self.bounds.size.height - _scrollView.contentSize.height) / 2;
+        
+        left   = (widthSpace  < self.minEdgeInsets.left)   ? self.minEdgeInsets.left   : widthSpace;
+        right  = (widthSpace  < self.minEdgeInsets.right)  ? self.minEdgeInsets.right  : widthSpace;
+        top    = (heightSpace < self.minEdgeInsets.top)    ? self.minEdgeInsets.top    : heightSpace;
+        bottom = (heightSpace < self.minEdgeInsets.bottom) ? self.minEdgeInsets.bottom : heightSpace;
+        
+        _scrollView.contentInset = UIEdgeInsetsMake(top, left, bottom, right);
+    }
+    else
+    {
+        _scrollView.contentInset = self.minEdgeInsets;
+    }
+}
+
 - (void)relayoutItems
 {    
     [UIView animateWithDuration:kDefaultAnimationDuration 
@@ -1023,7 +1047,7 @@ static const NSUInteger kTagOffset = 50;
     _itemSize = CGSizeMake(width, height);
     _numberTotalItems = numberItems;
     
-    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
+    [self recomputeSize];
     
     for (int i = 0; i < numberItems; i++) 
     {        
@@ -1081,8 +1105,7 @@ static const NSUInteger kTagOffset = 50;
     _numberTotalItems++;
     [_scrollView addSubview:cell];
     
-    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andPadding:self.itemPadding insideOfBounds:self.bounds];
-    _scrollView.contentSize = [self.layoutStrategy contentSize];
+    [self recomputeSize];
     
     [_scrollView scrollRectToVisible:cell.frame animated:YES];
     

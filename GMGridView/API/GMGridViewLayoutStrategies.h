@@ -58,7 +58,7 @@ typedef enum {
 @protocol GMGridViewLayoutStrategy <NSObject>
 
 // Setup
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andPadding:(NSInteger)padding insideOfBounds:(CGRect)bounds;
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds;
 
 // Fetching the result
 - (CGSize)contentSize;
@@ -76,17 +76,18 @@ typedef enum {
 @interface GMGridViewLayoutStrategyBase : NSObject
 {
     @protected
-    // All of these vars should be set in the rebase method
+    
+    // All of these vars should be set in the rebase method of the child class
     NSInteger _itemCount;
     CGSize _itemSize;
-    NSInteger _itemPadding;
+    NSInteger _itemSpacing;
     CGRect _contentBounds;
     CGSize _contentSize;
 }
 
 @property (nonatomic, readonly) NSInteger itemCount;
 @property (nonatomic, readonly) CGSize itemSize;
-@property (nonatomic, readonly) NSInteger itemPadding;
+@property (nonatomic, readonly) NSInteger itemSpacing;
 @property (nonatomic, readonly) CGRect contentBounds;
 @property (nonatomic, readonly) CGSize contentSize;
 

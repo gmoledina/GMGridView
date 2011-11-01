@@ -63,7 +63,7 @@
 
 @synthesize itemCount     = _itemCount;
 @synthesize itemSize      = _itemSize;
-@synthesize itemPadding   = _itemPadding;
+@synthesize itemSpacing   = _itemSpacing;
 @synthesize contentBounds = _contentBounds;
 @synthesize contentSize   = _contentSize;
 
@@ -79,24 +79,24 @@
 
 @synthesize numberOfItemsPerRow = _numberOfItemsPerRow;
 
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andPadding:(NSInteger)padding insideOfBounds:(CGRect)bounds
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
 {
     _itemCount     = count;
     _itemSize      = itemSize;
-    _itemPadding   = padding;
+    _itemSpacing   = spacing;
     _contentBounds = bounds;
     
     _numberOfItemsPerRow = 1;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemPadding) + self.itemPadding < self.contentBounds.size.width)
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing < self.contentBounds.size.width)
     {
         _numberOfItemsPerRow++;
     }
     
     NSInteger numberOfRows = ceil(self.itemCount / (1.0 * self.numberOfItemsPerRow));
     
-    _contentSize = CGSizeMake(ceil(self.numberOfItemsPerRow * (self.itemSize.width + self.itemPadding) + self.itemPadding), 
-                              ceil(numberOfRows * (self.itemSize.height + self.itemPadding) + self.itemPadding));
+    _contentSize = CGSizeMake(ceil(MIN(self.itemCount, self.numberOfItemsPerRow) * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
+                              ceil(numberOfRows * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -108,8 +108,8 @@
         NSUInteger col = position % self.numberOfItemsPerRow; 
         NSUInteger row = position / self.numberOfItemsPerRow;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemPadding) + self.itemPadding,
-                             row * (self.itemSize.height + self.itemPadding) + self.itemPadding);
+        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing),
+                             row * (self.itemSize.height + self.itemSpacing));
     }
     
     return origin;
@@ -117,8 +117,8 @@
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
-    int col = (int) (location.x / (self.itemSize.width + self.itemPadding)); 
-    int row = (int) (location.y / (self.itemSize.height + self.itemPadding));
+    int col = (int) (location.x / (self.itemSize.width + self.itemSpacing)); 
+    int row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
     
     int position = col + row * self.numberOfItemsPerRow;
     
@@ -131,8 +131,8 @@
         CGPoint itemOrigin = [self originForItemAtPosition:position];
         CGRect itemFrame = CGRectMake(itemOrigin.x, 
                                       itemOrigin.y, 
-                                      self.itemSize.width + self.itemPadding, 
-                                      self.itemSize.height + self.itemPadding);
+                                      self.itemSize.width, 
+                                      self.itemSize.height);
         
         if (!CGRectContainsPoint(itemFrame, location)) 
         {
@@ -154,24 +154,24 @@
 
 @synthesize numberOfItemsPerColumn = _numberOfItemsPerColumn;
 
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andPadding:(NSInteger)padding insideOfBounds:(CGRect)bounds
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
 {
     _itemCount     = count;
     _itemSize      = itemSize;
-    _itemPadding   = padding;
+    _itemSpacing   = spacing;
     _contentBounds = bounds;
     
     _numberOfItemsPerColumn = 1;
     
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemPadding) + self.itemPadding < self.contentBounds.size.height)
+    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing < self.contentBounds.size.height)
     {
         _numberOfItemsPerColumn++;
     }
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
             
-    _contentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemPadding) + self.itemPadding), 
-                              ceil(self.numberOfItemsPerColumn * (self.itemSize.height + self.itemPadding) + self.itemPadding));
+    _contentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
+                              ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -183,8 +183,8 @@
         NSUInteger col = position / self.numberOfItemsPerColumn; 
         NSUInteger row = position % self.numberOfItemsPerColumn;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemPadding) + self.itemPadding,
-                             row * (self.itemSize.height + self.itemPadding) + self.itemPadding);
+        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing),
+                             row * (self.itemSize.height + self.itemSpacing));
     }
     
     return origin;
@@ -192,8 +192,8 @@
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
-    int col = (int) (location.x / (self.itemSize.width + self.itemPadding)); 
-    int row = (int) (location.y / (self.itemSize.height + self.itemPadding));
+    int col = (int) (location.x / (self.itemSize.width + self.itemSpacing)); 
+    int row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
     
     int position = row + col * self.numberOfItemsPerColumn;
     
@@ -206,8 +206,8 @@
         CGPoint itemOrigin = [self originForItemAtPosition:position];
         CGRect itemFrame = CGRectMake(itemOrigin.x, 
                                       itemOrigin.y, 
-                                      self.itemSize.width + self.itemPadding, 
-                                      self.itemSize.height + self.itemPadding);
+                                      self.itemSize.width, 
+                                      self.itemSize.height);
         
         if (!CGRectContainsPoint(itemFrame, location)) 
         {

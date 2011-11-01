@@ -10,7 +10,7 @@
 #import "GMGridView.h"
 #import <QuartzCore/QuartzCore.h>
 
-#define NUMBER_ITEMS_ON_LOAD 250
+#define NUMBER_ITEMS_ON_LOAD 25
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
@@ -103,7 +103,7 @@
     GMGridView *gmGridView = [[GMGridView alloc] initWithFrame:self.view.bounds];
     gmGridView.style = GMGridViewStyleSwap;
     gmGridView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    gmGridView.itemPadding = _itemPadding;
+    gmGridView.itemSpacing = _itemPadding;
     gmGridView.centerGrid = YES;
     gmGridView.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:gmGridView];
