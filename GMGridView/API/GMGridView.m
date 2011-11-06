@@ -64,8 +64,10 @@ static const NSUInteger kTagOffset = 50;
     // Moving (sorting) control vars
     GMGridViewCell *_sortMovingItem;
     NSInteger _sortFuturePosition;
-    CGPoint _sortMovingItemStartingPoint;
     BOOL _autoScrollActive;
+    
+    CGPoint _minPossibleContentOffset;
+    CGPoint _maxPossibleContentOffset;
     
     // Transforming control vars
     GMGridViewCell *_transformingItem;
@@ -92,7 +94,6 @@ static const NSUInteger kTagOffset = 50;
 - (void)sortingMoveDidContinueToPoint:(CGPoint)point;
 - (void)sortingMoveDidStopAtPoint:(CGPoint)point;
 - (void)sortingAutoScrollMovementCheck;
-- (void)updateIndexOfItem:(UIView *)view toIndex:(NSInteger)index;
 
 // Transformation control
 - (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture;
@@ -181,6 +182,7 @@ static const NSUInteger kTagOffset = 50;
         
         _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
         _sortingLongPressGesture.numberOfTouchesRequired = 1;
+        _sortingLongPressGesture.delegate = self;
         [_scrollView addGestureRecognizer:_sortingLongPressGesture];
 
         
@@ -189,7 +191,6 @@ static const NSUInteger kTagOffset = 50;
         [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
         self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
-        //self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal]; // Work in progress
         
         self.itemSpacing = 10;
         self.style = GMGridViewStyleSwap;
@@ -202,6 +203,9 @@ static const NSUInteger kTagOffset = 50;
         
         _lastScale = 1.0;
         _lastRotation = 0.0;
+        
+        _minPossibleContentOffset = CGPointMake(0, 0);
+        _maxPossibleContentOffset = CGPointMake(0, 0);
     }
     return self;
 }
@@ -244,6 +248,12 @@ static const NSUInteger kTagOffset = 50;
     [self setNeedsLayout];
 }
 
+- (void)setCenterGrid:(BOOL)centerGrid
+{
+    _centerGrid = centerGrid;
+    [self setNeedsLayout];
+}
+
 - (void)setMinEdgeInsets:(UIEdgeInsets)minEdgeInsets
 {
     _minEdgeInsets = minEdgeInsets;
@@ -278,13 +288,17 @@ static const NSUInteger kTagOffset = 50;
         CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
         valid = [self.layoutStrategy itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
     }
+    else if (gestureRecognizer == _sortingLongPressGesture)
+    {
+        valid = (self.sortingDelegate != nil);
+    }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
         valid = (_sortMovingItem != nil && [_sortingLongPressGesture hasRecognizedValidGesture]);
     }
     else if(gestureRecognizer == _rotationGesture || gestureRecognizer == _pinchGesture || gestureRecognizer == _panGesture)
     {
-        if ([gestureRecognizer numberOfTouches] == 2) 
+        if (self.transformDelegate != nil && [gestureRecognizer numberOfTouches] == 2) 
         {
             CGPoint locationTouch1 = [gestureRecognizer locationOfTouch:0 inView:_scrollView];
             CGPoint locationTouch2 = [gestureRecognizer locationOfTouch:1 inView:_scrollView];
@@ -355,13 +369,10 @@ static const NSUInteger kTagOffset = 50;
         case UIGestureRecognizerStateFailed:
         {
             _autoScrollActive = NO;
-            _sortMovingItemStartingPoint = CGPointZero;
             break;
         }
         case UIGestureRecognizerStateBegan:
-        {
-            _sortMovingItemStartingPoint = [panGesture locationInView:_scrollView];
-            
+        {            
             _autoScrollActive = YES;
             [self sortingAutoScrollMovementCheck];
             
@@ -388,52 +399,68 @@ static const NSUInteger kTagOffset = 50;
     if (_sortMovingItem && _autoScrollActive) 
     {
         CGPoint locationInMainView = [_sortingPanGesture locationInView:self];
-        CGPoint locationInScroll = [_sortingPanGesture locationInView:_scrollView];
-        CGRect visibleRect = CGRectMake(_scrollView.contentOffset.x, 
-                                        _scrollView.contentOffset.y, 
-                                        _scrollView.bounds.size.width, 
-                                        _scrollView.bounds.size.height);
+        CGPoint locationInScroll   = [_sortingPanGesture locationInView:_scrollView];
+
+        CGFloat threshhold = _itemSize.height;
+        CGPoint offset = _scrollView.contentOffset;
         
-        void (^completionBlock)(void) = ^{
-            if (_autoScrollActive) 
+        // Going down
+        if (locationInMainView.x + threshhold > self.bounds.size.width) 
+        {            
+            offset.x += _itemSize.width;
+            
+            if (offset.x > _maxPossibleContentOffset.x) 
             {
-                [self sortingMoveDidContinueToPoint:locationInScroll];
+                offset.x = _maxPossibleContentOffset.x;
             }
-            
-            [self sortingAutoScrollMovementCheck];
-        };
-        
-        if (locationInMainView.y + _itemSize.height/2 > self.bounds.size.height) 
-        {
-            CGAffineTransform transform = CGAffineTransformTranslate(CGAffineTransformIdentity, 0, _itemSize.height);
-            
-            CGRect newVisiblerect = CGRectApplyAffineTransform(visibleRect, transform);
-            
-            [UIView animateWithDuration:0.2 
-                                  delay:0 
-                                options:0 
-                             animations:^{
-                                 [_scrollView scrollRectToVisible:newVisiblerect animated:NO];
-                             }
-                             completion:^(BOOL finished){
-                                 completionBlock();
-                             }
-             ];
         }
-        else if (locationInMainView.y - _itemSize.height/2 <= 0) 
+        // Going up
+        else if (locationInMainView.x - threshhold <= 0) 
+        {            
+            offset.x -= _itemSize.width;
+            
+            if (offset.x < _minPossibleContentOffset.x) 
+            {
+                offset.x = _minPossibleContentOffset.x;
+            }
+        }
+        
+        // Going right
+        if (locationInMainView.y + threshhold > self.bounds.size.height) 
+        {            
+            offset.y += _itemSize.height;
+            
+            if (offset.y > _maxPossibleContentOffset.y) 
+            {
+                offset.y = _maxPossibleContentOffset.y;
+            }
+        }
+        // Going leftz
+        else if (locationInMainView.y - threshhold <= 0) 
+        {            
+            offset.y -= _itemSize.height;
+            
+            if (offset.y < _minPossibleContentOffset.y) 
+            {
+                offset.y = _minPossibleContentOffset.y;
+            }
+        }
+        
+        if (offset.x != _scrollView.contentOffset.x || offset.y != _scrollView.contentOffset.y) 
         {
-            CGAffineTransform transform = CGAffineTransformTranslate(CGAffineTransformIdentity, 0, -1 * _itemSize.height);
-            
-            CGRect newVisiblerect = CGRectApplyAffineTransform(visibleRect, transform);
-            
-            [UIView animateWithDuration:0.2 
+            [UIView animateWithDuration:kDefaultAnimationDuration 
                                   delay:0 
                                 options:0 
                              animations:^{
-                                 [_scrollView scrollRectToVisible:newVisiblerect animated:NO];
+                                 _scrollView.contentOffset = offset;
                              }
                              completion:^(BOOL finished){
-                                 completionBlock();
+                                 if (_autoScrollActive) 
+                                 {
+                                     [self sortingMoveDidContinueToPoint:locationInScroll];
+                                 }
+                                 
+                                 [self sortingAutoScrollMovementCheck];
                              }
              ];
         }
@@ -463,9 +490,16 @@ static const NSUInteger kTagOffset = 50;
     _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
     _sortMovingItem.tag = 0;
     
-    [self.sortingDelegate GMGridView:self didStartMovingView:_sortMovingItem.contentView];
+    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didStartMovingView:)])
+    {
+        [self.sortingDelegate GMGridView:self didStartMovingView:_sortMovingItem.contentView];
+    }
     
-    if ([self.sortingDelegate GMGridView:self shouldAllowShakingBehaviorWhenMovingView:_sortMovingItem.contentView atIndex:position]) 
+    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didStartMovingView:)]) 
+    {
+        [_sortMovingItem shake:[self.sortingDelegate GMGridView:self shouldAllowShakingBehaviorWhenMovingView:_sortMovingItem.contentView atIndex:position]];
+    }
+    else
     {
         [_sortMovingItem shake:YES];
     }
@@ -483,18 +517,20 @@ static const NSUInteger kTagOffset = 50;
     _sortMovingItem.frame = frameInScroll;
     [_scrollView addSubview:_sortMovingItem];
     
-    [self updateIndexOfItem:_sortMovingItem toIndex:_sortFuturePosition];
-    
     CGPoint newOrigin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
     CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
     
-    [UIView animateWithDuration:0.2 
+    [UIView animateWithDuration:kDefaultAnimationDuration 
                      animations:^{
                          _sortMovingItem.transform = CGAffineTransformIdentity;
                          _sortMovingItem.frame = newFrame;
                      }
                      completion:^(BOOL finished){
-                         [self.sortingDelegate GMGridView:self didEndMovingView:_sortMovingItem.contentView];
+                         if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didEndMovingView:)])
+                         {
+                             [self.sortingDelegate GMGridView:self didEndMovingView:_sortMovingItem.contentView];
+                         }
+                         
                          _sortMovingItem = nil;
                          _sortFuturePosition = GMGV_INVALID_POSITION;
                      }
@@ -548,6 +584,7 @@ static const NSUInteger kTagOffset = 50;
                         }
                     }
                     
+                    [self.sortingDelegate GMGridView:self moveItemAtIndex:_sortFuturePosition toIndex:position];
                     [self relayoutItems];
                     
                     break;
@@ -558,6 +595,7 @@ static const NSUInteger kTagOffset = 50;
                     if (_sortMovingItem) 
                     {
                         UIView *v = [self itemSubViewForPosition:position];
+                                                
                         v.tag = _sortFuturePosition + kTagOffset;
                         CGPoint origin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
                         
@@ -569,9 +607,9 @@ static const NSUInteger kTagOffset = 50;
                                          }
                                          completion:nil
                          ];
-                        
-                        [self updateIndexOfItem:v toIndex:v.tag - kTagOffset];
                     }
+                    
+                    [self.sortingDelegate GMGridView:self exchangeItemAtIndex:_sortFuturePosition withItemAtIndex:position];
                     
                     break;
                 }
@@ -708,7 +746,6 @@ static const NSUInteger kTagOffset = 50;
     }
 }
 
-
 - (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture
 {
     if (!_transformingItem) 
@@ -725,13 +762,13 @@ static const NSUInteger kTagOffset = 50;
         [self addSubview:_transformingItem];
         [self bringSubviewToFront:_transformingItem];
         
-        if (!_transformingItem.fullSizeView) 
-        {
-            _transformingItem.fullSize = [self.dataSource GMGridView:self fullSizeForView:_transformingItem.contentView];
-            _transformingItem.fullSizeView = [self.dataSource GMGridView:self fullSizeViewForView:_transformingItem];
-        }
+        _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForView:_transformingItem.contentView];
+        _transformingItem.fullSizeView = [self.transformDelegate GMGridView:self fullSizeViewForView:_transformingItem];
         
-        [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
+        if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingView:)]) 
+        {
+            [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
+        }
     }
 }
 
@@ -747,7 +784,6 @@ static const NSUInteger kTagOffset = 50;
                 {
                     _inFullSizeMode = NO;
                     [_transformingItem removeGestureRecognizer:pinchGesture];
-
                     _transformingItem.frame = _transformingItem.fullSizeView.frame;
                     
                     [self transformingGestureDidFinish];
@@ -796,7 +832,12 @@ static const NSUInteger kTagOffset = 50;
                              completion:^(BOOL finished){
                                  _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                                  _inFullSizeMode = YES;
-                                 [self.transformDelegate GMGridView:self didEnterFullSizeForView:_transformingItem.contentView];
+                                 
+                                 if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForView:)])
+                                 {
+                                    [self.transformDelegate GMGridView:self didEnterFullSizeForView:_transformingItem.contentView];
+                                 }
+                                 
                              }
              ];
         }
@@ -827,8 +868,13 @@ static const NSUInteger kTagOffset = 50;
                                  transformingView.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
                              } 
                              completion:^(BOOL finished){
+                                 transformingView.fullSizeView = nil;
                                  [self relayoutItems];
-                                 [self.transformDelegate GMGridView:self didEndTransformingView:transformingView.contentView];
+                                 
+                                 if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEndTransformingView:)])
+                                 {
+                                    [self.transformDelegate GMGridView:self didEndTransformingView:transformingView.contentView];
+                                 }
                              }
              ];
         }
@@ -956,16 +1002,6 @@ static const NSUInteger kTagOffset = 50;
     return position;
 }
 
-- (void)updateIndexOfItem:(GMGridViewCell *)view toIndex:(NSInteger)index
-{
-    NSUInteger oldIndex = [self positionForItemSubview:view];
-    
-    if (index >= 0 && oldIndex != index && oldIndex < _numberTotalItems) 
-    {
-        [self.dataSource GMGridView:self itemAtIndex:oldIndex movedToIndex:index];
-    }
-}
-
 - (void)recomputeSize
 {
     CGRect actualBounds = CGRectMake(0, 
@@ -996,6 +1032,11 @@ static const NSUInteger kTagOffset = 50;
     {
         _scrollView.contentInset = self.minEdgeInsets;
     }
+    
+    _minPossibleContentOffset = CGPointMake(-1 * (_scrollView.contentInset.left), 
+                                            -1 * (_scrollView.contentInset.top));
+    _maxPossibleContentOffset = CGPointMake(_scrollView.contentSize.width - _scrollView.bounds.size.width + _scrollView.contentInset.right, 
+                                            _scrollView.contentSize.height - _scrollView.bounds.size.height + _scrollView.contentInset.bottom);
 }
 
 - (void)relayoutItems
@@ -1040,11 +1081,8 @@ static const NSUInteger kTagOffset = 50;
     
     [self setSubviewsCacheAsInvalid];
     
-    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
-    NSUInteger width       = [self.dataSource widthForItemsInGMGridView:self];
-    NSUInteger height      = [self.dataSource heightForItemsInGMGridView:self];
-    
-    _itemSize = CGSizeMake(width, height);
+    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];    
+    _itemSize = [self.dataSource sizeForItemsInGMGridView:self];
     _numberTotalItems = numberItems;
     
     [self recomputeSize];
@@ -1056,6 +1094,7 @@ static const NSUInteger kTagOffset = 50;
         [_scrollView addSubview:cell];
     }
     
+    _scrollView.contentOffset = _minPossibleContentOffset;
     [self setSubviewsCacheAsInvalid];
     [self setNeedsLayout];
 }
@@ -1127,7 +1166,7 @@ static const NSUInteger kTagOffset = 50;
     
     cell.tag = kTagOffset - 1;
     
-    [UIView animateWithDuration:0.2 
+    [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0 
                         options:0 
                      animations:^{

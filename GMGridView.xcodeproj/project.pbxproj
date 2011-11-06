@@ -18,13 +18,14 @@
 		16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0B144156FE00E6E556 /* UIKit.framework */; };
 		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
 		16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0F144156FE00E6E556 /* CoreGraphics.framework */; };
+		169AE3781460E1B300C0CBCD /* OptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 169AE3771460E1B300C0CBCD /* OptionsViewController.m */; };
 		16A0D030145342F8004D7BBC /* GMGridViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 16A0D02F145342F8004D7BBC /* GMGridViewCell.m */; };
 		16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */ = {isa = PBXBuildFile; fileRef = 16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */; };
 		16DF1A71145E3461006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 16DF1A70145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		16026C0C1454628800093AFF /* UIView+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; name = "UIView+GMGridViewAdditions.h"; path = "GMGridView/API/UIView+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
+		16026C0C1454628800093AFF /* UIView+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIView+GMGridViewAdditions.h"; path = "GMGridView/API/UIView+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
 		16026C0D1454628800093AFF /* UIView+GMGridViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+GMGridViewAdditions.m"; path = "GMGridView/API/UIView+GMGridViewAdditions.m"; sourceTree = SOURCE_ROOT; };
 		16026C111454631600093AFF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		16026C121454631600093AFF /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -42,11 +43,13 @@
 		16924B0B144156FE00E6E556 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		16924B0D144156FE00E6E556 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		16924B0F144156FE00E6E556 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		169AE3761460E1B300C0CBCD /* OptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptionsViewController.h; path = GMGridView/OptionsViewController.h; sourceTree = SOURCE_ROOT; };
+		169AE3771460E1B300C0CBCD /* OptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OptionsViewController.m; path = GMGridView/OptionsViewController.m; sourceTree = SOURCE_ROOT; };
 		16A0D02E145342F8004D7BBC /* GMGridViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewCell.h; path = GMGridView/API/GMGridViewCell.h; sourceTree = SOURCE_ROOT; };
 		16A0D02F145342F8004D7BBC /* GMGridViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewCell.m; path = GMGridView/API/GMGridViewCell.m; sourceTree = SOURCE_ROOT; };
 		16DF1A6C145E3456006AA43C /* GMGridViewLayoutStrategies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewLayoutStrategies.h; path = GMGridView/API/GMGridViewLayoutStrategies.h; sourceTree = SOURCE_ROOT; };
 		16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewLayoutStrategies.m; path = GMGridView/API/GMGridViewLayoutStrategies.m; sourceTree = SOURCE_ROOT; };
-		16DF1A6F145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; name = "UIGestureRecognizer+GMGridViewAdditions.h"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
+		16DF1A6F145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIGestureRecognizer+GMGridViewAdditions.h"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
 		16DF1A70145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIGestureRecognizer+GMGridViewAdditions.m"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.m"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -111,6 +114,8 @@
 				1691D7A71442D01F00F472BF /* AppDelegate.m */,
 				1691D7A81442D01F00F472BF /* ViewController.h */,
 				1691D7A91442D01F00F472BF /* ViewController.m */,
+				169AE3761460E1B300C0CBCD /* OptionsViewController.h */,
+				169AE3771460E1B300C0CBCD /* OptionsViewController.m */,
 				16924B12144156FE00E6E556 /* Supporting Files */,
 			);
 			name = Demo;
@@ -216,6 +221,7 @@
 				16026C0E1454628800093AFF /* UIView+GMGridViewAdditions.m in Sources */,
 				16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */,
 				16DF1A71145E3461006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */,
+				169AE3781460E1B300C0CBCD /* OptionsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

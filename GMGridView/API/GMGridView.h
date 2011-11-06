@@ -50,12 +50,12 @@ typedef enum
 }
 
 // Delegates
-@property (nonatomic, weak) id<GMGridViewDataSource> dataSource;
-@property (nonatomic, weak) id<GMGridViewSortingDelegate> sortingDelegate;
-@property (nonatomic, weak) id<GMGridViewTransformationDelegate> transformDelegate;
+@property (nonatomic, weak) NSObject<GMGridViewDataSource> *dataSource;                        // Required
+@property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;              // Required to enable sorting
+@property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate;     // Required to enable fullsize mode
 
 // Layout Strategy
-@property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy;
+@property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy; // Default is GMGridViewLayoutVerticalStrategy
 
 // Customizing Options
 @property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
@@ -79,20 +79,13 @@ typedef enum
 #pragma mark Protocol GMGridViewDataSource
 //////////////////////////////////////////////////////////////
 
-@protocol GMGridViewDataSource
+@protocol GMGridViewDataSource <NSObject>
 
+@required
 // Populating subview items 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
-- (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView;
-- (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView;
+- (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView;
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
-
-// Item moved - right place to update the data structure
-- (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex;
-
-// Fullsize
-- (CGSize)GMGridView:(GMGridView *)gridView fullSizeForView:(UIView *)view;
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view;
 
 @end
 
@@ -101,12 +94,17 @@ typedef enum
 #pragma mark Protocol GMGridViewSortingDelegate
 //////////////////////////////////////////////////////////////
 
-@protocol GMGridViewSortingDelegate
+@protocol GMGridViewSortingDelegate <NSObject>
 
+@required
+// Item moved - right place to update the data structure
+- (void)GMGridView:(GMGridView *)gridView moveItemAtIndex:(NSInteger)oldIndex toIndex:(NSInteger)newIndex;
+- (void)GMGridView:(GMGridView *)gridView exchangeItemAtIndex:(NSInteger)index1 withItemAtIndex:(NSInteger)index2;
+
+@optional
 // Sorting started/ended - indexes are not specified on purpose (not the right place to update data structure)
 - (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view;
-
 // Enable/Disable the shaking behavior of an item being moved
 - (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index;
 
@@ -116,9 +114,15 @@ typedef enum
 #pragma mark Protocol GMGridViewTransformationDelegate
 //////////////////////////////////////////////////////////////
 
-@protocol GMGridViewTransformationDelegate
+@protocol GMGridViewTransformationDelegate <NSObject>
 
-// Transformation (pinch, drag, rotate) of the an item
+@required
+// Fullsize
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForView:(UIView *)view;
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view;
+
+// Transformation (pinch, drag, rotate) of the item
+@optional
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view;
 - (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view;

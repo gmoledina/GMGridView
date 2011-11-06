@@ -63,6 +63,7 @@
 
 @implementation GMGridViewLayoutStrategyBase
 
+@synthesize type          = _type;
 @synthesize itemCount     = _itemCount;
 @synthesize itemSize      = _itemSize;
 @synthesize itemSpacing   = _itemSpacing;
@@ -81,6 +82,16 @@
 @implementation GMGridViewLayoutVerticalStrategy
 
 @synthesize numberOfItemsPerRow = _numberOfItemsPerRow;
+
+- (id)init
+{
+    if ((self = [super init])) 
+    {
+        _type = GMGridViewLayoutVertical;
+    }
+    
+    return self;
+}
 
 - (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
 {
@@ -157,6 +168,16 @@
 @implementation GMGridViewLayoutHorizontalStrategy
 
 @synthesize numberOfItemsPerColumn = _numberOfItemsPerColumn;
+
+- (id)init
+{
+    if ((self = [super init])) 
+    {
+        _type = GMGridViewLayoutHorizontal;
+    }
+    
+    return self;
+}
 
 - (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
 {

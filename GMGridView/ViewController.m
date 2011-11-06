@@ -6,11 +6,14 @@
 //  Copyright (c) 2011 GMoledina.ca. All rights reserved.
 //
 
+#import <QuartzCore/QuartzCore.h>
 #import "ViewController.h"
 #import "GMGridView.h"
-#import <QuartzCore/QuartzCore.h>
+#import "OptionsViewController.h"
 
 #define NUMBER_ITEMS_ON_LOAD 250
+#define INTERFACE_IS_PAD     ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) 
+#define INTERFACE_IS_PHONE   ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
@@ -20,16 +23,18 @@
 @interface ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate>
 {
     __weak GMGridView *_gmGridView;
+    UINavigationController *_optionsNav;
+    UIPopoverController *_optionsPopOver;
+    
     NSMutableArray *_data;
-    CGSize _itemSize;
-    CGFloat _itemPadding;
 }
 
 - (void)addMoreItem;
 - (void)removeItem;
 - (void)refreshItem;
-- (void)segmentedControlChanged:(UISegmentedControl *)control;
 - (void)presentInfo;
+- (void)presentOptions:(UIBarButtonItem *)barButton;
+- (void)optionsDoneAction;
 
 @end
 
@@ -46,6 +51,8 @@
 {
     if ((self =[super init])) 
     {
+        self.title = @"GM-GridView";
+        
         UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addMoreItem)];
         
         UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
@@ -57,17 +64,13 @@
         space2.width = 10;
         
         UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshItem)];
-    
-        UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"Swap", @"Push", nil]];
-        segmentedControl.frame = CGRectMake(0, 0, 150, 30);
-        [segmentedControl addTarget:self action:@selector(segmentedControlChanged:) forControlEvents:UIControlEventValueChanged];
-        segmentedControl.selectedSegmentIndex = 0;
 
-        UIBarButtonItem *segmentedBarItem = [[UIBarButtonItem alloc] initWithCustomView:segmentedControl];
-        
-        
         self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:addButton, space, removeButton, space2, refreshButton, nil];
-        self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:segmentedBarItem, nil];
+        
+        
+        UIBarButtonItem *optionsButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(presentOptions:)];
+        
+        self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:optionsButton, nil];
         
                 
         _data = [[NSMutableArray alloc] init];
@@ -77,16 +80,6 @@
             [_data addObject:[NSString stringWithFormat:@"%d", i]];
         }
         
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
-        {
-            _itemSize = CGSizeMake(140, 110);
-            _itemPadding = 10;
-        }
-        else
-        {
-            _itemSize = CGSizeMake(230, 175);
-            _itemPadding = 15;
-        }
     }
     
     return self;
@@ -99,20 +92,24 @@
 - (void)loadView 
 {
     [super loadView];
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    NSInteger spacing = INTERFACE_IS_PHONE ? 10 : 15;
     
     GMGridView *gmGridView = [[GMGridView alloc] initWithFrame:self.view.bounds];
-    gmGridView.style = GMGridViewStyleSwap;
     gmGridView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    gmGridView.itemSpacing = _itemPadding;
-    gmGridView.centerGrid = YES;
-    gmGridView.backgroundColor = [UIColor whiteColor];
+    gmGridView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:gmGridView];
     _gmGridView = gmGridView;
     
-    _gmGridView.sortingDelegate = self;
+    _gmGridView.style = GMGridViewStyleSwap;
+    _gmGridView.itemSpacing = spacing;
+    _gmGridView.minEdgeInsets = UIEdgeInsetsMake(spacing, spacing, spacing, spacing);
+    _gmGridView.centerGrid = YES;
+    _gmGridView.sortingDelegate   = self;
     _gmGridView.transformDelegate = self;
     _gmGridView.dataSource = self;
-    
+        
     UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoDark];
     infoButton.frame = CGRectMake(self.view.bounds.size.width - 40, 
                                   self.view.bounds.size.height - 40, 
@@ -121,6 +118,19 @@
     infoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
     [infoButton addTarget:self action:@selector(presentInfo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:infoButton];
+
+    
+    OptionsViewController *optionsController = [[OptionsViewController alloc] init];
+    optionsController.gridView = gmGridView;
+    optionsController.contentSizeForViewInPopover = CGSizeMake(400, 500);
+    
+    _optionsNav = [[UINavigationController alloc] initWithRootViewController:optionsController];
+    
+     if (INTERFACE_IS_PHONE)
+     {
+         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(optionsDoneAction)];
+         optionsController.navigationItem.rightBarButtonItem = doneButton;
+     }
 }
 
 
@@ -143,7 +153,7 @@
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark DraggableGridViewDataSource
+#pragma mark GMGridViewDataSource
 //////////////////////////////////////////////////////////////
 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView
@@ -151,19 +161,23 @@
     return [_data count];
 }
 
-- (NSInteger)widthForItemsInGMGridView:(GMGridView *)gridView
+- (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView
 {
-    return _itemSize.width;
-}
-
-- (NSInteger)heightForItemsInGMGridView:(GMGridView *)gridView
-{
-    return _itemSize.height;
+    if (INTERFACE_IS_PHONE) 
+    {
+        return CGSizeMake(140, 110);
+    }
+    else
+    {
+        return CGSizeMake(230, 175);
+    }
 }
 
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index
 {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _itemSize.width, _itemSize.height)];
+    CGSize size = [self sizeForItemsInGMGridView:gridView];
+    
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
     view.backgroundColor = [UIColor redColor];
     view.layer.masksToBounds = NO;
     view.layer.cornerRadius = 8;
@@ -183,63 +197,10 @@
     return view;
 }
 
-- (CGSize)GMGridView:(GMGridView *)gridView fullSizeForView:(UIView *)view
-{
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
-    {
-        return CGSizeMake(310, 310);
-    }
-    else
-    {
-        return CGSizeMake(700, 700);
-    }
-}
-
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view
-{
-    UIView *fullView = [[UIView alloc] init];
-    fullView.backgroundColor = [UIColor yellowColor];
-    fullView.layer.masksToBounds = NO;
-    fullView.layer.cornerRadius = 8;
-    
-    CGSize size = [self GMGridView:gridView fullSizeForView:view];
-    fullView.bounds = CGRectMake(0, 0, size.width, size.height);
-    
-    UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
-    label.text = @"Fullscreen View";
-    label.textAlignment = UITextAlignmentCenter;
-    label.backgroundColor = [UIColor clearColor];
-    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
-    {
-        label.font = [UIFont boldSystemFontOfSize:15];
-    }
-    else
-    {
-        label.font = [UIFont boldSystemFontOfSize:20];
-    }
-    
-    [fullView addSubview:label];
-    
-    
-    return fullView;
-}
-
 
 //////////////////////////////////////////////////////////////
-#pragma mark DraggableGridViewSortingDelegate
+#pragma mark GMGridViewSortingDelegate
 //////////////////////////////////////////////////////////////
-
-- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index
-{
-    return YES;
-}
-
-- (void)GMGridView:(GMGridView *)gridView itemAtIndex:(NSInteger)oldIndex movedToIndex:(NSInteger)newIndex
-{
-    [_data exchangeObjectAtIndex:oldIndex withObjectAtIndex:newIndex];
-}
 
 - (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view
 {
@@ -267,10 +228,70 @@
      ];
 }
 
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index
+{
+    return YES;
+}
+
+- (void)GMGridView:(GMGridView *)gridView moveItemAtIndex:(NSInteger)oldIndex toIndex:(NSInteger)newIndex
+{
+    NSObject *object = [_data objectAtIndex:oldIndex];
+    [_data removeObject:object];
+    [_data insertObject:object atIndex:newIndex];
+}
+
+- (void)GMGridView:(GMGridView *)gridView exchangeItemAtIndex:(NSInteger)index1 withItemAtIndex:(NSInteger)index2
+{
+    [_data exchangeObjectAtIndex:index1 withObjectAtIndex:index2];
+}
+
 
 //////////////////////////////////////////////////////////////
 #pragma mark DraggableGridViewTransformingDelegate
 //////////////////////////////////////////////////////////////
+
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForView:(UIView *)view
+{
+    if (INTERFACE_IS_PHONE) 
+    {
+        return CGSizeMake(310, 310);
+    }
+    else
+    {
+        return CGSizeMake(700, 700);
+    }
+}
+
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view
+{
+    UIView *fullView = [[UIView alloc] init];
+    fullView.backgroundColor = [UIColor yellowColor];
+    fullView.layer.masksToBounds = NO;
+    fullView.layer.cornerRadius = 8;
+    
+    CGSize size = [self GMGridView:gridView sizeInFullSizeForView:view];
+    fullView.bounds = CGRectMake(0, 0, size.width, size.height);
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
+    label.text = @"Fullscreen View";
+    label.textAlignment = UITextAlignmentCenter;
+    label.backgroundColor = [UIColor clearColor];
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    if (INTERFACE_IS_PHONE) 
+    {
+        label.font = [UIFont boldSystemFontOfSize:15];
+    }
+    else
+    {
+        label.font = [UIFont boldSystemFontOfSize:20];
+    }
+    
+    [fullView addSubview:label];
+    
+    
+    return fullView;
+}
 
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view
 {
@@ -353,17 +374,39 @@
     [alertView show];
 }
 
-- (void)segmentedControlChanged:(UISegmentedControl *)control
+- (void)presentOptions:(UIBarButtonItem *)barButton
 {
-    switch (control.selectedSegmentIndex) 
+    if (INTERFACE_IS_PHONE)
     {
-        case 1:
-            _gmGridView.style = GMGridViewStylePush;
-            break;
-        case 0:
-        default:
-            _gmGridView.style = GMGridViewStyleSwap;
-            break;
+        [self presentModalViewController:_optionsNav animated:YES];
+    }
+    else
+    {
+        if(![_optionsPopOver isPopoverVisible])
+        {
+            if (!_optionsPopOver)
+            {
+                _optionsPopOver = [[UIPopoverController alloc] initWithContentViewController:_optionsNav];
+            }
+            
+            [_optionsPopOver presentPopoverFromBarButtonItem:barButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        }
+        else
+        {
+            [self optionsDoneAction];
+        }
+    }
+}
+
+- (void)optionsDoneAction
+{
+    if (INTERFACE_IS_PHONE)
+    {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+    else
+    {
+        [_optionsPopOver dismissPopoverAnimated:YES];
     }
 }
 
