@@ -170,11 +170,14 @@
         
         _inFullSizeMode = YES;
         
-        [UIView animateWithDuration:0.1 
+        self.fullSizeView.alpha = MAX(self.fullSizeView.alpha, self.contentView.alpha);
+        self.contentView.alpha  = 0;
+        
+        [UIView animateWithDuration:0.3 
                          animations:^{
                              self.fullSizeView.alpha = 1;
-                             self.contentView.alpha  = 0;
-                             self.backgroundColor = [UIColor clearColor];
+                             self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, self.fullSizeView.frame.origin.y, self.fullSize.width, self.fullSize.height);
+                             self.fullSizeView.center = center;
                          } 
                          completion:^(BOOL finished){
                              [self setNeedsLayout];
@@ -186,10 +189,10 @@
         self.fullSizeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
         _inFullSizeMode = NO;
+        self.fullSizeView.alpha = 0;
         
-        [UIView animateWithDuration:0.1 
+        [UIView animateWithDuration:0.3 
                          animations:^{
-                             self.fullSizeView.alpha = 0;
                              self.contentView.alpha  = 1;
                              self.fullSizeView.frame = self.bounds;
                          } 

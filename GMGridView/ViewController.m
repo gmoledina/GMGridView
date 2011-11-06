@@ -258,7 +258,7 @@
     }
     else
     {
-        return CGSizeMake(700, 700);
+        return CGSizeMake(700, 530);
     }
 }
 

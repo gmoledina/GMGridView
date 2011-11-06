@@ -689,8 +689,8 @@ static const NSUInteger kTagOffset = 50;
             scale = MIN(scale, kMaxScale / currentScale);
             scale = MAX(scale, kMinScale / currentScale);
             
-            if (scale >= 0.5 && scale <= 3) 
-            {
+            //if (scale >= 0.5 && scale <= 3) 
+            //{
                 CGAffineTransform currentTransform = [_transformingItem transform];
                 CGAffineTransform newTransform = CGAffineTransformScale(currentTransform, scale, scale);
                 _transformingItem.transform = newTransform;
@@ -701,7 +701,7 @@ static const NSUInteger kTagOffset = 50;
                 {
                     [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - currentScale)];
                 }
-            }
+            //}
             
             break;
         }
@@ -823,23 +823,17 @@ static const NSUInteger kTagOffset = 50;
             [_transformingItem addGestureRecognizer:pinch];
             
             _transformingItem.transform = CGAffineTransformIdentity;
+            _transformingItem.frame = self.bounds;
             [_transformingItem switchToFullSizeMode:YES];
+            _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.7];
             
-            [UIView animateWithDuration:kDefaultAnimationDuration 
-                             animations:^{
-                                 _transformingItem.frame = self.bounds;
-                             } 
-                             completion:^(BOOL finished){
-                                 _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                                 _inFullSizeMode = YES;
-                                 
-                                 if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForView:)])
-                                 {
-                                    [self.transformDelegate GMGridView:self didEnterFullSizeForView:_transformingItem.contentView];
-                                 }
-                                 
-                             }
-             ];
+            _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            _inFullSizeMode = YES;
+            
+            if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForView:)])
+            {
+                [self.transformDelegate GMGridView:self didEnterFullSizeForView:_transformingItem.contentView];
+            }
         }
         else
         {
@@ -850,6 +844,7 @@ static const NSUInteger kTagOffset = 50;
             _transformingItem = nil;
             
             transformingView.transform = CGAffineTransformIdentity;
+            transformingView.backgroundColor = [UIColor clearColor];
             
             CGRect frameInScroll = [self convertRect:transformingView.frame toView:_scrollView];
             
