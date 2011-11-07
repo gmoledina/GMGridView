@@ -42,6 +42,6 @@
 - (void)shake:(BOOL)on; // shakes the contentView only, not the fullsize one
 
 - (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
-- (void)stepToFullsizeWithAlpha:(CGFloat)alpha;
+- (void)stepToFullsizeWithAlpha:(CGFloat)alpha; // not supported yet
 
 @end

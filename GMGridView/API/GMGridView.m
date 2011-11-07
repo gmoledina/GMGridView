@@ -162,17 +162,17 @@ static const NSUInteger kTagOffset = 50;
         
         _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
         _pinchGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_pinchGesture];
+        [self addGestureRecognizer:_pinchGesture];
         
         _rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureUpdated:)];
         _rotationGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_rotationGesture];
+        [self addGestureRecognizer:_rotationGesture];
         
         _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
         _panGesture.delegate = self;
         [_panGesture setMaximumNumberOfTouches:2];
         [_panGesture setMinimumNumberOfTouches:2];
-        [_scrollView addGestureRecognizer:_panGesture];
+        [self addGestureRecognizer:_panGesture];
         
         // Sorting gestures :
         
@@ -649,7 +649,7 @@ static const NSUInteger kTagOffset = 50;
         case UIGestureRecognizerStateChanged:
         {
             CGPoint translate = [panGesture translationInView:_scrollView];
-            [_transformingItem setCenter:CGPointMake(_transformingItem.center.x + translate.x, _transformingItem.center.y + translate.y)];
+            [_transformingItem.contentView setCenter:CGPointMake(_transformingItem.contentView.center.x + translate.x, _transformingItem.contentView.center.y + translate.y)];
             [panGesture setTranslation:CGPointZero inView:_scrollView];
             
             break;
@@ -679,29 +679,36 @@ static const NSUInteger kTagOffset = 50;
         }
         case UIGestureRecognizerStateChanged:
         {
-            CGFloat currentScale = [[_transformingItem.layer valueForKeyPath:@"transform.scale"] floatValue];
+            CGFloat currentScale = [[_transformingItem.contentView.layer valueForKeyPath:@"transform.scale"] floatValue];
             
             CGFloat scale = 1 - (_lastScale - [_pinchGesture scale]);
             
+            //todo: compute these scale factors dynamically based on view sizes
             const CGFloat kMaxScale = 3;
             const CGFloat kMinScale = 0.5;
             
             scale = MIN(scale, kMaxScale / currentScale);
             scale = MAX(scale, kMinScale / currentScale);
             
-            //if (scale >= 0.5 && scale <= 3) 
-            //{
-                CGAffineTransform currentTransform = [_transformingItem transform];
+            if (scale >= 0.5 && scale <= 3) 
+            {
+                CGAffineTransform currentTransform = [_transformingItem.contentView transform];
                 CGAffineTransform newTransform = CGAffineTransformScale(currentTransform, scale, scale);
-                _transformingItem.transform = newTransform;
+                _transformingItem.contentView.transform = newTransform;
                 
                 _lastScale = [_pinchGesture scale];
                 
+                CGFloat alpha = 1 - (2.5 - currentScale);
+                alpha = MAX(0, alpha);
+                alpha = MIN(1, alpha);
+                
                 if (self.showFullSizeViewWithAlphaWhenTransforming && currentScale >= 1.5) 
                 {
-                    [_transformingItem stepToFullsizeWithAlpha:1 - (2.5 - currentScale)];
+                    [_transformingItem stepToFullsizeWithAlpha:alpha];
                 }
-            //}
+                
+                _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:MIN(alpha, 0.7)];
+            }
             
             break;
         }
@@ -727,15 +734,14 @@ static const NSUInteger kTagOffset = 50;
         case UIGestureRecognizerStateBegan:
         {
             [self transformingGestureDidBeginWithGesture:rotationGesture];
-            
             break;
         }
         case UIGestureRecognizerStateChanged:
         {
             CGFloat rotation = [rotationGesture rotation] - _lastRotation;
-            CGAffineTransform currentTransform = [_transformingItem transform];
+            CGAffineTransform currentTransform = [_transformingItem.contentView transform];
             CGAffineTransform newTransform = CGAffineTransformRotate(currentTransform, rotation);
-            _transformingItem.transform = newTransform;
+            _transformingItem.contentView.transform = newTransform;
             _lastRotation = [rotationGesture rotation];
             
             break;
@@ -748,17 +754,28 @@ static const NSUInteger kTagOffset = 50;
 
 - (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture
 {
-    if (!_transformingItem) 
+    if (_inFullSizeMode)
+    {
+        _inFullSizeMode = NO;
+        
+        _lastScale = 1.0;
+        
+        [_transformingItem switchToFullSizeMode:NO];
+        CGAffineTransform newTransform = CGAffineTransformMakeScale(3, 3);
+        _transformingItem.contentView.transform = newTransform;
+    }
+    else if (!_transformingItem) 
     {
         CGPoint locationTouch = [gesture locationOfTouch:0 inView:_scrollView];            
         NSInteger positionTouch = [self.layoutStrategy itemPositionFromLocation:locationTouch];
         _transformingItem = [self itemSubViewForPosition:positionTouch];
         
-        
         CGRect frameInMainView = [_scrollView convertRect:_transformingItem.frame toView:self];
         
         [_transformingItem removeFromSuperview];
-        _transformingItem.frame = frameInMainView;
+        _transformingItem.frame = self.bounds;
+        _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        _transformingItem.contentView.frame = frameInMainView;
         [self addSubview:_transformingItem];
         [self bringSubviewToFront:_transformingItem];
         
@@ -768,37 +785,6 @@ static const NSUInteger kTagOffset = 50;
         if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingView:)]) 
         {
             [self.transformDelegate GMGridView:self didStartTransformingView:_transformingItem.contentView];
-        }
-    }
-}
-
-- (void)exitFullSizePinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture
-{
-    if([self isInTransformingState] && _inFullSizeMode)
-    {
-        switch (pinchGesture.state) 
-        {
-            case UIGestureRecognizerStateChanged:
-            {
-                if ([pinchGesture scale] < 1.0) 
-                {
-                    _inFullSizeMode = NO;
-                    [_transformingItem removeGestureRecognizer:pinchGesture];
-                    _transformingItem.frame = _transformingItem.fullSizeView.frame;
-                    
-                    [self transformingGestureDidFinish];
-                    
-                    break;
-                }
-            }
-            case UIGestureRecognizerStateEnded:
-            case UIGestureRecognizerStateCancelled:
-            case UIGestureRecognizerStateFailed:
-            case UIGestureRecognizerStateBegan:
-            default:
-            {
-                break;
-            }
         }
     }
 }
@@ -819,15 +805,11 @@ static const NSUInteger kTagOffset = 50;
             
             [self bringSubviewToFront:_transformingItem];
             
-            UIPinchGestureRecognizer *pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(exitFullSizePinchGestureUpdated:)];
-            [_transformingItem addGestureRecognizer:pinch];
-            
-            _transformingItem.transform = CGAffineTransformIdentity;
-            _transformingItem.frame = self.bounds;
+            _transformingItem.contentView.transform = CGAffineTransformIdentity;
+
             [_transformingItem switchToFullSizeMode:YES];
             _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.7];
             
-            _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
             _inFullSizeMode = YES;
             
             if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForView:)])
@@ -843,13 +825,14 @@ static const NSUInteger kTagOffset = 50;
             GMGridViewCell *transformingView = _transformingItem;
             _transformingItem = nil;
             
-            transformingView.transform = CGAffineTransformIdentity;
+            transformingView.contentView.transform = CGAffineTransformIdentity;
             transformingView.backgroundColor = [UIColor clearColor];
             
-            CGRect frameInScroll = [self convertRect:transformingView.frame toView:_scrollView];
+            CGRect frameInScroll = [self convertRect:transformingView.contentView.frame toView:_scrollView];
             
             [transformingView removeFromSuperview];
             transformingView.frame = frameInScroll;
+            transformingView.contentView.frame = transformingView.bounds;
             [_scrollView addSubview:transformingView];
             
             NSInteger position = [self positionForItemSubview:transformingView];

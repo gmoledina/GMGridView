@@ -190,6 +190,7 @@
         
         _inFullSizeMode = NO;
         self.fullSizeView.alpha = 0;
+        self.contentView.alpha  = 0.6;
         
         [UIView animateWithDuration:0.3 
                          animations:^{
@@ -205,16 +206,12 @@
 
 - (void)stepToFullsizeWithAlpha:(CGFloat)alpha
 {
+    return; // not supported anymore - to be fixed
+    
     if (![self isInFullSizeMode]) 
     {
-        if (alpha > 1) 
-        {
-            alpha = 1;
-        }
-        else if (alpha < 0)
-        {
-            alpha = 0;
-        }
+        alpha = MAX(0, alpha);
+        alpha = MIN(1, alpha);
         
         self.fullSizeView.alpha = alpha;
         self.contentView.alpha  = 1.4 - alpha;
