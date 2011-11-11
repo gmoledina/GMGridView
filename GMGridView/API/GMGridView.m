@@ -414,7 +414,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         // Going down
         if (locationInMainView.x + threshhold > self.bounds.size.width) 
         {            
-            offset.x += _itemSize.width;
+            offset.x += _itemSize.width / 2;
             
             if (offset.x > _maxPossibleContentOffset.x) 
             {
@@ -424,7 +424,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         // Going up
         else if (locationInMainView.x - threshhold <= 0) 
         {            
-            offset.x -= _itemSize.width;
+            offset.x -= _itemSize.width / 2;
             
             if (offset.x < _minPossibleContentOffset.x) 
             {
@@ -435,7 +435,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         // Going right
         if (locationInMainView.y + threshhold > self.bounds.size.height) 
         {            
-            offset.y += _itemSize.height;
+            offset.y += _itemSize.height / 2;
             
             if (offset.y > _maxPossibleContentOffset.y) 
             {
@@ -445,7 +445,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         // Going left
         else if (locationInMainView.y - threshhold <= 0) 
         {            
-            offset.y -= _itemSize.height;
+            offset.y -= _itemSize.height / 2;
             
             if (offset.y < _minPossibleContentOffset.y) 
             {
@@ -457,7 +457,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         {
             [UIView animateWithDuration:kDefaultAnimationDuration 
                                   delay:0
-                                options:kDefaultAnimationOptions
+                                options:kDefaultAnimationOptions | UIViewAnimationOptionAllowUserInteraction
                              animations:^{
                                  _scrollView.contentOffset = offset;
                              }

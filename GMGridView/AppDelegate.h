@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class ViewController;
+@class Demo1ViewController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 

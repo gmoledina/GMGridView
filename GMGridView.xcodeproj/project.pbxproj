@@ -11,9 +11,10 @@
 		16026C131454631600093AFF /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 16026C111454631600093AFF /* LICENSE */; };
 		16026C141454631600093AFF /* README in Resources */ = {isa = PBXBuildFile; fileRef = 16026C121454631600093AFF /* README */; };
 		16275EF2144D26C10041AF02 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16275EF1144D26C10041AF02 /* QuartzCore.framework */; };
+		16583C24146CC2290006F11B /* Demo2ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 16583C23146CC2290006F11B /* Demo2ViewController.m */; };
 		1691D7A41442CFC300F472BF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A31442CFC300F472BF /* main.m */; };
 		1691D7AA1442D01F00F472BF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A71442D01F00F472BF /* AppDelegate.m */; };
-		1691D7AB1442D01F00F472BF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A91442D01F00F472BF /* ViewController.m */; };
+		1691D7AB1442D01F00F472BF /* Demo1ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7A91442D01F00F472BF /* Demo1ViewController.m */; };
 		1691D7AE1442D02C00F472BF /* GMGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1691D7AD1442D02C00F472BF /* GMGridView.m */; };
 		16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0B144156FE00E6E556 /* UIKit.framework */; };
 		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
@@ -30,13 +31,15 @@
 		16026C111454631600093AFF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		16026C121454631600093AFF /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		16275EF1144D26C10041AF02 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		16583C22146CC2290006F11B /* Demo2ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Demo2ViewController.h; path = GMGridView/Demo2ViewController.h; sourceTree = SOURCE_ROOT; };
+		16583C23146CC2290006F11B /* Demo2ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Demo2ViewController.m; path = GMGridView/Demo2ViewController.m; sourceTree = SOURCE_ROOT; };
 		1691D7A01442CFA800F472BF /* GMGridView-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GMGridView-Info.plist"; path = "GMGridView/GMGridView-Info.plist"; sourceTree = SOURCE_ROOT; };
 		1691D7A21442CFC300F472BF /* GMGridView-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GMGridView-Prefix.pch"; path = "GMGridView/GMGridView-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		1691D7A31442CFC300F472BF /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = GMGridView/main.m; sourceTree = SOURCE_ROOT; };
 		1691D7A61442D01F00F472BF /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = GMGridView/AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		1691D7A71442D01F00F472BF /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = GMGridView/AppDelegate.m; sourceTree = SOURCE_ROOT; };
-		1691D7A81442D01F00F472BF /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = GMGridView/ViewController.h; sourceTree = SOURCE_ROOT; };
-		1691D7A91442D01F00F472BF /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = GMGridView/ViewController.m; sourceTree = SOURCE_ROOT; };
+		1691D7A81442D01F00F472BF /* Demo1ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Demo1ViewController.h; path = GMGridView/Demo1ViewController.h; sourceTree = SOURCE_ROOT; };
+		1691D7A91442D01F00F472BF /* Demo1ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Demo1ViewController.m; path = GMGridView/Demo1ViewController.m; sourceTree = SOURCE_ROOT; };
 		1691D7AC1442D02C00F472BF /* GMGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridView.h; path = GMGridView/API/GMGridView.h; sourceTree = SOURCE_ROOT; };
 		1691D7AD1442D02C00F472BF /* GMGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GMGridView.m; path = GMGridView/API/GMGridView.m; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		16924B07144156FE00E6E556 /* GMGridView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GMGridView.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,8 +115,10 @@
 			children = (
 				1691D7A61442D01F00F472BF /* AppDelegate.h */,
 				1691D7A71442D01F00F472BF /* AppDelegate.m */,
-				1691D7A81442D01F00F472BF /* ViewController.h */,
-				1691D7A91442D01F00F472BF /* ViewController.m */,
+				1691D7A81442D01F00F472BF /* Demo1ViewController.h */,
+				1691D7A91442D01F00F472BF /* Demo1ViewController.m */,
+				16583C22146CC2290006F11B /* Demo2ViewController.h */,
+				16583C23146CC2290006F11B /* Demo2ViewController.m */,
 				169AE3761460E1B300C0CBCD /* OptionsViewController.h */,
 				169AE3771460E1B300C0CBCD /* OptionsViewController.m */,
 				16924B12144156FE00E6E556 /* Supporting Files */,
@@ -215,13 +220,14 @@
 			files = (
 				1691D7A41442CFC300F472BF /* main.m in Sources */,
 				1691D7AA1442D01F00F472BF /* AppDelegate.m in Sources */,
-				1691D7AB1442D01F00F472BF /* ViewController.m in Sources */,
+				1691D7AB1442D01F00F472BF /* Demo1ViewController.m in Sources */,
 				1691D7AE1442D02C00F472BF /* GMGridView.m in Sources */,
 				16A0D030145342F8004D7BBC /* GMGridViewCell.m in Sources */,
 				16026C0E1454628800093AFF /* UIView+GMGridViewAdditions.m in Sources */,
 				16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */,
 				16DF1A71145E3461006AA43C /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */,
 				169AE3781460E1B300C0CBCD /* OptionsViewController.m in Sources */,
+				16583C24146CC2290006F11B /* Demo2ViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

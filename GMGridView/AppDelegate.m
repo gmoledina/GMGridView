@@ -7,7 +7,9 @@
 //
 
 #import "AppDelegate.h"
-#import "ViewController.h"
+#import "Demo1ViewController.h"
+#import "Demo2ViewController.h"
+
 
 @implementation AppDelegate
 
@@ -16,7 +18,14 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = [[UINavigationController alloc] initWithRootViewController:[[ViewController alloc] init]];
+    
+    UITabBarController *tabBarController = [[UITabBarController alloc] init];
+    [tabBarController setViewControllers:[NSArray arrayWithObjects: 
+                                          [[UINavigationController alloc] initWithRootViewController:[[Demo1ViewController alloc] init]],
+                                          [[UINavigationController alloc] initWithRootViewController:[[Demo2ViewController alloc] init]],
+                                          nil]];
+    
+    self.window.rootViewController = tabBarController;
     
     [self.window makeKeyAndVisible];
     return YES;

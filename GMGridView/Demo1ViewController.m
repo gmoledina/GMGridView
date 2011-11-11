@@ -7,20 +7,18 @@
 //
 
 #import <QuartzCore/QuartzCore.h>
-#import "ViewController.h"
+#import "Demo1ViewController.h"
 #import "GMGridView.h"
 #import "OptionsViewController.h"
 
 #define NUMBER_ITEMS_ON_LOAD 250
-#define INTERFACE_IS_PAD     ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) 
-#define INTERFACE_IS_PHONE   ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) 
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark ViewController (privates methods)
 //////////////////////////////////////////////////////////////
 
-@interface ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate>
+@interface Demo1ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate>
 {
     __weak GMGridView *_gmGridView;
     UINavigationController *_optionsNav;
@@ -44,14 +42,14 @@
 #pragma mark ViewController implementation
 //////////////////////////////////////////////////////////////
 
-@implementation ViewController
+@implementation Demo1ViewController
 
 
 - (id)init
 {
     if ((self =[super init])) 
     {
-        self.title = @"GM-GridView";
+        self.title = @"Demo 1";
         
         UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addMoreItem)];
         
@@ -136,7 +134,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    _gmGridView.mainSuperView = [UIApplication sharedApplication].keyWindow.rootViewController.view;
+    _gmGridView.mainSuperView = self.navigationController.view; //[UIApplication sharedApplication].keyWindow.rootViewController.view;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -374,7 +372,8 @@
 
 - (void)presentInfo
 {
-    NSString *info = @"Long-press an item and its color will change; letting you know that you can now move it around.";
+    NSString *info = @"Long-press an item and its color will change; letting you know that you can now move it around. \n\nUsing two fingers, pinch/drag/rotate an item; zoom it enough and you will enter the fullsize mode";
+    
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Info" 
                                                         message:info 
                                                        delegate:nil 
