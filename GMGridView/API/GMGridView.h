@@ -50,20 +50,21 @@ typedef enum
 }
 
 // Delegates
-@property (nonatomic, weak) NSObject<GMGridViewDataSource> *dataSource;                        // Required
-@property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;              // Required to enable sorting
-@property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate;     // Required to enable fullsize mode
+@property (nonatomic, weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
+@property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Required to enable sorting
+@property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Required to enable fullsize mode
 
 // Layout Strategy
 @property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy; // Default is GMGridViewLayoutVerticalStrategy
 
 // Customizing Options
+@property (nonatomic, weak) UIView *mainSuperView;                    // Default is self
 @property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
 @property (nonatomic) NSInteger itemSpacing;                          // Default is 10
 @property (nonatomic) BOOL centerGrid;                                // Default is YES
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
-@property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES
+@property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 
 // Actions
 - (void)reloadData;

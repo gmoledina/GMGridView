@@ -133,6 +133,16 @@
      }
 }
 
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    _gmGridView.mainSuperView = [UIApplication sharedApplication].keyWindow.rootViewController.view;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark memory management
