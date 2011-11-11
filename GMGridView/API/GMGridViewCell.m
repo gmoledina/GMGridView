@@ -77,6 +77,7 @@
     if ((self = [super initWithFrame:contentView.bounds])) 
     {
         self.contentView = contentView;
+        self.autoresizesSubviews = YES;
     }
     
     return self;
@@ -111,7 +112,7 @@
     [_contentView removeFromSuperview];
     _contentView = contentView;
     _contentView.frame = self.bounds;
-    _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _contentView.autoresizingMask = UIViewAutoresizingNone;
     [self addSubview:_contentView];
 }
 

@@ -697,7 +697,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             
             CGFloat scale = 1 - (_lastScale - [_pinchGesture scale]);
             
-            //todo: compute these scale factors dynamically based on view sizes
+            //todo: compute these scale factors dynamically based on ratio of thumbnail/fullscreen sizes
             const CGFloat kMaxScale = 3;
             const CGFloat kMinScale = 0.5;
             
@@ -835,7 +835,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.9];
             
             _transformingItem.fullSizeView.transform =  CGAffineTransformMakeRotation(rotationValue);
-            [UIView animateWithDuration:0.3 animations:^{
+            [UIView animateWithDuration:kDefaultAnimationDuration animations:^{
                 _transformingItem.fullSizeView.transform = CGAffineTransformIdentity;
             }];
             
