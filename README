@@ -4,10 +4,10 @@ GM-GRID-VIEW
 An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in fullsize by pinching them. 
 This view is inspired by the UITableView and uses a datasource and delegates in order to get the data and interact with it.
 
-The best sorting sorting style (swap or push) depens on the frame of the grid; you can choose that one thats suits you best.
+The best sorting style (swap or push) depends on the frame of the grid; you can choose the one thats suits you best.
 Same applies to the layout strategy (vertical or horizontal).
 
-May working examples provided in the demo app!
+Many working examples provided in the demo app!
 
 ---
 
@@ -37,7 +37,9 @@ Features - Fullsize:
 - Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
 
 COMING SOON :
+- Lazy-loading of items / reusing cells
 - Changing the zoom scale dynamically (when pinching to go fullscreen)
 - Delegate callbacks for tap and double-tap
+
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
