@@ -150,6 +150,13 @@
 #pragma mark Public methods
 //////////////////////////////////////////////////////////////
 
+- (void)prepareForReuse
+{
+    self.contentView = nil;
+    self.fullSize = CGSizeZero;
+    self.fullSizeView = nil;
+}
+
 - (void)shake:(BOOL)on
 {
     if ((on && !self.inShakingMode) || (!on && self.inShakingMode)) 

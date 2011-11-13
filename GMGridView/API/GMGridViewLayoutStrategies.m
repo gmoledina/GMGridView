@@ -157,6 +157,23 @@
     return position;
 }
 
+- (NSRange)rangeOfPositionsInBoundsFromOffset:(CGPoint)offset
+{
+    CGPoint contentOffset = CGPointMake(MAX(0, offset.x), 
+                                        MAX(0, offset.y));
+    
+    CGFloat itemHeight = self.itemSize.height + self.itemSpacing;
+    
+    CGFloat firstRow = (int)(contentOffset.y / itemHeight);
+
+    CGFloat lastRow = ceil((contentOffset.y + self.contentBounds.size.height) / itemHeight);
+    
+    NSInteger firstPosition = firstRow * self.numberOfItemsPerRow;
+    NSInteger lastPosition  = ((lastRow + 1) * self.numberOfItemsPerRow);
+    
+    return NSMakeRange(firstPosition, (lastPosition - firstPosition));
+}
+
 @end
 
 
@@ -241,6 +258,23 @@
     }
     
     return position;
+}
+
+- (NSRange)rangeOfPositionsInBoundsFromOffset:(CGPoint)offset
+{
+    CGPoint contentOffset = CGPointMake(MAX(0, offset.x), 
+                                        MAX(0, offset.y));
+    
+    CGFloat itemWidth = self.itemSize.width + self.itemSpacing;
+    
+    CGFloat firstCol = (int)(contentOffset.x / itemWidth);
+    
+    CGFloat lastCol = ceil((contentOffset.x + self.contentBounds.size.width) / itemWidth);
+    
+    NSInteger firstPosition = firstCol * self.numberOfItemsPerColumn;
+    NSInteger lastPosition  = ((lastCol + 1) * self.numberOfItemsPerColumn);
+    
+    return NSMakeRange(firstPosition, (lastPosition - firstPosition));
 }
 
 @end

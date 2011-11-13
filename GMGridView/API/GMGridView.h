@@ -51,8 +51,8 @@ typedef enum
 
 // Delegates
 @property (nonatomic, weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
-@property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Required to enable sorting
-@property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Required to enable fullsize mode
+@property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Optional - to enable sorting
+@property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Optional - to enable fullsize mode
 
 // Layout Strategy
 @property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy; // Default is GMGridViewLayoutVerticalStrategy
@@ -72,6 +72,7 @@ typedef enum
 - (void)removeObjectAtIndex:(NSInteger)index;
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
+- (void)scrollToObjectAtIndex:(NSInteger)index;
 
 @end
 

@@ -183,6 +183,8 @@
 
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index
 {
+    NSLog(@"Creating view indx %d", index);
+    
     CGSize size = [self sizeForItemsInGMGridView:gridView];
     
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];

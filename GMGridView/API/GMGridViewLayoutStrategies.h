@@ -67,6 +67,7 @@ typedef enum {
 - (CGPoint)originForItemAtPosition:(NSInteger)position;
 - (NSInteger)itemPositionFromLocation:(CGPoint)location;
 
+- (NSRange)rangeOfPositionsInBoundsFromOffset:(CGPoint)offset;
 
 @end
 

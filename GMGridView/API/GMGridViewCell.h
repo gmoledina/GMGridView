@@ -39,6 +39,7 @@
 
 
 - (id)initContentView:(UIView *)contentView;
+- (void)prepareForReuse;
 - (void)shake:(BOOL)on; // shakes the contentView only, not the fullsize one
 
 - (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
