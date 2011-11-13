@@ -92,6 +92,10 @@ typedef enum
 - (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView;
 - (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
 
+@optional
+// Required to enable editing mode
+- (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index;
+
 @end
 
 

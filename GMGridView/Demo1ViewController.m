@@ -207,6 +207,10 @@
     return view;
 }
 
+- (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index
+{
+    [_data removeObjectAtIndex:index];
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark GMGridViewSortingDelegate

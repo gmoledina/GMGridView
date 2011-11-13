@@ -164,7 +164,7 @@
     
     CGFloat itemHeight = self.itemSize.height + self.itemSpacing;
     
-    CGFloat firstRow = (int)(contentOffset.y / itemHeight);
+    CGFloat firstRow = MAX(0, (int)(contentOffset.y / itemHeight) - 1);
 
     CGFloat lastRow = ceil((contentOffset.y + self.contentBounds.size.height) / itemHeight);
     
@@ -267,7 +267,7 @@
     
     CGFloat itemWidth = self.itemSize.width + self.itemSpacing;
     
-    CGFloat firstCol = (int)(contentOffset.x / itemWidth);
+    CGFloat firstCol = MAX(0, (int)(contentOffset.x / itemWidth) - 1);
     
     CGFloat lastCol = ceil((contentOffset.x + self.contentBounds.size.width) / itemWidth);
     

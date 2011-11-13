@@ -306,7 +306,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)setEditing:(BOOL)editing
 {
-    if (![self isInTransformingState] 
+    if ([self.dataSource respondsToSelector:@selector(GMGridView:deleteItemAtIndex:)]
+        &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
         for (GMGridViewCell *cell in [self itemSubviews]) 
@@ -989,8 +990,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             NSInteger index = [self positionForItemSubview:cell];
             if (index != GMGV_INVALID_POSITION) 
             {
+                [self.dataSource GMGridView:self deleteItemAtIndex:index];
                 [self removeObjectAtIndex:index];
-                //todo: tell the delegate !!!!
             }
         };
     }
@@ -1067,15 +1068,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andSpacing:self.itemSpacing insideOfBounds:actualBounds];
     
-    _scrollView.contentSize = [self.layoutStrategy contentSize];
+    CGSize contentSize = [self.layoutStrategy contentSize];
     
     if (self.centerGrid)
     {
         NSInteger widthSpace, heightSpace;        
         NSInteger top, left, bottom, right;
         
-        widthSpace  = (self.bounds.size.width  - _scrollView.contentSize.width)  / 2;
-        heightSpace = (self.bounds.size.height - _scrollView.contentSize.height) / 2;
+        widthSpace  = (self.bounds.size.width  - contentSize.width)  / 2;
+        heightSpace = (self.bounds.size.height - contentSize.height) / 2;
         
         left   = (widthSpace  < self.minEdgeInsets.left)   ? self.minEdgeInsets.left   : widthSpace;
         right  = (widthSpace  < self.minEdgeInsets.right)  ? self.minEdgeInsets.right  : widthSpace;
@@ -1091,8 +1092,19 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     _minPossibleContentOffset = CGPointMake(-1 * (_scrollView.contentInset.left), 
                                             -1 * (_scrollView.contentInset.top));
-    _maxPossibleContentOffset = CGPointMake(_scrollView.contentSize.width - _scrollView.bounds.size.width + _scrollView.contentInset.right, 
-                                            _scrollView.contentSize.height - _scrollView.bounds.size.height + _scrollView.contentInset.bottom);
+    _maxPossibleContentOffset = CGPointMake(contentSize.width - _scrollView.bounds.size.width + _scrollView.contentInset.right, 
+                                            contentSize.height - _scrollView.bounds.size.height + _scrollView.contentInset.bottom);
+
+    [UIView animateWithDuration:kDefaultAnimationDuration 
+                          delay:0 
+                        options:kDefaultAnimationOptions | UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{
+                         if (!CGSizeEqualToSize(_scrollView.contentSize, contentSize)) 
+                         {
+                             _scrollView.contentSize = contentSize;
+                         }
+                     }
+                     completion:nil];
 }
 
 - (void)relayoutItems
@@ -1348,11 +1360,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          [_scrollView scrollRectToVisible:CGRectMake(newObjectOrigin.x, newObjectOrigin.y, _itemSize.width, _itemSize.height) animated:NO];
                      } 
                      completion:^(BOOL finished){
+                         [self setNeedsLayout];
                      }
      ];
     
     
-    [self setNeedsLayout];
+    
     [self setSubviewsCacheAsInvalid];
 }
 
@@ -1361,7 +1374,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index specified");
 
     GMGridViewCell *cell = [self itemSubViewForPosition:index];
-    _numberTotalItems--;
     
     for (int i = index + 1; i < _numberTotalItems; i++)
     {
@@ -1370,6 +1382,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     
     cell.tag = kTagOffset - 1;
+    _numberTotalItems--;
+    
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
     
     // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
@@ -1379,6 +1393,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      animations:^{
                          cell.contentView.alpha = 0.3;
                          cell.alpha = 0;
+
                          [_scrollView scrollRectToVisible:CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height) animated:NO];
                      } 
                      completion:^(BOOL finished){
@@ -1388,7 +1403,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          self.firstPositionLoaded = self.lastPositionLoaded = GMGV_INVALID_POSITION;
                          [self loadRequiredItems];
                          
-                         [self setNeedsLayout];  
+                         [self setNeedsLayout];
                      }
      ];
     
