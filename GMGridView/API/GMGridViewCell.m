@@ -40,6 +40,9 @@
 }
 
 @property (nonatomic, assign) UIViewAutoresizing defaultFullsizeViewResizingMask;
+@property (nonatomic, weak) UIButton *deleteButton;
+
+- (void)actionDelete;
 
 @end
 
@@ -53,11 +56,16 @@
 @implementation GMGridViewCell
 
 @synthesize contentView = _contentView;
+@synthesize editing = _editing;
 @synthesize inShakingMode = _inShakingMode;
 @synthesize fullSize = _fullSize;
 @synthesize fullSizeView = _fullSizeView;
 @synthesize inFullSizeMode = _inFullSizeMode;
-@synthesize defaultFullsizeViewResizingMask;
+@synthesize defaultFullsizeViewResizingMask = _defaultFullsizeViewResizingMask;
+@synthesize deleteButton = _deleteButton;
+@synthesize deleteBlock = _deleteBlock;
+@synthesize deleteButtonIcon = _deleteButtonIcon;
+@synthesize deleteButtonOffset;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors
@@ -78,6 +86,17 @@
     {
         self.contentView = contentView;
         self.autoresizesSubviews = YES;
+        self.editing = NO;
+        
+        UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.deleteButton = deleteButton;
+        [self.deleteButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        self.deleteButton.showsTouchWhenHighlighted = YES;
+        self.deleteButtonIcon = nil;
+        self.deleteButtonOffset = CGPointMake(-5, -5);
+        self.deleteButton.alpha = 0;
+        [self addSubview:deleteButton];
+        [deleteButton addTarget:self action:@selector(actionDelete) forControlEvents:UIControlEventTouchUpInside];
     }
     
     return self;
@@ -109,11 +128,13 @@
 - (void)setContentView:(UIView *)contentView
 {
     [self shake:NO];
-    [_contentView removeFromSuperview];
+    [self.contentView removeFromSuperview];
     _contentView = contentView;
-    _contentView.frame = self.bounds;
-    _contentView.autoresizingMask = UIViewAutoresizingNone;
-    [self addSubview:_contentView];
+    self.contentView.frame = self.bounds;
+    self.contentView.autoresizingMask = UIViewAutoresizingNone;
+    [self addSubview:self.contentView];
+    
+    [self bringSubviewToFront:self.deleteButton];
 }
 
 - (void)setFullSizeView:(UIView *)fullSizeView
@@ -136,6 +157,8 @@
     [_fullSizeView removeFromSuperview];
     _fullSizeView = fullSizeView;
     [self addSubview:_fullSizeView];
+    
+    [self bringSubviewToFront:self.deleteButton];
 }
 
 - (void)setFullSize:(CGSize)fullSize
@@ -145,6 +168,76 @@
     [self setNeedsLayout];
 }
 
+- (void)setEditing:(BOOL)editing
+{
+    _editing = editing;
+    
+    [UIView animateWithDuration:0.2 
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseOut
+                     animations:^{
+                         self.deleteButton.alpha = editing ? 1 : 0;
+                     } 
+                     completion:nil];
+}
+
+- (void)setDeleteButtonOffset:(CGPoint)offset
+{
+    self.deleteButton.frame = CGRectMake(offset.x, 
+                                         offset.y, 
+                                         self.deleteButton.frame.size.width, 
+                                         self.deleteButton.frame.size.height);
+}
+
+- (CGPoint)deleteButtonOffset
+{
+    return self.deleteButton.frame.origin;
+}
+
+- (void)setDeleteButtonIcon:(UIImage *)deleteButtonIcon
+{
+    [self.deleteButton setImage:deleteButtonIcon forState:UIControlStateNormal];
+    
+    if (deleteButtonIcon) 
+    {
+        self.deleteButton.frame = CGRectMake(self.deleteButton.frame.origin.x, 
+                                             self.deleteButton.frame.origin.y, 
+                                             deleteButtonIcon.size.width, 
+                                             deleteButtonIcon.size.height);
+        
+        [self.deleteButton setTitle:nil forState:UIControlStateNormal];
+        [self.deleteButton setBackgroundColor:[UIColor clearColor]];
+    }
+    else
+    {
+        self.deleteButton.frame = CGRectMake(self.deleteButton.frame.origin.x, 
+                                             self.deleteButton.frame.origin.y, 
+                                             35, 
+                                             35);
+        
+        [self.deleteButton setTitle:@"X" forState:UIControlStateNormal];
+        [self.deleteButton setBackgroundColor:[UIColor lightGrayColor]];
+    }
+    
+    
+}
+
+- (UIImage *)deleteButtonIcon
+{
+    return [self.deleteButton currentImage];
+}
+
+//////////////////////////////////////////////////////////////
+#pragma mark Private methods
+//////////////////////////////////////////////////////////////
+
+- (void)actionDelete
+{
+    if (self.deleteBlock) 
+    {
+        self.deleteBlock(self);
+    }
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark Public methods
@@ -155,6 +248,7 @@
     self.contentView = nil;
     self.fullSize = CGSizeZero;
     self.fullSizeView = nil;
+    self.editing = NO;
 }
 
 - (void)shake:(BOOL)on

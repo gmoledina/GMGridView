@@ -19,6 +19,7 @@
 		16924B0C144156FE00E6E556 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0B144156FE00E6E556 /* UIKit.framework */; };
 		16924B0E144156FE00E6E556 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0D144156FE00E6E556 /* Foundation.framework */; };
 		16924B10144156FE00E6E556 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16924B0F144156FE00E6E556 /* CoreGraphics.framework */; };
+		16955523146FA81800DECCA6 /* close_x.png in Resources */ = {isa = PBXBuildFile; fileRef = 16955522146FA81800DECCA6 /* close_x.png */; };
 		169AE3781460E1B300C0CBCD /* OptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 169AE3771460E1B300C0CBCD /* OptionsViewController.m */; };
 		16A0D030145342F8004D7BBC /* GMGridViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 16A0D02F145342F8004D7BBC /* GMGridViewCell.m */; };
 		16DF1A6E145E3456006AA43C /* GMGridViewLayoutStrategies.m in Sources */ = {isa = PBXBuildFile; fileRef = 16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */; };
@@ -46,6 +47,7 @@
 		16924B0B144156FE00E6E556 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		16924B0D144156FE00E6E556 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		16924B0F144156FE00E6E556 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		16955522146FA81800DECCA6 /* close_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = close_x.png; sourceTree = "<group>"; };
 		169AE3761460E1B300C0CBCD /* OptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptionsViewController.h; path = GMGridView/OptionsViewController.h; sourceTree = SOURCE_ROOT; };
 		169AE3771460E1B300C0CBCD /* OptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OptionsViewController.m; path = GMGridView/OptionsViewController.m; sourceTree = SOURCE_ROOT; };
 		16A0D02E145342F8004D7BBC /* GMGridViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewCell.h; path = GMGridView/API/GMGridViewCell.h; sourceTree = SOURCE_ROOT; };
@@ -85,6 +87,7 @@
 			children = (
 				16924B11144156FE00E6E556 /* Demo */,
 				16924B361442CA9400E6E556 /* API */,
+				16955520146FA80200DECCA6 /* Resources */,
 				16026C10145462EC00093AFF /* Documentation */,
 				16924B0A144156FE00E6E556 /* Frameworks */,
 				16924B08144156FE00E6E556 /* Products */,
@@ -155,6 +158,15 @@
 			path = DraggableGridView/API;
 			sourceTree = "<group>";
 		};
+		16955520146FA80200DECCA6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				16955522146FA81800DECCA6 /* close_x.png */,
+			);
+			name = Resources;
+			path = GMGridView/Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -208,6 +220,7 @@
 			files = (
 				16026C131454631600093AFF /* LICENSE in Resources */,
 				16026C141454631600093AFF /* README in Resources */,
+				16955523146FA81800DECCA6 /* close_x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

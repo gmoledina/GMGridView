@@ -117,7 +117,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)queueReusableCell:(GMGridViewCell *)cell;
 - (GMGridViewCell *)dequeueReusableCell;
 
-
+// Memory warning
 - (void)receivedMemoryWarningNotification:(NSNotification *)notification;
 
 @end
@@ -140,6 +140,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize centerGrid = _centerGrid;
 @synthesize minEdgeInsets = _minEdgeInsets;
 @synthesize showFullSizeViewWithAlphaWhenTransforming;
+@synthesize editing = _editing;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
@@ -209,6 +210,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
         
         self.mainSuperView = self;
+        self.editing = NO;
         self.itemSpacing = 10;
         self.style = GMGridViewStyleSwap;
         self.minimumPressDuration = 0.2;
@@ -302,6 +304,20 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return _sortingLongPressGesture.minimumPressDuration;
 }
 
+- (void)setEditing:(BOOL)editing
+{
+    if (![self isInTransformingState] 
+        && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
+    {
+        for (GMGridViewCell *cell in [self itemSubviews]) 
+        {
+            [cell setEditing:editing];
+        }
+        
+        _editing = editing;
+    }
+}
+
 //////////////////////////////////////////////////////////////
 #pragma mark UIScrollView delegate
 //////////////////////////////////////////////////////////////
@@ -327,11 +343,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     if (gestureRecognizer == _tapGesture) 
     {
         CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
-        valid = [self.layoutStrategy itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
+        valid = !self.isEditing && [self.layoutStrategy itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
     }
     else if (gestureRecognizer == _sortingLongPressGesture)
     {
-        valid = (self.sortingDelegate != nil);
+        valid = !self.isEditing && (self.sortingDelegate != nil);
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -347,7 +363,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             NSInteger positionTouch1 = [self.layoutStrategy itemPositionFromLocation:locationTouch1];
             NSInteger positionTouch2 = [self.layoutStrategy itemPositionFromLocation:locationTouch2];
             
-            valid = [self isInTransformingState] || ((positionTouch1 == positionTouch2) && (positionTouch1 != GMGV_INVALID_POSITION));
+            valid = !self.isEditing && ([self isInTransformingState] || ((positionTouch1 == positionTouch2) && (positionTouch1 != GMGV_INVALID_POSITION)));
         }
         else
         {
@@ -966,6 +982,17 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     if (!cell) 
     {
         cell = [[GMGridViewCell alloc] initContentView:contentView];
+        cell.deleteButtonIcon = [UIImage imageNamed:@"close_x.png"];
+        cell.deleteButtonOffset = CGPointMake(-15, -15);
+        cell.deleteBlock = ^(GMGridViewCell *cell)
+        {
+            NSInteger index = [self positionForItemSubview:cell];
+            if (index != GMGV_INVALID_POSITION) 
+            {
+                [self removeObjectAtIndex:index];
+                //todo: tell the delegate !!!!
+            }
+        };
     }
     else
     {
@@ -976,6 +1003,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     cell.frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     cell.tag = position + kTagOffset;
+    cell.editing = self.editing;
     
     return cell;
 }
@@ -1159,9 +1187,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self setSubviewsCacheAsInvalid];
     }
     
-    if (rangeOfPositions.location + rangeOfPositions.length < self.lastPositionLoaded) 
+    if (NSMaxRange(rangeOfPositions) < self.lastPositionLoaded) 
     {
-        for (int i = rangeOfPositions.location + rangeOfPositions.length; i <= self.lastPositionLoaded; i++)
+        for (int i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
         {
             cell = [self itemSubViewForPosition:i];
             if(cell)
@@ -1172,7 +1200,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             }
         }
         
-        self.lastPositionLoaded = rangeOfPositions.location + rangeOfPositions.length;
+        self.lastPositionLoaded = NSMaxRange(rangeOfPositions);
         [self setSubviewsCacheAsInvalid];
     }
 }
@@ -1182,6 +1210,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     if (cell) 
     {
         [cell prepareForReuse];
+        cell.alpha = 1;
         [_reusableCells addObject:cell];
     }
 }
@@ -1348,17 +1377,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         cell.contentView.alpha = 0;
+                         cell.contentView.alpha = 0.3;
+                         cell.alpha = 0;
                          [_scrollView scrollRectToVisible:CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height) animated:NO];
                      } 
                      completion:^(BOOL finished){
                          [self queueReusableCell:cell];
                          [cell removeFromSuperview];
+                         
+                         self.firstPositionLoaded = self.lastPositionLoaded = GMGV_INVALID_POSITION;
+                         [self loadRequiredItems];
+                         
+                         [self setNeedsLayout];  
                      }
      ];
     
     [self setSubviewsCacheAsInvalid];
-    [self setNeedsLayout];    
 }
 
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2

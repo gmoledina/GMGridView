@@ -28,6 +28,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class GMGridViewCell;
+typedef void (^GMGridViewCellDeleteBlock)(GMGridViewCell*);
+
+
+
 @interface GMGridViewCell : UIView
 
 @property (nonatomic, strong) UIView *contentView;
@@ -37,6 +42,10 @@
 @property (nonatomic, readonly, getter=isInShakingMode) BOOL inShakingMode;
 @property (nonatomic, readonly, getter=isInFullSizeMode) BOOL inFullSizeMode;
 
+@property (nonatomic, getter=isEditing) BOOL editing;
+@property (nonatomic, copy) GMGridViewCellDeleteBlock deleteBlock;
+@property (nonatomic, strong) UIImage *deleteButtonIcon;
+@property (nonatomic) CGPoint deleteButtonOffset;
 
 - (id)initContentView:(UIView *)contentView;
 - (void)prepareForReuse;

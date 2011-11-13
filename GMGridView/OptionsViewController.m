@@ -12,12 +12,20 @@
 
 // Sections
 typedef enum {
-    OptionSectionLayout = 0,
+    OptionSectionGeneral = 0,
+    OptionSectionLayout,
     OptionSectionSorting,
     OptionSectionDebug,
     
     OptionSectionsCount
 } OptionsTypeSections;
+
+// General
+typedef enum {
+    OptionTypeGeneralEditing = 0,
+    
+    OptionGeneralCount
+} OptionsTypeGeneral;
 
 // Options layout
 typedef enum {
@@ -49,6 +57,7 @@ typedef enum {
     __weak UITableView *_tableView;
 }
 
+- (void)editingSwitchChanged:(UISwitch *)control;
 - (void)sortStyleSegmentedControlChanged:(UISegmentedControl *)control;
 - (void)layoutStrategySegmentedControlChanged:(UISegmentedControl *)control;
 - (void)layoutCenterSwitchChanged:(UISwitch *)control;
@@ -133,6 +142,9 @@ typedef enum {
     
     switch (section) 
     {
+        case OptionSectionGeneral:
+            title = @"General";
+            break;
         case OptionSectionLayout:
             title = @"Layout";
             break;
@@ -153,6 +165,9 @@ typedef enum {
     
     switch (section) 
     {
+        case OptionSectionGeneral:
+            count = OptionGeneralCount;
+            break;
         case OptionSectionLayout:
             count = OptionLayoutCount;
             break;
@@ -178,7 +193,25 @@ typedef enum {
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
 
-    if ([indexPath section] == OptionSectionLayout) 
+    
+    
+    if ([indexPath section] == OptionSectionGeneral)
+    {
+        switch ([indexPath row]) 
+        {
+            case OptionTypeGeneralEditing:
+            {
+                cell.detailTextLabel.text = @"Editing";
+                
+                UISwitch *editingSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
+                [editingSwitch addTarget:self action:@selector(editingSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+                editingSwitch.on = self.gridView.isEditing;
+                
+                cell.accessoryView = editingSwitch;
+            }
+        }
+    }
+    else if ([indexPath section] == OptionSectionLayout) 
     {
         switch ([indexPath row]) 
         {
@@ -303,6 +336,12 @@ typedef enum {
 //////////////////////////////////////////////////////////////
 #pragma mark Control callbacks
 //////////////////////////////////////////////////////////////
+
+- (void)editingSwitchChanged:(UISwitch *)control
+{
+    self.gridView.editing = control.on;
+    control.on = self.gridView.isEditing;
+}
 
 - (void)sortStyleSegmentedControlChanged:(UISegmentedControl *)control
 {
