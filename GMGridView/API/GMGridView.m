@@ -79,8 +79,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 @property (nonatomic, readonly) BOOL itemsSubviewsCacheIsValid;
 @property (nonatomic, strong) NSArray *itemSubviewsCache;
-@property (nonatomic) NSInteger firstPositionLoaded;
-@property (nonatomic) NSInteger lastPositionLoaded;
+@property (atomic) NSInteger firstPositionLoaded;
+@property (atomic) NSInteger lastPositionLoaded;
 
 
 // Gestures
@@ -1019,20 +1019,23 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else
     {
-        NSMutableArray *itemSubViews = [[NSMutableArray alloc] initWithCapacity:_numberTotalItems];
-        
-        for (UIView * v in [_scrollView subviews]) 
+        @synchronized(_scrollView)
         {
-            if ([v isKindOfClass:[GMGridViewCell class]]) 
+            NSMutableArray *itemSubViews = [[NSMutableArray alloc] initWithCapacity:_numberTotalItems];
+            
+            for (UIView * v in [_scrollView subviews]) 
             {
-                [itemSubViews addObject:v];
+                if ([v isKindOfClass:[GMGridViewCell class]]) 
+                {
+                    [itemSubViews addObject:v];
+                }
             }
+            
+            subviews = itemSubViews;
+            
+            self.itemSubviewsCache = [subviews copy];
+            _itemsSubviewsCacheIsValid = YES;
         }
-        
-        subviews = itemSubViews;
-        
-        self.itemSubviewsCache = [subviews copy];
-        _itemsSubviewsCacheIsValid = YES;
     }
     
     return subviews;
@@ -1395,6 +1398,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          cell.alpha = 0;
 
                          [_scrollView scrollRectToVisible:CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height) animated:NO];
+                         
+                         [self recomputeSize];
                      } 
                      completion:^(BOOL finished){
                          [self queueReusableCell:cell];
@@ -1402,8 +1407,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          
                          self.firstPositionLoaded = self.lastPositionLoaded = GMGV_INVALID_POSITION;
                          [self loadRequiredItems];
-                         
-                         [self setNeedsLayout];
+                         [self relayoutItems];
                      }
      ];
     
