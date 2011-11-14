@@ -26,27 +26,19 @@
 //  THE SOFTWARE.
 //
 
-#import "GMGridViewCell.h"
+#import "GMGridViewCell+Extended.h"
 #import "UIView+GMGridViewAdditions.h"
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Interface GMGridViewCell (Privates)
+#pragma mark Interface Private
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewCell () 
-{
-    
-}
-
-@property (nonatomic, assign) UIViewAutoresizing defaultFullsizeViewResizingMask;
-@property (nonatomic, weak) UIButton *deleteButton;
+@interface GMGridViewCell (Privates) 
 
 - (void)actionDelete;
 
 @end
-
-
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
@@ -71,21 +63,20 @@
 #pragma mark Constructors
 //////////////////////////////////////////////////////////////
 
-- (id)initWithFrame:(CGRect)frame
+- (id)init
 {
-    if ((self = [self initContentView:nil])) 
+    if ([self initWithFrame:CGRectZero]) 
     {
-        self.frame = frame;
+
     }
     return self;
 }
 
-- (id)initContentView:(UIView *)contentView
+- (id)initWithFrame:(CGRect)frame
 {
-    if ((self = [super initWithFrame:contentView.bounds])) 
+    if ((self = [super initWithFrame:frame])) 
     {
-        self.contentView = contentView;
-        self.autoresizesSubviews = YES;
+        self.autoresizesSubviews = !YES;
         self.editing = NO;
         
         UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -98,7 +89,6 @@
         [self addSubview:deleteButton];
         [deleteButton addTarget:self action:@selector(actionDelete) forControlEvents:UIControlEventTouchUpInside];
     }
-    
     return self;
 }
 
@@ -129,8 +119,13 @@
 {
     [self shake:NO];
     [self.contentView removeFromSuperview];
+    
+    if(self.contentView)
+    {
+        contentView.frame = self.contentView.frame;
+    }
     _contentView = contentView;
-    self.contentView.frame = self.bounds;
+    
     self.contentView.autoresizingMask = UIViewAutoresizingNone;
     [self addSubview:self.contentView];
     
@@ -245,10 +240,10 @@
 
 - (void)prepareForReuse
 {
-    self.contentView = nil;
     self.fullSize = CGSizeZero;
     self.fullSizeView = nil;
     self.editing = NO;
+    self.deleteBlock = nil;
 }
 
 - (void)shake:(BOOL)on

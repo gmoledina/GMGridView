@@ -1,5 +1,5 @@
 //
-//  GMGridViewCell.h
+//  GMGridViewCell+Extended.h
 //  GMGridView
 //
 //  Created by Gulam Moledina on 11-10-22.
@@ -26,17 +26,38 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "GMGridViewCell.h"
 
+typedef void (^GMGridViewCellDeleteBlock)(GMGridViewCell*);
 
-@interface GMGridViewCell : UIView
+//////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Interface GMGridViewCell (Extended)
+//////////////////////////////////////////////////////////////
+
+@interface GMGridViewCell () 
 {
     
 }
 
-@property (nonatomic, strong) UIView *contentView;         // The contentView - default is nil
-@property (nonatomic, strong) UIImage *deleteButtonIcon;   // Delete button image
-@property (nonatomic) CGPoint deleteButtonOffset;          // Delete button offset relative to the origin
+@property (nonatomic, strong) UIView *fullSizeView;
+@property (nonatomic, assign) CGSize fullSize;
 
+@property (nonatomic, readonly, getter=isInShakingMode) BOOL inShakingMode;
+@property (nonatomic, readonly, getter=isInFullSizeMode) BOOL inFullSizeMode;
+
+@property (nonatomic, getter=isEditing) BOOL editing;
+@property (nonatomic, copy) GMGridViewCellDeleteBlock deleteBlock;
+
+@property (nonatomic, assign) UIViewAutoresizing defaultFullsizeViewResizingMask;
+@property (nonatomic, weak) UIButton *deleteButton;
+
+
+- (void)prepareForReuse;
+- (void)shake:(BOOL)on; // shakes the contentView only, not the fullsize one
+
+- (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
+- (void)stepToFullsizeWithAlpha:(CGFloat)alpha; // not supported yet
 
 @end

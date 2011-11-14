@@ -244,28 +244,40 @@
     }
 }
 
-- (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index
+- (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index
 {
     CGSize size = [self sizeForItemsInGMGridView:gridView];
     
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-    view.backgroundColor =  gridView == _gmGridView1 ? [UIColor purpleColor] : [UIColor greenColor];
-    view.layer.masksToBounds = NO;
-    view.layer.cornerRadius = 8;
-    view.layer.shadowColor = [UIColor grayColor].CGColor;
-    view.layer.shadowOffset = CGSizeMake(5, 5);
-    view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
-    view.layer.shadowRadius = 8;
+    GMGridViewCell *cell = [gridView dequeueReusableCell];
     
-    UILabel *label = [[UILabel alloc] initWithFrame:view.frame];
+    if (!cell) 
+    {
+        cell = [[GMGridViewCell alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+        
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+        view.backgroundColor = (gridView == _gmGridView1) ? [UIColor purpleColor] : [UIColor greenColor];
+        view.layer.masksToBounds = NO;
+        view.layer.cornerRadius = 8;
+        view.layer.shadowColor = [UIColor grayColor].CGColor;
+        view.layer.shadowOffset = CGSizeMake(5, 5);
+        view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
+        view.layer.shadowRadius = 8;
+        
+        cell.contentView = view;
+    }
+    
+    [[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:cell.contentView.bounds];
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     label.text = [NSString stringWithFormat:@"%d", index];
     label.textAlignment = UITextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
     label.textColor = [UIColor blackColor];
     label.font = [UIFont boldSystemFontOfSize:20];
-    [view addSubview:label];
+    [cell.contentView addSubview:label];
     
-    return view;
+    return cell;
 }
 
 
@@ -273,33 +285,33 @@
 #pragma mark GMGridViewSortingDelegate
 //////////////////////////////////////////////////////////////
 
-- (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view
+- (void)GMGridView:(GMGridView *)gridView didStartMovingCell:(GMGridViewCell *)cell
 {
     [UIView animateWithDuration:0.3 
                           delay:0 
                         options:UIViewAnimationOptionAllowUserInteraction 
                      animations:^{
-                         view.backgroundColor = [UIColor orangeColor];
-                         view.layer.shadowOpacity = 0.7;
+                         cell.contentView.backgroundColor = [UIColor orangeColor];
+                         cell.contentView.layer.shadowOpacity = 0.7;
                      } 
                      completion:nil
      ];
 }
 
-- (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view
+- (void)GMGridView:(GMGridView *)gridView didEndMovingCell:(GMGridViewCell *)cell
 {
     [UIView animateWithDuration:0.3 
                           delay:0 
                         options:UIViewAnimationOptionAllowUserInteraction 
                      animations:^{  
-                         view.backgroundColor = (gridView == _gmGridView1) ? [UIColor purpleColor] : [UIColor greenColor];
-                         view.layer.shadowOpacity = 0;
+                         cell.contentView.backgroundColor = (gridView == _gmGridView1) ? [UIColor purpleColor] : [UIColor greenColor];
+                         cell.contentView.layer.shadowOpacity = 0;
                      }
                      completion:nil
      ];
 }
 
-- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
 {
     return YES;
 }
@@ -319,7 +331,7 @@
 #pragma mark DraggableGridViewTransformingDelegate
 //////////////////////////////////////////////////////////////
 
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForView:(UIView *)view
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell
 {
     if (INTERFACE_IS_PHONE) 
     {
@@ -331,14 +343,14 @@
     }
 }
 
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell
 {
     UIView *fullView = [[UIView alloc] init];
     fullView.backgroundColor = [UIColor yellowColor];
     fullView.layer.masksToBounds = NO;
     fullView.layer.cornerRadius = 8;
     
-    CGSize size = [self GMGridView:gridView sizeInFullSizeForView:view];
+    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell];
     fullView.bounds = CGRectMake(0, 0, size.width, size.height);
     
     UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
@@ -362,31 +374,31 @@
     return fullView;
 }
 
-- (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view
+- (void)GMGridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell
 {
     [UIView animateWithDuration:0.5 
                           delay:0 
                         options:UIViewAnimationOptionAllowUserInteraction 
                      animations:^{
-                         view.backgroundColor = [UIColor blueColor];
-                         view.layer.shadowOpacity = 0.7;
+                         cell.contentView.backgroundColor = [UIColor blueColor];
+                         cell.contentView.layer.shadowOpacity = 0.7;
                      } 
                      completion:nil];
 }
 
-- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell
 {
     [UIView animateWithDuration:0.5 
                           delay:0 
                         options:UIViewAnimationOptionAllowUserInteraction 
                      animations:^{
-                         view.backgroundColor = (gridView == _gmGridView1) ? [UIColor purpleColor] : [UIColor greenColor];
-                         view.layer.shadowOpacity = 0;
+                         cell.contentView.backgroundColor = (gridView == _gmGridView1) ? [UIColor purpleColor] : [UIColor greenColor];
+                         cell.contentView.layer.shadowOpacity = 0;
                      } 
                      completion:nil];
 }
 
-- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view
+- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell
 {
     
 }

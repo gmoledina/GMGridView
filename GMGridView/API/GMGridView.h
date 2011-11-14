@@ -27,8 +27,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GMGridViewCell.h"
 
 @protocol GMGridViewDataSource;
+@protocol GMGridViewActionDelegate;
 @protocol GMGridViewSortingDelegate;
 @protocol GMGridViewTransformationDelegate;
 @protocol GMGridViewLayoutStrategy;
@@ -51,11 +53,15 @@ typedef enum
 
 // Delegates
 @property (nonatomic, weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
+@property (nonatomic, weak) NSObject<GMGridViewActionDelegate> *actionDelegate;            // Optional - to get taps callback
 @property (nonatomic, weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Optional - to enable sorting
 @property (nonatomic, weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Optional - to enable fullsize mode
 
 // Layout Strategy
 @property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy; // Default is GMGridViewLayoutVerticalStrategy
+
+// Editing Mode
+@property (nonatomic, getter=isEditing) BOOL editing; // Default is NO - When set to YES, all gestures are disabled and delete buttons shows up on cells
 
 // Customizing Options
 @property (nonatomic, weak) UIView *mainSuperView;                    // Default is self
@@ -66,8 +72,9 @@ typedef enum
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 
-// Editing
-@property (nonatomic, getter=isEditing) BOOL editing;                 // Default is NO
+
+// Reusable cells
+- (GMGridViewCell *)dequeueReusableCell;
 
 // Actions
 - (void)reloadData;
@@ -90,11 +97,23 @@ typedef enum
 // Populating subview items 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
 - (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView;
-- (UIView *)GMGridView:(GMGridView *)gridView viewForItemAtIndex:(NSInteger)index;
+- (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
 // Required to enable editing mode
 - (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index;
+
+@end
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark Protocol GMGridViewActionDelegate
+//////////////////////////////////////////////////////////////
+
+@protocol GMGridViewActionDelegate <NSObject>
+
+@required
+- (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @end
 
@@ -112,10 +131,10 @@ typedef enum
 
 @optional
 // Sorting started/ended - indexes are not specified on purpose (not the right place to update data structure)
-- (void)GMGridView:(GMGridView *)gridView didStartMovingView:(UIView *)view;
-- (void)GMGridView:(GMGridView *)gridView didEndMovingView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView didStartMovingCell:(GMGridViewCell *)cell;
+- (void)GMGridView:(GMGridView *)gridView didEndMovingCell:(GMGridViewCell *)cell;
 // Enable/Disable the shaking behavior of an item being moved
-- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingView:(UIView *)view atIndex:(NSInteger)index;
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
 
 @end
 
@@ -127,13 +146,13 @@ typedef enum
 
 @required
 // Fullsize
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForView:(UIView *)view;
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForView:(UIView *)view;
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell;
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell;
 
 // Transformation (pinch, drag, rotate) of the item
 @optional
-- (void)GMGridView:(GMGridView *)gridView didStartTransformingView:(UIView *)view;
-- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForView:(UIView *)view;
-- (void)GMGridView:(GMGridView *)gridView didEndTransformingView:(UIView *)view;
+- (void)GMGridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell;
+- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell;
+- (void)GMGridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell;
 
 @end
