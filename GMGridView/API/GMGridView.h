@@ -71,6 +71,7 @@ typedef enum
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
+@property (nonatomic) BOOL pagingEnabled;                             // Default is NO
 
 
 // Reusable cells
