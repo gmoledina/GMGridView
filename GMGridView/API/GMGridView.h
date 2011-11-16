@@ -72,7 +72,7 @@ typedef enum
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 @property (nonatomic) BOOL pagingEnabled;                             // Default is NO
-
+@property (nonatomic, readonly) CGPoint contentOffset;                // top-left offset of the visible content (within the internal scroll view)
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;
@@ -84,6 +84,7 @@ typedef enum
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 - (void)scrollToObjectAtIndex:(NSInteger)index;
+- (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated;
 
 // Geometry
 
@@ -91,6 +92,7 @@ typedef enum
 - (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view;
 // converts a rect, taking into account the internal scroll position
 - (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view;
+
 @end
 
 

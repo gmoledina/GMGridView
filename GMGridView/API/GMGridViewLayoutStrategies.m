@@ -332,7 +332,7 @@
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
-  NSUInteger page = floor(location.x / self.contentBounds.size.width);
+  NSUInteger page = [self pageForContentOffset:location];
   NSUInteger column = (location.x - page * self.contentBounds.size.width - _pagePaddingLeft) / (self.itemSize.width + self.itemSpacing);
   NSUInteger row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
   
@@ -379,6 +379,15 @@
                                       MAX(0, offset.y));
   NSUInteger page = floor(contentOffset.x / _contentBounds.size.width);
   return [self rangeOfPositionsFromPage:page];
+}
+
+- (NSUInteger) pageForContentOffset:(CGPoint)offset
+{
+  return floor(offset.x / self.contentBounds.size.width);
+}
+- (CGPoint)originForPage:(NSUInteger)page 
+{
+  return CGPointMake(page * self.contentBounds.size.width, 0);
 }
 
 @end

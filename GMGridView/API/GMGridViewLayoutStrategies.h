@@ -155,5 +155,7 @@ typedef enum {
 
 @property (nonatomic, readonly) NSUInteger numberOfPages;
 @property (nonatomic, readonly) NSUInteger numberOfColumnsPerPage;
-
+- (NSUInteger) pageForContentOffset:(CGPoint)offset;
+- (CGPoint)originForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page;
+- (CGPoint)originForPage:(NSUInteger)page;
 @end

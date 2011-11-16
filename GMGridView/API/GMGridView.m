@@ -146,6 +146,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 @synthesize firstPositionLoaded = _firstPositionLoaded;
 @synthesize lastPositionLoaded = _lastPositionLoaded;
+@synthesize contentOffset;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors and destructor
@@ -328,6 +329,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
   return _scrollView.pagingEnabled;
 }
 
+- (CGPoint) contentOffset {
+  return _scrollView.contentOffset;
+}
+
+- (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated {
+  [_scrollView setContentOffset:offset animated:animated];
+}
 //////////////////////////////////////////////////////////////
 // Geometry
 //////////////////////////////////////////////////////////////
