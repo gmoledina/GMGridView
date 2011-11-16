@@ -323,7 +323,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
   _scrollView.pagingEnabled = pagingEnabled;
 }
 
-- (BOOL)isPagingEnabled
+- (BOOL)pagingEnabled
 {
   return _scrollView.pagingEnabled;
 }
