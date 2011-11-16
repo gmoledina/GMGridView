@@ -329,6 +329,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 }
 
 //////////////////////////////////////////////////////////////
+// Geometry
+//////////////////////////////////////////////////////////////
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view {
+  return [_scrollView convertPoint:point toView:view];
+}
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view {
+  return [_scrollView convertRect:rect toView:view];
+}
+
+//////////////////////////////////////////////////////////////
 #pragma mark UIScrollView delegate
 //////////////////////////////////////////////////////////////
 
@@ -972,7 +982,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-    
+
     if (position != GMGV_INVALID_POSITION) 
     {
         [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];

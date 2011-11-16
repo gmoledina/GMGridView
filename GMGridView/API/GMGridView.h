@@ -85,6 +85,12 @@ typedef enum
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 - (void)scrollToObjectAtIndex:(NSInteger)index;
 
+// Geometry
+
+// converts a point, taking into account the internal scroll view
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view;
+// converts a rect, taking into account the internal scroll position
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view;
 @end
 
 
