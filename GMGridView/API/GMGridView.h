@@ -123,7 +123,9 @@ typedef enum
 
 @required
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
-
+@optional
+// tells the delegate that the scroll view just did scroll. similar in concept to [UIScrollView scrollViewDidScroll:]
+- (void)GMGridViewDidScroll:(GMGridView*)gridView;
 @end
 
 

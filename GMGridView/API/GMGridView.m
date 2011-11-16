@@ -353,6 +353,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [self loadRequiredItems];
+    if ([self.actionDelegate respondsToSelector:@selector(GMGridViewDidScroll:)]) {
+      [self.actionDelegate GMGridViewDidScroll:self];
+    }
 }
 
 //////////////////////////////////////////////////////////////
