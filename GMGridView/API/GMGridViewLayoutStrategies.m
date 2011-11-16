@@ -43,6 +43,9 @@
         case GMGridViewLayoutVertical:
             strategy = [[GMGridViewLayoutVerticalStrategy alloc] init];
             break;
+        case GMGridViewLayoutHorizontalPagedLtr:
+            strategy = [[GMGridViewLayoutHorizontalPagedLtrStrategy alloc] init];
+            break;
         case GMGridViewLayoutHorizontal:
         default:
             strategy = [[GMGridViewLayoutHorizontalStrategy alloc] init];
@@ -280,11 +283,102 @@
 @end
 
 
+//////////////////////////////////////////////////////////////
+#pragma mark - 
+#pragma mark - Horizontal Paged LTR strategy implementation
+//////////////////////////////////////////////////////////////
 
+@implementation GMGridViewLayoutHorizontalPagedLtrStrategy
 
+@synthesize numberOfPages = _numberOfPages;
+@synthesize numberOfColumnsPerPage = _numberOfColumnsPerPage;
 
+- (id)init
+{
+  if ((self = [super init])) 
+  {
+    _type = GMGridViewLayoutHorizontalPagedLtr;
+  }
+  return self;
+}
 
+- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
+{
+  [super rebaseWithItemCount:count havingSize:itemSize andSpacing:spacing insideOfBounds:bounds];
+  _numberOfPages = ceil(self.contentSize.width / bounds.size.width);
+  _contentSize.width = _numberOfPages * bounds.size.width;
+  _numberOfColumnsPerPage = floor(bounds.size.width / (itemSize.width + spacing));
+  
+  // The total size of each page's 'content' area from which the left padding will be calculated so that the content can be centered in the page
+  NSUInteger pageContentwidth = _numberOfColumnsPerPage * (itemSize.width + spacing) - spacing; 
+  _pagePaddingLeft = (bounds.size.width - pageContentwidth) / 2;
+}
 
+- (CGPoint)originForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page 
+{
+  CGFloat x = page * self.contentBounds.size.width + _pagePaddingLeft + column * (self.itemSize.width + self.itemSpacing);
+  CGFloat y = row * (self.itemSize.height + self.itemSpacing);
+  return CGPointMake(x, y);
+}
 
+- (CGPoint)originForItemAtPosition:(NSInteger)position
+{
+  // page, column and row are zero based
+  NSUInteger page = floor(position / (self.numberOfColumnsPerPage * self.numberOfItemsPerColumn));
+  NSUInteger column = position % self.numberOfColumnsPerPage; // The columns is a column within the page
+  NSUInteger row = (NSUInteger) floor(position / self.numberOfColumnsPerPage) % self.numberOfItemsPerColumn;
+  return [self originForItemAtColumn:column row:row page:page];
+}
 
+- (NSInteger)itemPositionFromLocation:(CGPoint)location
+{
+  NSUInteger page = floor(location.x / self.contentBounds.size.width);
+  NSUInteger column = (location.x - page * self.contentBounds.size.width - _pagePaddingLeft) / (self.itemSize.width + self.itemSpacing);
+  NSUInteger row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
+  
+  NSInteger position = page * self.numberOfItemsPerColumn * self.numberOfColumnsPerPage + row * self.numberOfColumnsPerPage + column;
+  
+  if (position >= [self itemCount] || position < 0) 
+  {
+    position = GMGV_INVALID_POSITION;
+  }
+  else
+  {
+    CGPoint itemOrigin = [self originForItemAtPosition:position];
+    CGRect itemFrame = CGRectMake(itemOrigin.x, 
+                                  itemOrigin.y, 
+                                  self.itemSize.width, 
+                                  self.itemSize.height);
+    
+    if (!CGRectContainsPoint(itemFrame, location)) 
+    {
+      position = GMGV_INVALID_POSITION;
+    }
+  }
+  
+  return position;
+}
 
+- (NSRange) rangeOfPositionsFromPage:(NSUInteger)page
+{
+  NSUInteger itemsPerPage = self.numberOfItemsPerColumn * self.numberOfColumnsPerPage;
+  // in theory it's correct to return the following:
+  //return NSMakeRange(page * itemsPerPage, itemsPerPage);
+  // however, if we do that, scrolling would not work smmothly and users would notice the cells being loaded
+  // with each page transition.
+  // Therefore instead, we return a larger range which includes two more pages, one to the left of this page and another to the right
+  // It comes on the expense of memory, but provides smoother experience
+  NSUInteger pageToTheLeft = page == 0 ? 0 : page - 1;
+  NSUInteger pageToTheRight = page == self.numberOfPages ? page : page + 1;
+  return NSMakeRange(pageToTheLeft * itemsPerPage, (pageToTheRight - pageToTheLeft + 1) * itemsPerPage);
+}
+
+- (NSRange)rangeOfPositionsInBoundsFromOffset:(CGPoint)offset
+{
+  CGPoint contentOffset = CGPointMake(MAX(0, offset.x), 
+                                      MAX(0, offset.y));
+  NSUInteger page = floor(contentOffset.x / _contentBounds.size.width);
+  return [self rangeOfPositionsFromPage:page];
+}
+
+@end
