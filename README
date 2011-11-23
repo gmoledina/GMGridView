@@ -7,8 +7,8 @@ This view is inspired by the UITableView and uses a datasource and delegates in 
 The cells are reusable and are not loaded until required (only the ones visible on the scrollview are loaded). 
 It is important to use the dequeue method to reuse the cell.
 
-The best sorting style (swap or push) depends on personal taste and the frame of the grid; you can choose the one thats suits you best.
-Same applies to the layout strategy (vertical or horizontal).
+The best sorting style (swap or push) depends on personal taste and the frame of the grid; you can choose the one that suits you best.
+Same applies to the layout strategy (vertical or horizontal... and more to come).
 
 Many working examples provided in the demo app!
 All the files in the API folder are required. You only need to deal with 2 header files though (the grid and the cell).
@@ -44,6 +44,8 @@ Features - Fullsize:
 
 COMING SOON :
 - Changing the zoom scale dynamically (when pinching to go fullscreen)
+- Support for pagging
+- Support for iOS 4
 
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
