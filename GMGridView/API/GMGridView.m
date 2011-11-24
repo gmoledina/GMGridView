@@ -997,13 +997,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     cell.tag = position + kTagOffset;
     cell.editing = self.editing;
     
+    __weak GMGridView *weakSelf = self; 
+    
     cell.deleteBlock = ^(GMGridViewCell *cell)
     {
-        NSInteger index = [self positionForItemSubview:cell];
+        NSInteger index = [weakSelf positionForItemSubview:cell];
         if (index != GMGV_INVALID_POSITION) 
         {
-            [self.dataSource GMGridView:self deleteItemAtIndex:index];
-            [self removeObjectAtIndex:index];
+            [weakSelf.dataSource GMGridView:self deleteItemAtIndex:index];
+            [weakSelf removeObjectAtIndex:index];
         }
     };
     
