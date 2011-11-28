@@ -160,7 +160,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     if ((self = [super initWithFrame:frame])) 
     {
-        _scrollView = [[UIScrollView alloc] initWithFrame:frame];
+        _scrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
         _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _scrollView.backgroundColor = [UIColor clearColor];
         _scrollView.delegate = self;
