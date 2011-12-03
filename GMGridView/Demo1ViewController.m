@@ -290,7 +290,7 @@
 #pragma mark DraggableGridViewTransformingDelegate
 //////////////////////////////////////////////////////////////
 
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
 {
     if (INTERFACE_IS_PHONE) 
     {
@@ -302,18 +302,18 @@
     }
 }
 
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
 {
     UIView *fullView = [[UIView alloc] init];
     fullView.backgroundColor = [UIColor yellowColor];
     fullView.layer.masksToBounds = NO;
     fullView.layer.cornerRadius = 8;
     
-    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell];
+    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell atIndex:index];
     fullView.bounds = CGRectMake(0, 0, size.width, size.height);
     
     UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
-    label.text = @"Fullscreen View";
+    label.text = [NSString stringWithFormat:@"Fullscreen View for cell at index %d", index];
     label.textAlignment = UITextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
     label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
