@@ -83,6 +83,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @property (atomic) NSInteger lastPositionLoaded;
 
 
+- (void)_setup;
+
 // Gestures
 - (void)sortingPanGestureUpdated:(UIPanGestureRecognizer *)panGesture;
 - (void)sortingLongPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture;
@@ -156,83 +158,94 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return [self initWithFrame:CGRectZero];
 }
 
+- (id)initWithCoder:(NSCoder *)coder {
+  self = [super initWithCoder:coder];
+  if (self) {
+    [self _setup];
+  }
+  return self;
+}
+
 - (id)initWithFrame:(CGRect)frame 
 {
     if ((self = [super initWithFrame:frame])) 
     {
-        _scrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
-        _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        _scrollView.backgroundColor = [UIColor clearColor];
-        _scrollView.delegate = self;
-        [self addSubview:_scrollView];
-        
-        _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
-        _tapGesture.delegate = self;
-        _tapGesture.numberOfTapsRequired = 1;
-        _tapGesture.numberOfTouchesRequired = 1;
-        [_scrollView addGestureRecognizer:_tapGesture];
-        
-        /////////////////////////////
-        // Transformation gestures :
-        
-        _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
-        _pinchGesture.delegate = self;
-        [self addGestureRecognizer:_pinchGesture];
-        
-        _rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureUpdated:)];
-        _rotationGesture.delegate = self;
-        [self addGestureRecognizer:_rotationGesture];
-        
-        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
-        _panGesture.delegate = self;
-        [_panGesture setMaximumNumberOfTouches:2];
-        [_panGesture setMinimumNumberOfTouches:2];
-        [self addGestureRecognizer:_panGesture];
-        
-        //////////////////////
-        // Sorting gestures :
-        
-        _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
-        _sortingPanGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_sortingPanGesture];
-        
-        _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
-        _sortingLongPressGesture.numberOfTouchesRequired = 1;
-        _sortingLongPressGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_sortingLongPressGesture];
-
-        ////////////////////////
-        // Gesture dependencies
-        [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
-        [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
-        
-        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
-        
-        self.mainSuperView = self;
-        self.editing = NO;
-        self.itemSpacing = 10;
-        self.style = GMGridViewStyleSwap;
-        self.minimumPressDuration = 0.2;
-        self.showFullSizeViewWithAlphaWhenTransforming = YES;
-        self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-        self.clipsToBounds = NO;
-        
-        _sortFuturePosition = GMGV_INVALID_POSITION;
-        _itemSize = CGSizeZero;
-        
-        _lastScale = 1.0;
-        _lastRotation = 0.0;
-        
-        _minPossibleContentOffset = CGPointMake(0, 0);
-        _maxPossibleContentOffset = CGPointMake(0, 0);
-        
-        _reusableCells = [[NSMutableSet alloc] init];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+      [self _setup];
     }
     return self;
 }
 
+- (void)_setup {
+  _scrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
+  _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  _scrollView.backgroundColor = [UIColor clearColor];
+  _scrollView.delegate = self;
+  [self addSubview:_scrollView];
+  
+  _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
+  _tapGesture.delegate = self;
+  _tapGesture.numberOfTapsRequired = 1;
+  _tapGesture.numberOfTouchesRequired = 1;
+  [_scrollView addGestureRecognizer:_tapGesture];
+  
+  /////////////////////////////
+  // Transformation gestures :
+  
+  _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
+  _pinchGesture.delegate = self;
+  [self addGestureRecognizer:_pinchGesture];
+  
+  _rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureUpdated:)];
+  _rotationGesture.delegate = self;
+  [self addGestureRecognizer:_rotationGesture];
+  
+  _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
+  _panGesture.delegate = self;
+  [_panGesture setMaximumNumberOfTouches:2];
+  [_panGesture setMinimumNumberOfTouches:2];
+  [self addGestureRecognizer:_panGesture];
+  
+  //////////////////////
+  // Sorting gestures :
+  
+  _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
+  _sortingPanGesture.delegate = self;
+  [_scrollView addGestureRecognizer:_sortingPanGesture];
+  
+  _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
+  _sortingLongPressGesture.numberOfTouchesRequired = 1;
+  _sortingLongPressGesture.delegate = self;
+  [_scrollView addGestureRecognizer:_sortingLongPressGesture];
+  
+  ////////////////////////
+  // Gesture dependencies
+  [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
+  [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
+  
+  self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+  
+  self.mainSuperView = self;
+  self.editing = NO;
+  self.itemSpacing = 10;
+  self.style = GMGridViewStyleSwap;
+  self.minimumPressDuration = 0.2;
+  self.showFullSizeViewWithAlphaWhenTransforming = YES;
+  self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+  self.clipsToBounds = NO;
+  
+  _sortFuturePosition = GMGV_INVALID_POSITION;
+  _itemSize = CGSizeZero;
+  
+  _lastScale = 1.0;
+  _lastRotation = 0.0;
+  
+  _minPossibleContentOffset = CGPointMake(0, 0);
+  _maxPossibleContentOffset = CGPointMake(0, 0);
+  
+  _reusableCells = [[NSMutableSet alloc] init];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];  
+}
 
 - (void)dealloc
 {
@@ -1334,11 +1347,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSAssert((index >= 0 && index <= _numberTotalItems), @"Invalid index specified");
     
     GMGridViewCell *cell = nil;
-    BOOL isInsertedObjectVisible = NO;
+//    BOOL isInsertedObjectVisible = NO;
     
     if (index >= self.firstPositionLoaded && index <= self.lastPositionLoaded) 
     {
-        isInsertedObjectVisible = YES;
+//        isInsertedObjectVisible = YES;
         
         cell = [self newItemSubViewForPosition:index];
         

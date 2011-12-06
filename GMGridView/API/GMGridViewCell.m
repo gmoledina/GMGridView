@@ -65,7 +65,7 @@
 
 - (id)init
 {
-    if ([self initWithFrame:CGRectZero]) 
+    if (self = [self initWithFrame:CGRectZero]) 
     {
 
     }
