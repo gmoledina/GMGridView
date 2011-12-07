@@ -336,6 +336,27 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
 }
 
+- (void)setShowsVerticalScrollIndicator:(BOOL)showsVerticalScroll 
+{
+  _scrollView.showsVerticalScrollIndicator = showsVerticalScroll;
+}
+
+- (BOOL)showsVerticalScrollIndicator 
+{
+  return _scrollView.showsVerticalScrollIndicator;
+}
+
+- (void)setShowsHorizontalScrollIndicator:(BOOL)showsHorizontalScrollIndicator 
+{
+  _scrollView.showsHorizontalScrollIndicator = showsHorizontalScrollIndicator;
+}
+
+- (BOOL)showsHorizontalScrollIndicator 
+{
+  return _scrollView.showsHorizontalScrollIndicator;
+}
+
+
 //////////////////////////////////////////////////////////////
 #pragma mark UIScrollView delegate
 //////////////////////////////////////////////////////////////
