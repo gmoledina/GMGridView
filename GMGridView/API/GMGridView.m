@@ -336,6 +336,20 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated {
   [_scrollView setContentOffset:offset animated:animated];
 }
+
+- (void)setShowsVerticalScrollIndicator:(BOOL)showsVerticalScroll {
+  _scrollView.showsVerticalScrollIndicator = showsVerticalScroll;
+}
+- (BOOL)showsVerticalScrollIndicator {
+  return _scrollView.showsVerticalScrollIndicator;
+}
+- (void)setShowsHorizontalScrollIndicator:(BOOL)showsHorizontalScrollIndicator {
+  _scrollView.showsHorizontalScrollIndicator = showsHorizontalScrollIndicator;
+}
+- (BOOL)showsHorizontalScrollIndicator {
+  return _scrollView.showsHorizontalScrollIndicator;
+}
+
 //////////////////////////////////////////////////////////////
 // Geometry
 //////////////////////////////////////////////////////////////
