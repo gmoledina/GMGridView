@@ -249,6 +249,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self recomputeSize];
     [self relayoutItems];
+    [self loadRequiredItems];
     
     [_scrollView flashScrollIndicators];
 }
@@ -1067,34 +1068,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)recomputeSize
 {
-    CGRect actualBounds = CGRectMake(0, 
-                                     0, 
-                                     self.bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
-                                     self.bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
-    
-    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems havingSize:_itemSize andSpacing:self.itemSpacing insideOfBounds:actualBounds];
+    [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
+    [self.layoutStrategy rebaseWithItemCount:_numberTotalItems insideOfBounds:self.bounds];
     
     CGSize contentSize = [self.layoutStrategy contentSize];
-    
-    if (self.centerGrid)
-    {
-        NSInteger widthSpace, heightSpace;        
-        NSInteger top, left, bottom, right;
-        
-        widthSpace  = (self.bounds.size.width  - contentSize.width)  / 2;
-        heightSpace = (self.bounds.size.height - contentSize.height) / 2;
-        
-        left   = (widthSpace  < self.minEdgeInsets.left)   ? self.minEdgeInsets.left   : widthSpace;
-        right  = (widthSpace  < self.minEdgeInsets.right)  ? self.minEdgeInsets.right  : widthSpace;
-        top    = (heightSpace < self.minEdgeInsets.top)    ? self.minEdgeInsets.top    : heightSpace;
-        bottom = (heightSpace < self.minEdgeInsets.bottom) ? self.minEdgeInsets.bottom : heightSpace;
-        
-        _scrollView.contentInset = UIEdgeInsetsMake(top, left, bottom, right);
-    }
-    else
-    {
-        _scrollView.contentInset = self.minEdgeInsets;
-    }
     
     _minPossibleContentOffset = CGPointMake(-1 * (_scrollView.contentInset.left), 
                                             -1 * (_scrollView.contentInset.top));

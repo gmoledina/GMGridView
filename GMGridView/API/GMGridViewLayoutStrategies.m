@@ -64,11 +64,52 @@
 @implementation GMGridViewLayoutStrategyBase
 
 @synthesize type          = _type;
-@synthesize itemCount     = _itemCount;
+
 @synthesize itemSize      = _itemSize;
 @synthesize itemSpacing   = _itemSpacing;
+@synthesize minEdgeInsets = _minEdgeInsets;
+@synthesize centeredGrid  = _centeredGrid;
+
+@synthesize itemCount     = _itemCount;
+@synthesize edgeInsets    = _edgeInsets;
+@synthesize gridBounds    = _gridBounds;
 @synthesize contentBounds = _contentBounds;
 @synthesize contentSize   = _contentSize;
+
+
+- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered
+{
+    _itemSize      = itemSize;
+    _itemSpacing   = spacing;
+    _minEdgeInsets = edgeInsets;
+    _centeredGrid  = centered;
+}
+
+- (void)setEdgeAndContentSizeFromAbsoluteContentSize:(CGSize)actualContentSize
+{
+    if (self.centeredGrid)
+    {
+        NSInteger widthSpace, heightSpace;        
+        NSInteger top, left, bottom, right;
+        
+        widthSpace  = floor((self.gridBounds.size.width  - actualContentSize.width)  / 2.0);
+        heightSpace = floor((self.gridBounds.size.height - actualContentSize.height) / 2.0);
+        
+        left   = MAX(widthSpace,  self.minEdgeInsets.left);
+        right  = MAX(widthSpace,  self.minEdgeInsets.right);
+        top    = MAX(heightSpace, self.minEdgeInsets.top);
+        bottom = MAX(heightSpace, self.minEdgeInsets.bottom);
+        
+        _edgeInsets = UIEdgeInsetsMake(top, left, bottom, right);
+    }
+    else
+    {
+        _edgeInsets = self.minEdgeInsets;
+    }
+    
+    
+    _contentSize   = actualContentSize;
+}
 
 @end
 
@@ -93,24 +134,36 @@
     return self;
 }
 
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
+- (void)rebaseWithItemCount:(NSInteger)count insideOfBounds:(CGRect)bounds
 {
-    _itemCount     = count;
-    _itemSize      = itemSize;
-    _itemSpacing   = spacing;
-    _contentBounds = bounds;
+    _itemCount  = count;
+    _gridBounds = bounds;
+    
+    CGRect actualBounds = CGRectMake(0, 
+                                     0, 
+                                     bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
+                                     bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
+    
     
     _numberOfItemsPerRow = 1;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing < self.contentBounds.size.width)
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing < actualBounds.size.width)
     {
         _numberOfItemsPerRow++;
     }
     
     NSInteger numberOfRows = ceil(self.itemCount / (1.0 * self.numberOfItemsPerRow));
     
-    _contentSize = CGSizeMake(ceil(MIN(self.itemCount, self.numberOfItemsPerRow) * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
-                              ceil(numberOfRows * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    CGSize actualContentSize = CGSizeMake(ceil(MIN(self.itemCount, self.numberOfItemsPerRow) * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
+                               ceil(numberOfRows * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    
+    [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
+    
+    _contentBounds = CGRectMake(actualBounds.origin.x + _edgeInsets.left, 
+                                actualBounds.origin.y + _edgeInsets.top, 
+                                actualBounds.size.width -_edgeInsets.left - _edgeInsets.right, 
+                                actualBounds.size.height - _edgeInsets.top - _edgeInsets.bottom);
+    
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -122,8 +175,8 @@
         NSUInteger col = position % self.numberOfItemsPerRow; 
         NSUInteger row = position / self.numberOfItemsPerRow;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing),
-                             row * (self.itemSize.height + self.itemSpacing));
+        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing) + self.edgeInsets.left,
+                             row * (self.itemSize.height + self.itemSpacing) + self.edgeInsets.top);
     }
     
     return origin;
@@ -131,8 +184,11 @@
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
-    int col = (int) (location.x / (self.itemSize.width + self.itemSpacing)); 
-    int row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
+    CGPoint relativeLocation = CGPointMake(location.x - self.edgeInsets.left,
+                                           location.y - self.edgeInsets.top);
+    
+    int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
+    int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
     
     int position = col + row * self.numberOfItemsPerRow;
     
@@ -196,24 +252,34 @@
     return self;
 }
 
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds
+- (void)rebaseWithItemCount:(NSInteger)count insideOfBounds:(CGRect)bounds
 {
     _itemCount     = count;
-    _itemSize      = itemSize;
-    _itemSpacing   = spacing;
-    _contentBounds = bounds;
+    _gridBounds    = bounds;
+    
+    CGRect actualBounds = CGRectMake(0, 
+                                     0, 
+                                     bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
+                                     bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
     
     _numberOfItemsPerColumn = 1;
     
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing < self.contentBounds.size.height)
+    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing < actualBounds.size.height)
     {
         _numberOfItemsPerColumn++;
     }
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
             
-    _contentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
-                              ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    CGSize actualContentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
+                               ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    
+    [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
+    
+    _contentBounds = CGRectMake(actualBounds.origin.x + _edgeInsets.left, 
+                                actualBounds.origin.y + _edgeInsets.top, 
+                                actualBounds.size.width -_edgeInsets.left - _edgeInsets.right, 
+                                actualBounds.size.height - _edgeInsets.top - _edgeInsets.bottom);
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -225,8 +291,8 @@
         NSUInteger col = position / self.numberOfItemsPerColumn; 
         NSUInteger row = position % self.numberOfItemsPerColumn;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing),
-                             row * (self.itemSize.height + self.itemSpacing));
+        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing) + self.edgeInsets.left,
+                             row * (self.itemSize.height + self.itemSpacing) + self.edgeInsets.top);
     }
     
     return origin;
@@ -234,8 +300,11 @@
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
 {
-    int col = (int) (location.x / (self.itemSize.width + self.itemSpacing)); 
-    int row = (int) (location.y / (self.itemSize.height + self.itemSpacing));
+    CGPoint relativeLocation = CGPointMake(location.x - self.edgeInsets.left,
+                                           location.y - self.edgeInsets.top);
+
+    int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
+    int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
     
     int position = row + col * self.numberOfItemsPerColumn;
     

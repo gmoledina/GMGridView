@@ -60,9 +60,12 @@ typedef enum {
 - (GMGridViewLayoutStrategyType)type;
 
 // Setup
-- (void)rebaseWithItemCount:(NSInteger)count havingSize:(CGSize)itemSize andSpacing:(NSInteger)spacing insideOfBounds:(CGRect)bounds;
+- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
 
-// Fetching the result
+// Recomputing
+- (void)rebaseWithItemCount:(NSInteger)count insideOfBounds:(CGRect)bounds;
+
+// Fetching the results
 - (CGSize)contentSize;
 - (CGPoint)originForItemAtPosition:(NSInteger)position;
 - (NSInteger)itemPositionFromLocation:(CGPoint)location;
@@ -82,20 +85,38 @@ typedef enum {
     // All of these vars should be set in the init method
     GMGridViewLayoutStrategyType _type;
     
-    // All of these vars should be set in the rebase method of the child class
-    NSInteger _itemCount;
+    // All of these vars should be set in the setup method of the child class
     CGSize _itemSize;
     NSInteger _itemSpacing;
+    UIEdgeInsets _minEdgeInsets;
+    BOOL _centeredGrid;
+    
+    // All of these vars should be set in the rebase method of the child class
+    NSInteger _itemCount;
+    UIEdgeInsets _edgeInsets;
+    CGRect _gridBounds;
     CGRect _contentBounds;
     CGSize _contentSize;
 }
 
 @property (nonatomic, readonly) GMGridViewLayoutStrategyType type;
-@property (nonatomic, readonly) NSInteger itemCount;
+
 @property (nonatomic, readonly) CGSize itemSize;
 @property (nonatomic, readonly) NSInteger itemSpacing;
+@property (nonatomic, readonly) UIEdgeInsets minEdgeInsets;
+@property (nonatomic, readonly) BOOL centeredGrid;
+
+@property (nonatomic, readonly) NSInteger itemCount;
+@property (nonatomic, readonly) UIEdgeInsets edgeInsets;
+@property (nonatomic, readonly) CGRect gridBounds;
 @property (nonatomic, readonly) CGRect contentBounds;
 @property (nonatomic, readonly) CGSize contentSize;
+
+// Protocol methods implemented in base class
+- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
+
+// Helpers
+- (void)setEdgeAndContentSizeFromAbsoluteContentSize:(CGSize)actualContentSize;
 
 @end
 
