@@ -35,7 +35,20 @@
 
 typedef enum {
     GMGridViewLayoutVertical = 0,
-    GMGridViewLayoutHorizontal
+    GMGridViewLayoutHorizontal,
+    // A paged horizontal strategy in which in each page the items flow from top left to bottom right
+    // Example:
+    // ______________________
+    // | 1  2  3 | 10 11 12 |
+    // | 4  5  6 | 13 14    |
+    // | 7  8  9 |          |
+    // ----------------------
+    // NOTE: For this strategy to work properly and center the elements in each page, make sure that 
+    // the grid's left inset is zero. For example:
+    // gmGridView.minEdgeInsets = UIEdgeInsetsMake(6, 0, 0, 0);
+    // as well as that paging is enabled for this grid:
+    // gmGridView.pagingEnabled = YES;
+    GMGridViewLayoutHorizontalPagedLtr
 } GMGridViewLayoutStrategyType;
 
 
@@ -127,5 +140,22 @@ typedef enum {
 
 @end
 
+//////////////////////////////////////////////////////////////
+#pragma mark - Horizontal Paged LTR strategy
+//////////////////////////////////////////////////////////////
 
+@interface GMGridViewLayoutHorizontalPagedLtrStrategy : GMGridViewLayoutHorizontalStrategy <GMGridViewLayoutStrategy>
+{
+@protected
+    NSUInteger _numberOfPages;
+    NSUInteger _numberOfColumnsPerPage;
+    // left padding on each page. So that the content can be centered in the page
+    CGFloat _pagePaddingLeft;
+}
 
+@property (nonatomic, readonly) NSUInteger numberOfPages;
+@property (nonatomic, readonly) NSUInteger numberOfColumnsPerPage;
+- (NSUInteger) pageForContentOffset:(CGPoint)offset;
+- (CGPoint)originForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page;
+- (CGPoint)originForPage:(NSUInteger)page;
+@end

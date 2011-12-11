@@ -146,6 +146,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 @synthesize firstPositionLoaded = _firstPositionLoaded;
 @synthesize lastPositionLoaded = _lastPositionLoaded;
+@synthesize contentOffset;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors and destructor
@@ -318,6 +319,47 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
 }
 
+- (void)setPagingEnabled:(BOOL)pagingEnabled
+{
+  _scrollView.pagingEnabled = pagingEnabled;
+}
+
+- (BOOL)pagingEnabled
+{
+  return _scrollView.pagingEnabled;
+}
+
+- (CGPoint) contentOffset {
+  return _scrollView.contentOffset;
+}
+
+- (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated {
+  [_scrollView setContentOffset:offset animated:animated];
+}
+
+- (void)setShowsVerticalScrollIndicator:(BOOL)showsVerticalScroll {
+  _scrollView.showsVerticalScrollIndicator = showsVerticalScroll;
+}
+- (BOOL)showsVerticalScrollIndicator {
+  return _scrollView.showsVerticalScrollIndicator;
+}
+- (void)setShowsHorizontalScrollIndicator:(BOOL)showsHorizontalScrollIndicator {
+  _scrollView.showsHorizontalScrollIndicator = showsHorizontalScrollIndicator;
+}
+- (BOOL)showsHorizontalScrollIndicator {
+  return _scrollView.showsHorizontalScrollIndicator;
+}
+
+//////////////////////////////////////////////////////////////
+// Geometry
+//////////////////////////////////////////////////////////////
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view {
+  return [_scrollView convertPoint:point toView:view];
+}
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view {
+  return [_scrollView convertRect:rect toView:view];
+}
+
 //////////////////////////////////////////////////////////////
 #pragma mark UIScrollView delegate
 //////////////////////////////////////////////////////////////
@@ -325,6 +367,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [self loadRequiredItems];
+    if ([self.actionDelegate respondsToSelector:@selector(GMGridViewDidScroll:)]) {
+      [self.actionDelegate GMGridViewDidScroll:self];
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -962,7 +1007,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-    
+
     if (position != GMGV_INVALID_POSITION) 
     {
         [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];

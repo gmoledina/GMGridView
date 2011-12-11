@@ -71,7 +71,10 @@ typedef enum
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
-
+@property (nonatomic) BOOL pagingEnabled;                             // Default is NO
+@property (nonatomic) BOOL showsVerticalScrollIndicator;              // Default is YES
+@property (nonatomic) BOOL showsHorizontalScrollIndicator;            // Default is YES
+@property (nonatomic, readonly) CGPoint contentOffset;                // top-left offset of the visible content (within the internal scroll view)
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;
@@ -83,6 +86,14 @@ typedef enum
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 - (void)scrollToObjectAtIndex:(NSInteger)index;
+- (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated;
+
+// Geometry
+
+// converts a point, taking into account the internal scroll view
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view;
+// converts a rect, taking into account the internal scroll position
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view;
 
 @end
 
@@ -114,7 +125,9 @@ typedef enum
 
 @required
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
-
+@optional
+// tells the delegate that the scroll view just did scroll. similar in concept to [UIScrollView scrollViewDidScroll:]
+- (void)GMGridViewDidScroll:(GMGridView*)gridView;
 @end
 
 
