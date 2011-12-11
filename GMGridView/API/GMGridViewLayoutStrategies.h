@@ -35,7 +35,8 @@
 
 typedef enum {
     GMGridViewLayoutVertical = 0,
-    GMGridViewLayoutHorizontal
+    GMGridViewLayoutHorizontal,
+    GMGridViewLayoutHorizontalPaged
 } GMGridViewLayoutStrategyType;
 
 
@@ -56,6 +57,8 @@ typedef enum {
 //////////////////////////////////////////////////////////////
 
 @protocol GMGridViewLayoutStrategy <NSObject>
+
++ (BOOL)requiresEnablingPaging;
 
 - (GMGridViewLayoutStrategyType)type;
 
@@ -148,5 +151,23 @@ typedef enum {
 
 @end
 
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Horizontal strategy
+//////////////////////////////////////////////////////////////
+
+@interface GMGridViewLayoutHorizontalPagedStrategy : GMGridViewLayoutHorizontalStrategy <GMGridViewLayoutStrategy>
+{
+    @protected
+    NSInteger _numberOfItemsPerRow;
+    NSInteger _numberOfItemsPerPage;
+    NSInteger _numberOfPages;
+}
+
+@property (nonatomic, readonly) NSInteger numberOfItemsPerRow;
+@property (nonatomic, readonly) NSInteger numberOfItemsPerPage;
+@property (nonatomic, readonly) NSInteger numberOfPages;
+
+@end
 
 

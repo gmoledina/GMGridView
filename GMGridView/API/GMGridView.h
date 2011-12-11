@@ -82,7 +82,7 @@ typedef enum
 - (void)removeObjectAtIndex:(NSInteger)index;
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
-- (void)scrollToObjectAtIndex:(NSInteger)index;
+- (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
 

@@ -273,6 +273,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)setLayoutStrategy:(id<GMGridViewLayoutStrategy>)layoutStrategy
 {
     _layoutStrategy = layoutStrategy;
+    
+    _scrollView.pagingEnabled = [[self.layoutStrategy class] requiresEnablingPaging];
     [self setNeedsLayout];
 }
 
@@ -1073,8 +1075,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     CGSize contentSize = [self.layoutStrategy contentSize];
     
-    _minPossibleContentOffset = CGPointMake(-1 * (_scrollView.contentInset.left), 
-                                            -1 * (_scrollView.contentInset.top));
+    _minPossibleContentOffset = CGPointMake(0, 0);
     _maxPossibleContentOffset = CGPointMake(contentSize.width - _scrollView.bounds.size.width + _scrollView.contentInset.right, 
                                             contentSize.height - _scrollView.bounds.size.height + _scrollView.contentInset.bottom);
 
@@ -1270,12 +1271,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     currentView.tag = kTagOffset - 1;
     
-    // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [_scrollView scrollRectToVisible:cell.frame animated:NO];
+                         [self scrollToObjectAtIndex:index animated:NO];
                          currentView.alpha = 0;
                          cell.alpha = 1;
                      } 
@@ -1288,18 +1288,40 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setSubviewsCacheAsInvalid];
 }
 
-- (void)scrollToObjectAtIndex:(NSInteger)index
+- (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated
 {
-    NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index");
-    
+    index = MAX(0, index);
+    index = MIN(index, _numberTotalItems);
+
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
+    CGRect scrollToRect = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+    
+    if (_scrollView.pagingEnabled) 
+    {
+        CGPoint originScroll = CGPointZero;
+        
+        CGSize pageSize = CGSizeMake(_scrollView.bounds.size.width  - _scrollView.contentInset.left - _scrollView.contentInset.right, 
+                                     _scrollView.bounds.size.height - _scrollView.contentInset.top  - _scrollView.contentInset.bottom);
+        
+        while (originScroll.x + pageSize.width < origin.x) 
+        {
+            originScroll.x += pageSize.width;
+        }
+        
+        while (originScroll.y + pageSize.height < origin.y) 
+        {
+            originScroll.y += pageSize.height;
+        }
+        
+        scrollToRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
+    }
     
     // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
-    [UIView animateWithDuration:kDefaultAnimationDuration 
+    [UIView animateWithDuration:animated ? kDefaultAnimationDuration : 0
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [_scrollView scrollRectToVisible:CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height) animated:NO];
+                         [_scrollView scrollRectToVisible:scrollToRect animated:NO];
                      } 
                      completion:^(BOOL finished){
                      }
@@ -1311,12 +1333,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSAssert((index >= 0 && index <= _numberTotalItems), @"Invalid index specified");
     
     GMGridViewCell *cell = nil;
-    BOOL isInsertedObjectVisible = NO;
     
     if (index >= self.firstPositionLoaded && index <= self.lastPositionLoaded) 
-    {
-        isInsertedObjectVisible = YES;
-        
+    {        
         cell = [self newItemSubViewForPosition:index];
         
         for (int i = index; i < _numberTotalItems; i++)
@@ -1331,22 +1350,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _numberTotalItems++;
     [self recomputeSize];
     
-    // We cant use cell.frame as it might not be loaded yet
-    CGPoint newObjectOrigin = [self.layoutStrategy originForItemAtPosition:index];
-    
-    // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [_scrollView scrollRectToVisible:CGRectMake(newObjectOrigin.x, newObjectOrigin.y, _itemSize.width, _itemSize.height) animated:NO];
+                         [self scrollToObjectAtIndex:index animated:NO];
                      } 
                      completion:^(BOOL finished){
                          [self setNeedsLayout];
                      }
      ];
-    
-    
     
     [self setSubviewsCacheAsInvalid];
 }
@@ -1366,9 +1379,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     cell.tag = kTagOffset - 1;
     _numberTotalItems--;
     
-    CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
-    
-    // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
                         options:kDefaultAnimationOptions
@@ -1376,7 +1386,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          cell.contentView.alpha = 0.3;
                          cell.alpha = 0;
 
-                         [_scrollView scrollRectToVisible:CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height) animated:NO];
+                         [self scrollToObjectAtIndex:index animated:NO];
                          
                          [self recomputeSize];
                      } 
@@ -1424,11 +1434,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      animations:^{
                          if (!CGRectIntersectsRect(view2.frame, visibleRect)) 
                          {
-                             [_scrollView scrollRectToVisible:view1.frame animated:NO];
+                             [self scrollToObjectAtIndex:index1 animated:NO];
                          }
                          else if (!CGRectIntersectsRect(view1.frame, visibleRect)) 
                          {
-                             [_scrollView scrollRectToVisible:view2.frame animated:NO];
+                             [self scrollToObjectAtIndex:index2 animated:NO];
                          }
                      } 
                      completion:^(BOOL finished){
