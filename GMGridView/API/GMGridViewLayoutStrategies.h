@@ -36,8 +36,8 @@
 typedef enum {
     GMGridViewLayoutVertical = 0,
     GMGridViewLayoutHorizontal,
-    GMGridViewLayoutHorizontalPagedLTR,
-    GMGridViewLayoutHorizontalPagedTTB
+    GMGridViewLayoutHorizontalPagedLTR,   // LTR: left to right
+    GMGridViewLayoutHorizontalPagedTTB    // TTB: top to bottom
 } GMGridViewLayoutStrategyType;
 
 
@@ -168,7 +168,7 @@ typedef enum {
 @property (nonatomic, readonly) NSInteger numberOfPages;
 
 
-// These 3 methods can be implemented by child classes
+// Only these 3 methods have be reimplemented by child classes to change the LTR and TTB kind of behavior
 - (NSInteger)positionForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page;
 - (NSInteger)columnForItemAtPosition:(NSInteger)position;
 - (NSInteger)rowForItemAtPosition:(NSInteger)position;
