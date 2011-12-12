@@ -31,7 +31,6 @@
 
 @interface UIView (GMGridViewAdditions_Privates)
 
-- (void)shakeEnded:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context;
 
 @end
 
@@ -44,32 +43,22 @@
 {
     if (enabled) 
     {
-        CGFloat rotation = 4 * M_PI / 180;
+        CGFloat rotation = 0.03;
         
-        self.transform = CGAffineTransformMakeRotation(-1 * rotation);
+        CABasicAnimation *shake = [CABasicAnimation animationWithKeyPath:@"transform"];
+        shake.duration = 0.13;
+        shake.autoreverses = YES;
+        shake.repeatCount  = MAXFLOAT;
+        shake.removedOnCompletion = YES;
+        shake.fromValue = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform,-rotation, 0.0 ,0.0 ,1.0)];
+        shake.toValue   = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform, rotation, 0.0 ,0.0 ,1.0)];
         
-        [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationRepeatAutoreverses:YES];
-        [UIView setAnimationRepeatCount:MAXFLOAT];
-        [UIView setAnimationDuration:0.17];
-        [UIView setAnimationDelegate:self];
-        [UIView setAnimationDidStopSelector:@selector(shakeEnded:finished:context:)];
-        
-        self.transform = CGAffineTransformMakeRotation(rotation);
-        
-        [UIView commitAnimations];
+        [self.layer addAnimation:shake forKey:@"shakeAnimation"];
     }
     else
     {
-        [self.layer removeAllAnimations];
+        [self.layer removeAnimationForKey:@"shakeAnimation"];
     }
-}
-
-- (void)shakeEnded:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context 
-{
-    [UIView animateWithDuration:0.2 animations:^{
-        self.transform = CGAffineTransformIdentity;
-    }];
 }
 
 @end
