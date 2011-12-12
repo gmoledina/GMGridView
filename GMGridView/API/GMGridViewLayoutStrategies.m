@@ -43,12 +43,14 @@
         case GMGridViewLayoutVertical:
             strategy = [[GMGridViewLayoutVerticalStrategy alloc] init];
             break;
-        case GMGridViewLayoutHorizontalPaged:
-            strategy = [[GMGridViewLayoutHorizontalPagedStrategy alloc] init];
-            break;
         case GMGridViewLayoutHorizontal:
-        default:
             strategy = [[GMGridViewLayoutHorizontalStrategy alloc] init];
+            break;
+        case GMGridViewLayoutHorizontalPagedLTR:
+            strategy = [[GMGridViewLayoutHorizontalPagedLTRStrategy alloc] init];
+            break;
+        case GMGridViewLayoutHorizontalPagedTTB:
+            strategy = [[GMGridViewLayoutHorizontalPagedTTBStrategy alloc] init];
             break;
     }
     
@@ -76,7 +78,6 @@
 @synthesize itemCount     = _itemCount;
 @synthesize edgeInsets    = _edgeInsets;
 @synthesize gridBounds    = _gridBounds;
-@synthesize contentBounds = _contentBounds;
 @synthesize contentSize   = _contentSize;
 
 
@@ -165,12 +166,6 @@
                                ceil(numberOfRows * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
     
     [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
-    
-    _contentBounds = CGRectMake(actualBounds.origin.x + _edgeInsets.left, 
-                                actualBounds.origin.y + _edgeInsets.top, 
-                                actualBounds.size.width -_edgeInsets.left - _edgeInsets.right, 
-                                actualBounds.size.height - _edgeInsets.top - _edgeInsets.bottom);
-    
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -229,7 +224,7 @@
     
     CGFloat firstRow = MAX(0, (int)(contentOffset.y / itemHeight) - 1);
 
-    CGFloat lastRow = ceil((contentOffset.y + self.contentBounds.size.height) / itemHeight);
+    CGFloat lastRow = ceil((contentOffset.y + self.gridBounds.size.height) / itemHeight);
     
     NSInteger firstPosition = firstRow * self.numberOfItemsPerRow;
     NSInteger lastPosition  = ((lastRow + 1) * self.numberOfItemsPerRow);
@@ -287,11 +282,6 @@
                                ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
     
     [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
-    
-    _contentBounds = CGRectMake(actualBounds.origin.x + _edgeInsets.left, 
-                                actualBounds.origin.y + _edgeInsets.top, 
-                                actualBounds.size.width -_edgeInsets.left - _edgeInsets.right, 
-                                actualBounds.size.height - _edgeInsets.top - _edgeInsets.bottom);
 }
 
 - (CGPoint)originForItemAtPosition:(NSInteger)position
@@ -350,7 +340,7 @@
     
     CGFloat firstCol = MAX(0, (int)(contentOffset.x / itemWidth) - 1);
     
-    CGFloat lastCol = ceil((contentOffset.x + self.contentBounds.size.width) / itemWidth);
+    CGFloat lastCol = ceil((contentOffset.x + self.gridBounds.size.width) / itemWidth);
     
     NSInteger firstPosition = firstCol * self.numberOfItemsPerColumn;
     NSInteger lastPosition  = ((lastCol + 1) * self.numberOfItemsPerColumn);
@@ -378,24 +368,9 @@
     return YES;
 }
 
-- (id)init
-{
-    if ((self = [super init])) 
-    {
-        _type = GMGridViewLayoutHorizontalPaged;
-    }
-    
-    return self;
-}
-
 - (void)rebaseWithItemCount:(NSInteger)count insideOfBounds:(CGRect)bounds
 {
     [super rebaseWithItemCount:count insideOfBounds:bounds];
-    
-    CGRect actualBounds = CGRectMake(0, 
-                                     0, 
-                                     bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
-                                     bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
     
     _numberOfItemsPerRow = 1;
     
@@ -434,13 +409,6 @@
     
     _contentSize = CGSizeMake((onePageSize.width  + self.edgeInsets.left + self.edgeInsets.right) * self.numberOfPages, 
                               onePageSize.height + self.edgeInsets.top  + self.edgeInsets.bottom);
-    
-    _contentBounds = CGRectMake(actualBounds.origin.x + _edgeInsets.left, 
-                                actualBounds.origin.y + _edgeInsets.top, 
-                               actualBounds.size.width -_edgeInsets.left - _edgeInsets.right, 
-                                actualBounds.size.height - _edgeInsets.top - _edgeInsets.bottom);
-    
-    
 }
 
 - (NSInteger)pageForItemAtIndex:(NSInteger)index
@@ -460,19 +428,35 @@
                        y + offset.y);
 }
 
+- (NSInteger)positionForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page
+{
+    return column + row * self.numberOfItemsPerRow + (page * self.numberOfItemsPerPage); 
+}
+
+- (NSInteger)columnForItemAtPosition:(NSInteger)position
+{
+    position %= self.numberOfItemsPerPage;
+    return position % self.numberOfItemsPerRow;;
+}
+
+- (NSInteger)rowForItemAtPosition:(NSInteger)position
+{
+    position %= self.numberOfItemsPerPage;
+    return floor(position / self.numberOfItemsPerRow);
+}
+
 - (CGPoint)originForItemAtPosition:(NSInteger)position
 {
     NSUInteger page = [self pageForItemAtIndex:position];
     
     position %= self.numberOfItemsPerPage;
-    
-    NSUInteger column = position % self.numberOfItemsPerRow;
-    NSUInteger row = floor(position / self.numberOfItemsPerRow);
+        
+    NSUInteger row = [self rowForItemAtPosition:position];
+    NSUInteger column = [self columnForItemAtPosition:position];
     
     CGPoint origin = [self originForItemAtColumn:column row:row page:page];
     
     return origin;
-     
 }
 
 - (NSInteger)itemPositionFromLocation:(CGPoint)location
@@ -491,7 +475,7 @@
     int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
     int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
     
-    int position = col + row * self.numberOfItemsPerRow + (page * self.numberOfItemsPerPage);
+    int position = [self positionForItemAtColumn:col row:row page:page];
  
     if (position >= [self itemCount] || position < 0) 
     {
@@ -525,6 +509,65 @@
     NSInteger lastPosition  = MIN(firstPosition + 3 * self.numberOfItemsPerPage, self.itemCount);
     
     return NSMakeRange(firstPosition, (lastPosition - firstPosition));
+}
+
+@end
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark - 
+#pragma mark - HorizontalPagedLTR strategy implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutHorizontalPagedLTRStrategy
+
+- (id)init
+{
+    if ((self = [super init])) 
+    {
+        _type = GMGridViewLayoutHorizontalPagedLTR;
+    }
+    
+    return self;
+}
+
+// Nothing to change, LTR is already the behavior of the base class
+
+@end
+
+
+//////////////////////////////////////////////////////////////
+#pragma mark - 
+#pragma mark - HorizontalPagedRTL strategy implementation
+//////////////////////////////////////////////////////////////
+
+@implementation GMGridViewLayoutHorizontalPagedTTBStrategy
+
+- (id)init
+{
+    if ((self = [super init])) 
+    {
+        _type = GMGridViewLayoutHorizontalPagedTTB;
+    }
+    
+    return self;
+}
+
+- (NSInteger)positionForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page
+{
+    return row + column * self.numberOfItemsPerColumn + (page * self.numberOfItemsPerPage); 
+}
+
+- (NSInteger)columnForItemAtPosition:(NSInteger)position
+{
+    position %= self.numberOfItemsPerPage;
+    return floor(position / self.numberOfItemsPerColumn);
+}
+
+- (NSInteger)rowForItemAtPosition:(NSInteger)position
+{
+    position %= self.numberOfItemsPerPage;
+    return position % self.numberOfItemsPerColumn;
 }
 
 @end

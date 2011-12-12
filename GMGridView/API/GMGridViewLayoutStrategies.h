@@ -36,7 +36,8 @@
 typedef enum {
     GMGridViewLayoutVertical = 0,
     GMGridViewLayoutHorizontal,
-    GMGridViewLayoutHorizontalPaged
+    GMGridViewLayoutHorizontalPagedLTR,
+    GMGridViewLayoutHorizontalPagedTTB
 } GMGridViewLayoutStrategyType;
 
 
@@ -98,7 +99,6 @@ typedef enum {
     NSInteger _itemCount;
     UIEdgeInsets _edgeInsets;
     CGRect _gridBounds;
-    CGRect _contentBounds;
     CGSize _contentSize;
 }
 
@@ -112,7 +112,6 @@ typedef enum {
 @property (nonatomic, readonly) NSInteger itemCount;
 @property (nonatomic, readonly) UIEdgeInsets edgeInsets;
 @property (nonatomic, readonly) CGRect gridBounds;
-@property (nonatomic, readonly) CGRect contentBounds;
 @property (nonatomic, readonly) CGSize contentSize;
 
 // Protocol methods implemented in base class
@@ -153,10 +152,10 @@ typedef enum {
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark - Horizontal strategy
+#pragma mark - Horizontal Paged strategy (LTR behavior)
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewLayoutHorizontalPagedStrategy : GMGridViewLayoutHorizontalStrategy <GMGridViewLayoutStrategy>
+@interface GMGridViewLayoutHorizontalPagedStrategy : GMGridViewLayoutHorizontalStrategy
 {
     @protected
     NSInteger _numberOfItemsPerRow;
@@ -168,6 +167,27 @@ typedef enum {
 @property (nonatomic, readonly) NSInteger numberOfItemsPerPage;
 @property (nonatomic, readonly) NSInteger numberOfPages;
 
+
+// These 3 methods can be implemented by child classes
+- (NSInteger)positionForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page;
+- (NSInteger)columnForItemAtPosition:(NSInteger)position;
+- (NSInteger)rowForItemAtPosition:(NSInteger)position;
+
 @end
 
 
+//////////////////////////////////////////////////////////////
+#pragma mark - Horizontal Paged Left to Right strategy
+//////////////////////////////////////////////////////////////
+
+@interface GMGridViewLayoutHorizontalPagedLTRStrategy : GMGridViewLayoutHorizontalPagedStrategy
+
+@end
+
+//////////////////////////////////////////////////////////////
+#pragma mark - Horizontal Paged Top To Bottom strategy
+//////////////////////////////////////////////////////////////
+
+@interface GMGridViewLayoutHorizontalPagedTTBStrategy : GMGridViewLayoutHorizontalPagedStrategy
+
+@end

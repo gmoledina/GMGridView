@@ -242,7 +242,10 @@ typedef enum {
                 
                 switch ([self.gridView.layoutStrategy type]) 
                 {
-                    case GMGridViewLayoutHorizontalPaged:
+                    case GMGridViewLayoutHorizontalPagedTTB:
+                        [pickerView selectRow:3 inComponent:0 animated:YES];
+                        break;
+                    case GMGridViewLayoutHorizontalPagedLTR:
                         [pickerView selectRow:2 inComponent:0 animated:YES];
                         break;
                     case GMGridViewLayoutHorizontal:
@@ -378,7 +381,10 @@ typedef enum {
             self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal];
             break;
         case 2:
-            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontalPaged];
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontalPagedLTR];
+            break;
+        case 3:
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontalPagedTTB];
             break;
         case 0:
         default:
@@ -394,7 +400,7 @@ typedef enum {
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
 {
-    return 3;
+    return 4;
 }
 
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
@@ -409,7 +415,10 @@ typedef enum {
             title = @"Horizontal strategy";
             break;
         case 2:
-            title = @"Horizontal paged strategy";
+            title = @"Horizontal paged LTR strategy";
+            break;
+        case 3:
+            title = @"Horizontal paged TTB strategy";
             break;
         default:
             title = @"Unknown";
