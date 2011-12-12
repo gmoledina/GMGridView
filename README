@@ -15,9 +15,11 @@ It is important to use the dequeue method to reuse the cell.
 The best sorting style (swap or push) depends on personal taste and the frame of the grid; you can choose the one that suits you best.
 Same applies to the layout strategy (vertical, horizontal, paged,... and more to come).
 
-Many working examples provided in the demo app!
+Many working examples provided in the demo app.
 All the files in the API folder are required. You only need to deal with 2 header files though (the grid and the cell).
 
+Let me know how this component works out for you!
+New feature requests are welcome.
 
 ---
 
@@ -26,6 +28,7 @@ Fresh from the baking oven:
 
 Coming soon:
 - Changing the zoom scale dynamically (when pinching to go fullscreen)
+- API for adding a pageControl
 - More customization options
 - Support for iOS 4
 
