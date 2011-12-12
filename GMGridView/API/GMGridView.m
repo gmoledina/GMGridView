@@ -203,8 +203,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
         ////////////////////////
         // Gesture dependencies
-        [_scrollView.panGestureRecognizer setMaximumNumberOfTouches:1];
-        [_scrollView.panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
+        UIPanGestureRecognizer *panGestureRecognizer = nil;
+        if ([_scrollView respondsToSelector:@selector(panGestureRecognizer)]) { // iOS5 only
+            panGestureRecognizer = _scrollView.panGestureRecognizer;
+        }else {
+            for (UIGestureRecognizer *gestureRecognizer in _scrollView.gestureRecognizers) {     
+                if ([gestureRecognizer  isKindOfClass:[UIPanGestureRecognizer class]]) {
+                    panGestureRecognizer = (UIPanGestureRecognizer *) gestureRecognizer;
+                }
+            }
+        }
+        [panGestureRecognizer setMaximumNumberOfTouches:1];
+        [panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
         
         self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
         
@@ -1000,7 +1010,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     cell.tag = position + kTagOffset;
     cell.editing = self.editing;
     
-    __weak GMGridView *weakSelf = self; 
+    __gm_weak GMGridView *weakSelf = self; 
     
     cell.deleteBlock = ^(GMGridViewCell *cell)
     {

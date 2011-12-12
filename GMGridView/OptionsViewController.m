@@ -54,7 +54,7 @@ typedef enum {
 
 @interface OptionsViewController () <UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource>
 {
-    __weak UITableView *_tableView;
+    __gm_weak UITableView *_tableView;
 }
 
 - (void)editingSwitchChanged:(UISwitch *)control;

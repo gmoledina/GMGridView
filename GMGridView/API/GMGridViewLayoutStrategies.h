@@ -46,7 +46,7 @@ typedef enum {
 #pragma mark - Strategy Factory
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewLayoutStrategyFactory
+@interface GMGridViewLayoutStrategyFactory : NSObject
 
 + (id<GMGridViewLayoutStrategy>)strategyFromType:(GMGridViewLayoutStrategyType)type;
 
