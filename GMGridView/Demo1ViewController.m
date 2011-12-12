@@ -20,7 +20,7 @@
 
 @interface Demo1ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate, GMGridViewActionDelegate>
 {
-    __weak GMGridView *_gmGridView;
+    __gm_weak GMGridView *_gmGridView;
     UINavigationController *_optionsNav;
     UIPopoverController *_optionsPopOver;
     
@@ -62,15 +62,21 @@
         space2.width = 10;
         
         UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshItem)];
-
-        self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:addButton, space, removeButton, space2, refreshButton, nil];
         
+        if ([self.navigationItem respondsToSelector:@selector(leftBarButtonItems)]) {
+            self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:addButton, space, removeButton, space2, refreshButton, nil];
+        }else {
+            self.navigationItem.leftBarButtonItem = addButton;
+        }
         
         UIBarButtonItem *optionsButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(presentOptions:)];
         
-        self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:optionsButton, nil];
+        if ([self.navigationItem respondsToSelector:@selector(rightBarButtonItems)]) {
+            self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:optionsButton, nil];
+        }else {
+            self.navigationItem.rightBarButtonItem = optionsButton;
+        }
         
-                
         _data = [[NSMutableArray alloc] init];
         
         for (int i = 0; i < NUMBER_ITEMS_ON_LOAD; i ++) 
@@ -108,7 +114,7 @@
     _gmGridView.sortingDelegate = self;
     _gmGridView.transformDelegate = self;
     _gmGridView.dataSource = self;
-        
+    
     UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoDark];
     infoButton.frame = CGRectMake(self.view.bounds.size.width - 40, 
                                   self.view.bounds.size.height - 40, 
@@ -117,7 +123,7 @@
     infoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
     [infoButton addTarget:self action:@selector(presentInfo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:infoButton];
-
+    
     
     OptionsViewController *optionsController = [[OptionsViewController alloc] init];
     optionsController.gridView = gmGridView;
@@ -125,11 +131,11 @@
     
     _optionsNav = [[UINavigationController alloc] initWithRootViewController:optionsController];
     
-     if (INTERFACE_IS_PHONE)
-     {
-         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(optionsDoneAction)];
-         optionsController.navigationItem.rightBarButtonItem = doneButton;
-     }
+    if (INTERFACE_IS_PHONE)
+    {
+        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(optionsDoneAction)];
+        optionsController.navigationItem.rightBarButtonItem = doneButton;
+    }
 }
 
 - (void)viewDidLoad
