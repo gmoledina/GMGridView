@@ -34,7 +34,7 @@
 
 static const NSUInteger kTagOffset = 50;
 static const CGFloat kDefaultAnimationDuration = 0.3;
-static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOptionBeginFromCurrentState;
+static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction;
 
 
 //////////////////////////////////////////////////////////////
@@ -520,7 +520,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         {
             [UIView animateWithDuration:kDefaultAnimationDuration 
                                   delay:0
-                                options:kDefaultAnimationOptions | UIViewAnimationOptionAllowUserInteraction
+                                options:kDefaultAnimationOptions
                              animations:^{
                                  _scrollView.contentOffset = offset;
                              }
@@ -594,7 +594,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
-                        options:0
+                        options:kDefaultAnimationOptions
                      animations:^{
                          _sortMovingItem.transform = CGAffineTransformIdentity;
                          _sortMovingItem.frame = newFrame;
@@ -902,9 +902,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.9];
             
             _transformingItem.fullSizeView.transform =  CGAffineTransformMakeRotation(rotationValue);
-            [UIView animateWithDuration:kDefaultAnimationDuration animations:^{
-                _transformingItem.fullSizeView.transform = CGAffineTransformIdentity;
-            }];
+                        
+            [UIView animateWithDuration:kDefaultAnimationDuration 
+                                  delay:0
+                                options:kDefaultAnimationOptions
+                             animations:^{
+                                 _transformingItem.fullSizeView.transform = CGAffineTransformIdentity;
+                             }
+                             completion:nil
+             ];
             
             _inFullSizeMode = YES;
             
@@ -1000,7 +1006,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     // To make sure the frame is not animated
     [UIView animateWithDuration:0 
                           delay:0 
-                        options:UIViewAnimationOptionOverrideInheritedDuration 
+                        options:kDefaultAnimationOptions | UIViewAnimationOptionOverrideInheritedDuration 
                      animations:^{
                          cell.frame = frame;
                          cell.contentView.frame = cell.bounds;
@@ -1091,7 +1097,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0 
-                        options:kDefaultAnimationOptions | UIViewAnimationOptionAllowUserInteraction 
+                        options:kDefaultAnimationOptions 
                      animations:^{
                          if (!CGSizeEqualToSize(_scrollView.contentSize, contentSize)) 
                          {
