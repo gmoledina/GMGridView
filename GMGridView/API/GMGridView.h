@@ -65,7 +65,7 @@ typedef enum
 @property (nonatomic, getter=isEditing) BOOL editing; // Default is NO - When set to YES, all gestures are disabled and delete buttons shows up on cells
 
 // Customizing Options
-@property (nonatomic, gm_weak) UIView *mainSuperView;                    // Default is self
+@property (nonatomic, gm_weak) UIView *mainSuperView;                 // Default is self
 @property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
 @property (nonatomic) NSInteger itemSpacing;                          // Default is 10
 @property (nonatomic) BOOL centerGrid;                                // Default is YES
@@ -74,6 +74,8 @@ typedef enum
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 @property (nonatomic) BOOL showsVerticalScrollIndicator;              // Default is YES
 @property (nonatomic) BOOL showsHorizontalScrollIndicator;            // Default is YES
+
+@property (nonatomic, strong) UIScrollView *scrollView;
 
 
 // Reusable cells
