@@ -204,11 +204,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         ////////////////////////
         // Gesture dependencies
         UIPanGestureRecognizer *panGestureRecognizer = nil;
-        if ([_scrollView respondsToSelector:@selector(panGestureRecognizer)]) { // iOS5 only
+        if ([_scrollView respondsToSelector:@selector(panGestureRecognizer)]) // iOS5 only
+        { 
             panGestureRecognizer = _scrollView.panGestureRecognizer;
-        }else {
-            for (UIGestureRecognizer *gestureRecognizer in _scrollView.gestureRecognizers) {     
-                if ([gestureRecognizer  isKindOfClass:[UIPanGestureRecognizer class]]) {
+        }
+        else 
+        {
+            for (UIGestureRecognizer *gestureRecognizer in _scrollView.gestureRecognizers) 
+            { 
+                if ([gestureRecognizer  isKindOfClass:NSClassFromString(@"UIScrollViewPanGestureRecognizer")]) 
+                {
                     panGestureRecognizer = (UIPanGestureRecognizer *) gestureRecognizer;
                 }
             }
@@ -594,7 +599,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
-                        options:kDefaultAnimationOptions
+                        options:0
                      animations:^{
                          _sortMovingItem.transform = CGAffineTransformIdentity;
                          _sortMovingItem.frame = newFrame;
