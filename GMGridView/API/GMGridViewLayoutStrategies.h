@@ -27,6 +27,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "GMGridView-Constants.h"
 
 @protocol GMGridViewLayoutStrategy;
