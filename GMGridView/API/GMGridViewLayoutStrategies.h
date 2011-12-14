@@ -27,6 +27,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #define GMGV_INVALID_POSITION -1
 
