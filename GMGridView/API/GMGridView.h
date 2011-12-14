@@ -79,6 +79,9 @@ typedef enum
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;
 
+// Cells
+- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;
+
 // Actions
 - (void)reloadData;
 - (void)insertObjectAtIndex:(NSInteger)index;
