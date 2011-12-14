@@ -104,7 +104,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 // Helpers & more
 - (void)recomputeSize;
-- (void)relayoutItems;
+- (void)relayoutItemsAnimated:(BOOL)animated;
 - (NSArray *)itemSubviews;
 - (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position;
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position;
@@ -263,7 +263,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [super layoutSubviews];
     
     [self recomputeSize];
-    [self relayoutItems];
+    [self relayoutItemsAnimated:NO];
     [self loadRequiredItems];
     
     [_scrollView flashScrollIndicators];
@@ -687,7 +687,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                     }
                     
                     [self.sortingDelegate GMGridView:self moveItemAtIndex:_sortFuturePosition toIndex:position];
-                    [self relayoutItems];
+                    [self relayoutItemsAnimated:YES];
                     
                     break;
                 }
@@ -1029,24 +1029,17 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
     CGRect frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     
-    // To make sure the frame is not animated
-    [UIView animateWithDuration:0 
-                          delay:0 
-                        options:kDefaultAnimationOptions | UIViewAnimationOptionOverrideInheritedDuration 
-                     animations:^{
-                         cell.frame = frame;
-                         cell.contentView.frame = cell.bounds;
-                     } 
-                     completion:nil];
+    cell.frame = frame;
+    cell.contentView.frame = cell.bounds;
     
     cell.tag = position + kTagOffset;
     cell.editing = self.editing;
     
     __gm_weak GMGridView *weakSelf = self; 
-
-    cell.deleteBlock = ^(GMGridViewCell *cell)
+    
+    cell.deleteBlock = ^(GMGridViewCell *aCell)
     {
-        NSInteger index = [weakSelf positionForItemSubview:cell];
+        NSInteger index = [weakSelf positionForItemSubview:aCell];
         if (index != GMGV_INVALID_POSITION) 
         {
             [weakSelf.dataSource GMGridView:self deleteItemAtIndex:index];
@@ -1133,31 +1126,38 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      completion:nil];
 }
 
-- (void)relayoutItems
+- (void)relayoutItemsAnimated:(BOOL)animated
 {    
-    [UIView animateWithDuration:kDefaultAnimationDuration 
-                          delay:0
-                        options:kDefaultAnimationOptions
-                     animations:^{
-                         
-                         for (UIView *view in [self itemSubviews])
-                         {        
-                             if (view != _sortMovingItem && view != _transformingItem) 
-                             {
-                                 NSInteger index = view.tag - kTagOffset;
-                                 CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
-                                 CGRect newFrame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-                                 
-                                 // IF statement added for performance reasons (Time Profiling in instruments)
-                                 if (!CGRectEqualToRect(newFrame, view.frame)) 
-                                 {
-                                     view.frame = newFrame;
-                                 }
-                             }
+    void (^layoutBlock)(void) = ^{
+        for (UIView *view in [self itemSubviews])
+        {        
+            if (view != _sortMovingItem && view != _transformingItem) 
+            {
+                NSInteger index = view.tag - kTagOffset;
+                CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
+                CGRect newFrame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+                
+                // IF statement added for performance reasons (Time Profiling in instruments)
+                if (!CGRectEqualToRect(newFrame, view.frame)) 
+                {
+                    view.frame = newFrame;
+                }
+            }
+        }
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:kDefaultAnimationDuration 
+                              delay:0
+                            options:kDefaultAnimationOptions
+                         animations:^{
+                             layoutBlock();
                          }
-                     }
-                     completion:nil
-     ];
+                         completion:nil
+         ];
+    }else {
+        layoutBlock();
+    }
 }
 
 
@@ -1439,7 +1439,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          
                          self.firstPositionLoaded = self.lastPositionLoaded = GMGV_INVALID_POSITION;
                          [self loadRequiredItems];
-                         [self relayoutItems];
+                         [self relayoutItemsAnimated:YES];
                      }
      ];
     
