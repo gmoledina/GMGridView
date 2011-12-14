@@ -1247,6 +1247,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)reloadData
 {
+    CGPoint previousContentOffset = _scrollView.contentOffset;
+    
     [[self itemSubviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop){
         [(UIView *)obj removeFromSuperview];
     }];
@@ -1261,7 +1263,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _numberTotalItems = numberItems;
     
     [self recomputeSize];
-    _scrollView.contentOffset = _minPossibleContentOffset;
+    
+    CGPoint newContentOffset = CGPointMake(MIN(_maxPossibleContentOffset.x, previousContentOffset.x), MIN(_maxPossibleContentOffset.y, previousContentOffset.y));
+    newContentOffset = CGPointMake(MAX(newContentOffset.x, _minPossibleContentOffset.x), MAX(newContentOffset.y, _minPossibleContentOffset.y));
+                                        
+    _scrollView.contentOffset = newContentOffset;
     
     [self loadRequiredItems];
     
