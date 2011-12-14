@@ -26,7 +26,7 @@
 //  THE SOFTWARE.
 //
 
-#import <Quartzcore/QuartzCore.h>
+#import <QuartzCore/QuartzCore.h>
 #import "GMGridView.h"
 #import "GMGridViewCell+Extended.h"
 #import "GMGridViewLayoutStrategies.h"
@@ -174,7 +174,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         /////////////////////////////
         // Transformation gestures :
-        
         _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
         _pinchGesture.delegate = self;
         [self addGestureRecognizer:_pinchGesture];
@@ -220,7 +219,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         }
         [panGestureRecognizer setMaximumNumberOfTouches:1];
         [panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
-        
+
         self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
         
         self.mainSuperView = self;
@@ -265,8 +264,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self recomputeSize];
     [self relayoutItemsAnimated:NO];
     [self loadRequiredItems];
-    
-    [_scrollView flashScrollIndicators];
 }
 
 
