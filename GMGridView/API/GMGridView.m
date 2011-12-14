@@ -75,6 +75,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGFloat _lastRotation;
     CGFloat _lastScale;
     BOOL _inFullSizeMode;
+    BOOL _rotationActive;
 }
 
 @property (nonatomic, readonly) BOOL itemsSubviewsCacheIsValid;
@@ -118,6 +119,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 // Memory warning
 - (void)receivedMemoryWarningNotification:(NSNotification *)notification;
+
+// Rotation handling
+- (void)willRotate:(NSNotification *)notification;
 
 @end
 
@@ -243,6 +247,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         _reusableCells = [[NSMutableSet alloc] init];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
     }
     return self;
 }
@@ -251,6 +256,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
 }
 
 //////////////////////////////////////////////////////////////
@@ -261,11 +267,32 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     [super layoutSubviews];
     
-    [self recomputeSize];
-    [self relayoutItemsAnimated:NO];
-    [self loadRequiredItems];
+    void (^layoutBlock)(void) = ^{
+        [self recomputeSize];
+        [self relayoutItemsAnimated:NO];
+        [self loadRequiredItems];
+    };
+    
+    if (_rotationActive) {
+        CATransition *transition = [CATransition animation];
+        transition.duration = 0.25f;
+        transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        transition.type = kCATransitionFade;
+        [_scrollView.layer addAnimation:transition forKey:@"rotationAnimation"];
+        _rotationActive = NO;
+        
+        [UIView animateWithDuration:0 
+                              delay:0
+                            options:UIViewAnimationOptionOverrideInheritedDuration
+                         animations:^{
+                             layoutBlock();
+                         }
+                         completion:nil
+         ];
+    }else {
+        layoutBlock();
+    }
 }
-
 
 //////////////////////////////////////////////////////////////
 #pragma mark Setters / getters
@@ -1267,6 +1294,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [_reusableCells removeAllObjects];
 }
 
+- (void)willRotate:(NSNotification *)notification
+{
+    _rotationActive = YES;
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark public methods
