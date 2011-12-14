@@ -15,11 +15,11 @@
 
 @interface Demo2ViewController () <GMGridViewDataSource, GMGridViewSortingDelegate, GMGridViewTransformationDelegate>
 {
-    __weak GMGridView *_gmGridView1;
-    __weak GMGridView *_gmGridView2;
+    __gm_weak GMGridView *_gmGridView1;
+    __gm_weak GMGridView *_gmGridView2;
     
-    __weak UIButton *_buttonOptionsGrid1;
-    __weak UIButton *_buttonOptionsGrid2;
+    __gm_weak UIButton *_buttonOptionsGrid1;
+    __gm_weak UIButton *_buttonOptionsGrid2;
     
     UIPopoverController *_popOverController;
     UIViewController *_optionsController1;

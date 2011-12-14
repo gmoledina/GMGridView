@@ -27,6 +27,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #define GMGV_INVALID_POSITION -1
 
@@ -46,7 +47,7 @@ typedef enum {
 #pragma mark - Strategy Factory
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewLayoutStrategyFactory
+@interface GMGridViewLayoutStrategyFactory : NSObject
 
 + (id<GMGridViewLayoutStrategy>)strategyFromType:(GMGridViewLayoutStrategyType)type;
 
