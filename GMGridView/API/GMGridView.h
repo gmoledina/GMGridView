@@ -29,7 +29,7 @@
 #import <UIKit/UIKit.h>
 
 // use special weak keyword
-#if !defined gm_weak && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0
+#if !defined gm_weak && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 && !defined (GM_DONT_USE_ARC_WEAK_FEATURE)
 #define gm_weak weak
 #define __gm_weak __weak
 #define gm_nil(x)
