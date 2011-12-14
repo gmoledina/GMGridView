@@ -106,7 +106,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)recomputeSize;
 - (void)relayoutItemsAnimated:(BOOL)animated;
 - (NSArray *)itemSubviews;
-- (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position;
+- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position;
 - (NSInteger)positionForItemSubview:(GMGridViewCell *)view;
 - (void)setSubviewsCacheAsInvalid;
@@ -550,7 +550,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:point];
     
-    GMGridViewCell *item = [self itemSubViewForPosition:position];
+    GMGridViewCell *item = [self cellForItemAtIndex:position];
     
     [_scrollView bringSubviewToFront:item];
     _sortMovingItem = item;
@@ -672,7 +672,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 {
                     if (_sortMovingItem) 
                     {
-                        UIView *v = [self itemSubViewForPosition:position];
+                        UIView *v = [self cellForItemAtIndex:position];
                                                 
                         v.tag = _sortFuturePosition + kTagOffset;
                         CGPoint origin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
@@ -859,7 +859,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {        
         CGPoint locationTouch = [gesture locationOfTouch:0 inView:_scrollView];            
         NSInteger positionTouch = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-        _transformingItem = [self itemSubViewForPosition:positionTouch];
+        _transformingItem = [self cellForItemAtIndex:positionTouch];
         
         CGRect frameInMainView = [_scrollView convertRect:_transformingItem.frame toView:self.mainSuperView];
         
@@ -1052,7 +1052,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return subviews;
 }
 
-- (GMGridViewCell *)itemSubViewForPosition:(NSInteger)position
+- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position
 {
     GMGridViewCell *view = nil;
     
@@ -1150,7 +1150,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         if ((forceLoad || !NSLocationInRange(positionToLoad, loadedPositionsRange)) && positionToLoad < _numberTotalItems) 
         {
-            if (![self itemSubViewForPosition:positionToLoad]) 
+            if (![self cellForItemAtIndex:positionToLoad]) 
             {
                 GMGridViewCell *cell = [self newItemSubViewForPosition:positionToLoad];
                 [_scrollView addSubview:cell];
@@ -1178,7 +1178,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         {
             for (int i = self.firstPositionLoaded; i < rangeOfPositions.location; i++) 
             {
-                cell = [self itemSubViewForPosition:i];
+                cell = [self cellForItemAtIndex:i];
                 if(cell)
                 {
                     //NSLog(@"Removing item at position %d", i);
@@ -1195,7 +1195,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         {
             for (int i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
             {
-                cell = [self itemSubViewForPosition:i];
+                cell = [self cellForItemAtIndex:i];
                 if(cell)
                 {
                     //NSLog(@"Removing item at position %d", i);
@@ -1273,7 +1273,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {    
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index");
     
-    UIView *currentView = [self itemSubViewForPosition:index];
+    UIView *currentView = [self cellForItemAtIndex:index];
     
     GMGridViewCell *cell = [self newItemSubViewForPosition:index];
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
@@ -1352,7 +1352,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         for (int i = index; i < _numberTotalItems; i++)
         {
-            UIView *oldView = [self itemSubViewForPosition:i];
+            UIView *oldView = [self cellForItemAtIndex:i];
             oldView.tag = oldView.tag + 1;
         }
         
@@ -1380,11 +1380,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index specified");
 
-    GMGridViewCell *cell = [self itemSubViewForPosition:index];
+    GMGridViewCell *cell = [self cellForItemAtIndex:index];
     
     for (int i = index + 1; i < _numberTotalItems; i++)
     {
-        GMGridViewCell *oldView = [self itemSubViewForPosition:i];
+        GMGridViewCell *oldView = [self cellForItemAtIndex:i];
         oldView.tag = oldView.tag - 1;
     }
     
@@ -1421,8 +1421,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSAssert((index1 >= 0 && index1 < _numberTotalItems), @"Invalid index1 specified");
     NSAssert((index2 >= 0 && index2 < _numberTotalItems), @"Invalid index2 specified");
         
-    GMGridViewCell *view1 = [self itemSubViewForPosition:index1];
-    GMGridViewCell *view2 = [self itemSubViewForPosition:index2];
+    GMGridViewCell *view1 = [self cellForItemAtIndex:index1];
+    GMGridViewCell *view2 = [self cellForItemAtIndex:index2];
     
     view1.tag = index2 + kTagOffset;
     view2.tag = index1 + kTagOffset;
