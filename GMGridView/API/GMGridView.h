@@ -27,18 +27,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-// use special weak keyword
-#if !defined gm_weak && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0
-#define gm_weak weak
-#define __gm_weak __weak
-#define gm_nil(x)
-#elif !defined gm_weak
-#define gm_weak unsafe_unretained
-#define __gm_weak __unsafe_unretained
-#define gm_nil(x) x = nil
-#endif
-
+#import "GMGridView-Constants.h"
 #import "GMGridViewCell.h"
 
 @protocol GMGridViewDataSource;

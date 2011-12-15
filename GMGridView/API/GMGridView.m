@@ -1043,7 +1043,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     cell.editing = self.editing;
     
     __gm_weak GMGridView *weakSelf = self; 
-    
+
     cell.deleteBlock = ^(GMGridViewCell *cell)
     {
         NSInteger index = [weakSelf positionForItemSubview:cell];

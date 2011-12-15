@@ -27,8 +27,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#define GMGV_INVALID_POSITION -1
+#import "GMGridView-Constants.h"
 
 @protocol GMGridViewLayoutStrategy;
 

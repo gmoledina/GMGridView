@@ -27,6 +27,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GMGridView-Constants.h"
 
 @interface UIGestureRecognizer (GMGridViewAdditions)
 

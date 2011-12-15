@@ -1,12 +1,12 @@
 //
-//  GMGridViewCell.h
+//  GMGridView-Constants.h
 //  GMGridView
 //
-//  Created by Gulam Moledina on 11-10-22.
+//  Created by Gulam Moledina on 11-12-14.
 //  Copyright (c) 2011 GMoledina.ca. All rights reserved.
 //
 //  Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
-//
+// 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
@@ -26,17 +26,37 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
-#import "GMGridView-Constants.h"
 
-@interface GMGridViewCell : UIView
-{
-    
-}
-
-@property (nonatomic, strong) UIView *contentView;         // The contentView - default is nil
-@property (nonatomic, strong) UIImage *deleteButtonIcon;   // Delete button image
-@property (nonatomic) CGPoint deleteButtonOffset;          // Delete button offset relative to the origin
+#ifndef GMGridView_GMGridView_Constants_h
+#define GMGridView_GMGridView_Constants_h
 
 
-@end
+//
+// ARC on iOS 4 and 5 
+//
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0
+
+#define gm_weak   weak
+#define __gm_weak __weak
+#define gm_nil(x)
+
+#else
+
+#define gm_weak   unsafe_unretained
+#define __gm_weak __unsafe_unretained
+#define gm_nil(x) x = nil
+
+#endif
+
+
+//
+// Code specific
+//
+
+#define GMGV_INVALID_POSITION -1
+
+
+
+
+#endif

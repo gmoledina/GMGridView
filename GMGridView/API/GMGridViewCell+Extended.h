@@ -27,6 +27,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "GMGridView-Constants.h"
 #import "GMGridView.h"
 #import "GMGridViewCell.h"
 

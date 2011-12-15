@@ -86,7 +86,13 @@
         
     }
     
+    NSLog(@"Init");
     return self;
+}
+
+- (void)dealloc
+{
+    NSLog(@"Dealloc");
 }
 
 //////////////////////////////////////////////////////////////
@@ -136,14 +142,24 @@
         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(optionsDoneAction)];
         optionsController.navigationItem.rightBarButtonItem = doneButton;
     }
+    
+    NSLog(@"loadview");
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     _gmGridView.mainSuperView = self.navigationController.view; //[UIApplication sharedApplication].keyWindow.rootViewController.view;
+    NSLog(@"Viewdidload");
 }
 
+
+- (void)viewDidUnload
+{
+    [super viewDidUnload];
+    _gmGridView = nil;
+    NSLog(@"View did unload");
+}
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
