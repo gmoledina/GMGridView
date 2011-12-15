@@ -1058,8 +1058,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
     CGRect frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     
-    cell.frame = frame;
-    cell.contentView.frame = cell.bounds;
+    // To make sure the frame is not animated
+    [UIView animateWithDuration:0 
+                          delay:0 
+                        options:kDefaultAnimationOptions | UIViewAnimationOptionOverrideInheritedDuration 
+                     animations:^{
+                         cell.frame = frame;
+                         cell.contentView.frame = cell.bounds;
+                     } 
+                     completion:nil];
     
     cell.tag = position + kTagOffset;
     cell.editing = self.editing;
