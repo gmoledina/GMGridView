@@ -274,7 +274,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self loadRequiredItems];
     };
     
-    if (_rotationActive) {
+    if (_rotationActive) 
+    {
         CATransition *transition = [CATransition animation];
         transition.duration = 0.25f;
         transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
@@ -290,7 +291,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          }
                          completion:nil
          ];
-    }else {
+    }
+    else 
+    {
         layoutBlock();
     }
 }
