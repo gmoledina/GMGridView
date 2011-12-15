@@ -175,6 +175,7 @@
                      } 
                      completion:nil];
     
+    self.contentView.userInteractionEnabled = !editing;
     [self shakeStatus:editing];
 }
 

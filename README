@@ -24,6 +24,7 @@ New feature requests are welcome.
 ---
 
 Fresh from the baking oven:
+- Support for iOS 4
 - Paging!! 2 horizontally paged layout strategies added
 - shaking animation on items when in edit mode
 
@@ -31,13 +32,12 @@ Coming soon:
 - Changing the zoom scale dynamically (when pinching to go fullscreen)
 - API for adding a pageControl
 - More customization options
-- Support for iOS 4
 
 ---
 
 Requirements:
-- iOS 5 (to access the UIScrollView gestureRecognizers)
-- ARC (Automatic Reference Counting)
+- iOS 4 and up
+- ARC (Automatic Reference Counting) enabled
 - Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
 
 Features - General:
