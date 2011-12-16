@@ -27,6 +27,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "GMGridView-Constants.h"
+#import "GMGridView.h"
 #import "GMGridViewCell.h"
 
 typedef void (^GMGridViewCellDeleteBlock)(GMGridViewCell*);
@@ -51,7 +53,7 @@ typedef void (^GMGridViewCellDeleteBlock)(GMGridViewCell*);
 @property (nonatomic, copy) GMGridViewCellDeleteBlock deleteBlock;
 
 @property (nonatomic, assign) UIViewAutoresizing defaultFullsizeViewResizingMask;
-@property (nonatomic, weak) UIButton *deleteButton;
+@property (nonatomic, gm_weak) UIButton *deleteButton;
 
 
 - (void)prepareForReuse;

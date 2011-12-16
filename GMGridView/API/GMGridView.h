@@ -27,6 +27,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GMGridView-Constants.h"
 #import "GMGridViewCell.h"
 
 @protocol GMGridViewDataSource;
@@ -52,10 +53,10 @@ typedef enum
 }
 
 // Delegates
-@property (nonatomic, weak) IBOutlet NSObject<GMGridViewDataSource> *dataSource;                    // Required
-@property (nonatomic, weak) IBOutlet NSObject<GMGridViewActionDelegate> *actionDelegate;            // Optional - to get taps callback
-@property (nonatomic, weak) IBOutlet NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Optional - to enable sorting
-@property (nonatomic, weak) IBOutlet NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Optional - to enable fullsize mode
+@property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewDataSource> *dataSource;                    // Required
+@property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewActionDelegate> *actionDelegate;            // Optional - to get taps callback
+@property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Optional - to enable sorting
+@property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Optional - to enable fullsize mode
 
 // Layout Strategy
 @property (nonatomic, strong) id<GMGridViewLayoutStrategy> layoutStrategy; // Default is GMGridViewLayoutVerticalStrategy
@@ -64,17 +65,26 @@ typedef enum
 @property (nonatomic, getter=isEditing) BOOL editing; // Default is NO - When set to YES, all gestures are disabled and delete buttons shows up on cells
 
 // Customizing Options
-@property (nonatomic, weak) UIView *mainSuperView;                    // Default is self
+@property (nonatomic, gm_weak) UIView *mainSuperView;                 // Default is self
 @property (nonatomic) GMGridViewStyle style;                          // Default is GMGridViewStyleSwap
 @property (nonatomic) NSInteger itemSpacing;                          // Default is 10
 @property (nonatomic) BOOL centerGrid;                                // Default is YES
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
+@property (nonatomic) BOOL showsVerticalScrollIndicator;              // Default is YES
+@property (nonatomic) BOOL showsHorizontalScrollIndicator;            // Default is YES
+
+@property (nonatomic, readonly) UIScrollView *scrollView;             // Messing with the scrollView can lead to unexpected behavior. Avoid changing any properties
+                                                                      // or changing its delegate. You have been warned.
+
 
 
 // Reusable cells
-- (GMGridViewCell *)dequeueReusableCell;
+- (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
+
+// Cells
+- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded for the specific index
 
 // Actions
 - (void)reloadData;
@@ -82,7 +92,7 @@ typedef enum
 - (void)removeObjectAtIndex:(NSInteger)index;
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
-- (void)scrollToObjectAtIndex:(NSInteger)index;
+- (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
 
@@ -146,8 +156,8 @@ typedef enum
 
 @required
 // Fullsize
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell;
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell;
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
+- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
 
 // Transformation (pinch, drag, rotate) of the item
 @optional

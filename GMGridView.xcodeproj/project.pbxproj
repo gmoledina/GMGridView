@@ -53,6 +53,7 @@
 		169AE3771460E1B300C0CBCD /* OptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OptionsViewController.m; path = GMGridView/OptionsViewController.m; sourceTree = SOURCE_ROOT; };
 		16A0D02E145342F8004D7BBC /* GMGridViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewCell.h; path = GMGridView/API/GMGridViewCell.h; sourceTree = SOURCE_ROOT; };
 		16A0D02F145342F8004D7BBC /* GMGridViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewCell.m; path = GMGridView/API/GMGridViewCell.m; sourceTree = SOURCE_ROOT; };
+		16B3E6FA1499AB0000318848 /* GMGridView-Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GMGridView-Constants.h"; path = "GMGridView/API/GMGridView-Constants.h"; sourceTree = SOURCE_ROOT; };
 		16DF1A6C145E3456006AA43C /* GMGridViewLayoutStrategies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMGridViewLayoutStrategies.h; path = GMGridView/API/GMGridViewLayoutStrategies.h; sourceTree = SOURCE_ROOT; };
 		16DF1A6D145E3456006AA43C /* GMGridViewLayoutStrategies.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GMGridViewLayoutStrategies.m; path = GMGridView/API/GMGridViewLayoutStrategies.m; sourceTree = SOURCE_ROOT; };
 		16DF1A6F145E3460006AA43C /* UIGestureRecognizer+GMGridViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIGestureRecognizer+GMGridViewAdditions.h"; path = "GMGridView/API/UIGestureRecognizer+GMGridViewAdditions.h"; sourceTree = SOURCE_ROOT; };
@@ -164,6 +165,7 @@
 		16961E1C1470A61C00DA708A /* Implementation Logic */ = {
 			isa = PBXGroup;
 			children = (
+				16B3E6FA1499AB0000318848 /* GMGridView-Constants.h */,
 				1691D7AD1442D02C00F472BF /* GMGridView.m */,
 				16961E1A14705B9B00DA708A /* GMGridViewCell+Extended.h */,
 				16A0D02F145342F8004D7BBC /* GMGridViewCell.m */,

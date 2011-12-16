@@ -52,14 +52,13 @@ typedef enum {
     OptionDebugCount
 } OptionsTypeDebug;
 
-@interface OptionsViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface OptionsViewController () <UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource>
 {
-    __weak UITableView *_tableView;
+    __gm_weak UITableView *_tableView;
 }
 
 - (void)editingSwitchChanged:(UISwitch *)control;
 - (void)sortStyleSegmentedControlChanged:(UISegmentedControl *)control;
-- (void)layoutStrategySegmentedControlChanged:(UISegmentedControl *)control;
 - (void)layoutCenterSwitchChanged:(UISwitch *)control;
 - (void)layoutSpacingSliderChanged:(UISlider *)control;
 - (void)layoutInsetsSliderChanged:(UISlider *)control;
@@ -131,6 +130,23 @@ typedef enum {
     return 35;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    CGFloat height = 45;
+    
+    if ([indexPath section] == OptionSectionLayout) 
+    {
+        switch ([indexPath row]) 
+        {
+            case OptionTypeLayoutStrategy:
+                height = 160;
+                break;
+        }
+    }
+    
+    return height;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return OptionSectionsCount;
@@ -194,7 +210,6 @@ typedef enum {
     }
 
     
-    
     if ([indexPath section] == OptionSectionGeneral)
     {
         switch ([indexPath row]) 
@@ -217,14 +232,34 @@ typedef enum {
         {
             case OptionTypeLayoutStrategy:
             {
-                cell.detailTextLabel.text = @"Strategy";
+                cell.detailTextLabel.text = @"";
                 
-                UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"Vertical", @"Horizontal", nil]];
-                segmentedControl.frame = CGRectMake(0, 0, 200, 30);
-                [segmentedControl addTarget:self action:@selector(layoutStrategySegmentedControlChanged:) forControlEvents:UIControlEventValueChanged];
-                segmentedControl.selectedSegmentIndex = [self.gridView.layoutStrategy type] == GMGridViewLayoutVertical ? 0 : 1;
+                UIPickerView *pickerView = [[UIPickerView alloc] initWithFrame:cell.contentView.bounds];
+                pickerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+                pickerView.showsSelectionIndicator = YES;
+                pickerView.delegate = self;
+                pickerView.dataSource = self;
                 
-                cell.accessoryView = segmentedControl;
+                switch ([self.gridView.layoutStrategy type]) 
+                {
+                    case GMGridViewLayoutHorizontalPagedTTB:
+                        [pickerView selectRow:3 inComponent:0 animated:YES];
+                        break;
+                    case GMGridViewLayoutHorizontalPagedLTR:
+                        [pickerView selectRow:2 inComponent:0 animated:YES];
+                        break;
+                    case GMGridViewLayoutHorizontal:
+                        [pickerView selectRow:1 inComponent:0 animated:YES];
+                        break;
+                    case GMGridViewLayoutVertical:
+                    default:
+                        [pickerView selectRow:0 inComponent:0 animated:YES];
+                        break;
+                }
+
+                cell.contentView.clipsToBounds = YES;
+                [cell.contentView addSubview:pickerView];
+                
                 break;
             }
             case OptionsTypeLayoutCenter:
@@ -334,6 +369,66 @@ typedef enum {
 
 
 //////////////////////////////////////////////////////////////
+#pragma mark UIPickerView delegate and datasource
+//////////////////////////////////////////////////////////////
+
+
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
+    switch (row) 
+    {
+        case 1:
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal];
+            break;
+        case 2:
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontalPagedLTR];
+            break;
+        case 3:
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontalPagedTTB];
+            break;
+        case 0:
+        default:
+            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+            break;
+    }
+}
+
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+    return 4;
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    NSString *title = nil;
+    
+    switch (row) {
+        case 0:
+            title = @"Vertical strategy";
+            break;
+        case 1:
+            title = @"Horizontal strategy";
+            break;
+        case 2:
+            title = @"Horizontal paged LTR strategy";
+            break;
+        case 3:
+            title = @"Horizontal paged TTB strategy";
+            break;
+        default:
+            title = @"Unknown";
+            break;
+    }
+    
+    return title;
+}
+
+//////////////////////////////////////////////////////////////
 #pragma mark Control callbacks
 //////////////////////////////////////////////////////////////
 
@@ -353,20 +448,6 @@ typedef enum {
         case 0:
         default:
             self.gridView.style = GMGridViewStyleSwap;
-            break;
-    }
-}
-
-- (void)layoutStrategySegmentedControlChanged:(UISegmentedControl *)control
-{
-    switch (control.selectedSegmentIndex) 
-    {
-        case 1:
-            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutHorizontal];
-            break;
-        case 0:
-        default:
-            self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
             break;
     }
 }

@@ -1,12 +1,12 @@
 //
-//  UIView+GMGridViewShake.m
+//  GMGridView-Constants.h
 //  GMGridView
 //
-//  Created by Gulam Moledina on 11-10-22.
+//  Created by Gulam Moledina on 11-12-14.
 //  Copyright (c) 2011 GMoledina.ca. All rights reserved.
 //
 //  Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
-//
+// 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
@@ -26,39 +26,37 @@
 //  THE SOFTWARE.
 //
 
-#import <Quartzcore/QuartzCore.h>
-#import "UIView+GMGridViewAdditions.h"
 
-@interface UIView (GMGridViewAdditions_Privates)
-
-
-@end
+#ifndef GMGridView_GMGridView_Constants_h
+#define GMGridView_GMGridView_Constants_h
 
 
+//
+// ARC on iOS 4 and 5 
+//
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 && !defined (GM_DONT_USE_ARC_WEAK_FEATURE)
+
+#define gm_weak   weak
+#define __gm_weak __weak
+#define gm_nil(x)
+
+#else
+
+#define gm_weak   unsafe_unretained
+#define __gm_weak __unsafe_unretained
+#define gm_nil(x) x = nil
+
+#endif
 
 
-@implementation UIView (GMGridViewAdditions)
+//
+// Code specific
+//
 
-- (void)shakeStatus:(BOOL)enabled
-{
-    if (enabled) 
-    {
-        CGFloat rotation = 0.03;
-        
-        CABasicAnimation *shake = [CABasicAnimation animationWithKeyPath:@"transform"];
-        shake.duration = 0.13;
-        shake.autoreverses = YES;
-        shake.repeatCount  = MAXFLOAT;
-        shake.removedOnCompletion = NO;
-        shake.fromValue = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform,-rotation, 0.0 ,0.0 ,1.0)];
-        shake.toValue   = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform, rotation, 0.0 ,0.0 ,1.0)];
-        
-        [self.layer addAnimation:shake forKey:@"shakeAnimation"];
-    }
-    else
-    {
-        [self.layer removeAnimationForKey:@"shakeAnimation"];
-    }
-}
+#define GMGV_INVALID_POSITION -1
 
-@end
+
+
+
+#endif

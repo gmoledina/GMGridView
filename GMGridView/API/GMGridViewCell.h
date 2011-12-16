@@ -27,7 +27,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "GMGridView-Constants.h"
 
 @interface GMGridViewCell : UIView
 {
@@ -38,5 +38,6 @@
 @property (nonatomic, strong) UIImage *deleteButtonIcon;   // Delete button image
 @property (nonatomic) CGPoint deleteButtonOffset;          // Delete button offset relative to the origin
 
+- (void)prepareForReuse;
 
 @end

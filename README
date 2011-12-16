@@ -1,6 +1,11 @@
 GM-GRID-VIEW
 -------------
 
+"Definitely looks like one to watch" [ManiacDev.com]
+"Looks like the best 3rd party implementation I have seen so far" [iosDevWeekly.com]
+
+---
+
 An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in fullsize by pinching them. 
 This view is inspired by the UITableView and uses a datasource and delegates in order to get the data and interact with it.
 
@@ -8,16 +13,31 @@ The cells are reusable and are not loaded until required (only the ones visible 
 It is important to use the dequeue method to reuse the cell.
 
 The best sorting style (swap or push) depends on personal taste and the frame of the grid; you can choose the one that suits you best.
-Same applies to the layout strategy (vertical or horizontal... and more to come).
+Same applies to the layout strategy (vertical, horizontal, paged,... and more to come).
 
-Many working examples provided in the demo app!
+Many working examples provided in the demo app.
 All the files in the API folder are required. You only need to deal with 2 header files though (the grid and the cell).
+
+Let me know how this component works out for you!
+New feature requests are welcome.
+
+---
+
+Fresh from the baking oven:
+- Support for iOS 4
+- Paging!! 2 horizontally paged layout strategies added
+- shaking animation on items when in edit mode
+
+Coming soon:
+- Changing the zoom scale dynamically (when pinching to go fullscreen)
+- API for adding a pageControl
+- More customization options
 
 ---
 
 Requirements:
-- iOS 5 (to access the UIScrollView gestureRecognizers)
-- ARC (Automatic Reference Counting)
+- iOS 4 and up
+- ARC (Automatic Reference Counting) enabled
 - Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
 
 Features - General:
@@ -26,7 +46,7 @@ Features - General:
 - Reusable cells
 - Edit mode to delete cells
 - Gestures work great inside of the scrollView
-- Different layout strategies (Vertical and Horizontal)
+- 4 different layout strategies (Vertical, Horizontal, Horizontal Paged LTR/TTB)
 - Possibility to provide your own layout strategy
 - Demo app provided, with options panel
 
@@ -41,11 +61,6 @@ Features - Fullsize:
 - Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
 - Provide a different fullsize view (detailed view) for the view via the delegate
 - Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
-
-COMING SOON :
-- Changing the zoom scale dynamically (when pinching to go fullscreen)
-- Support for pagging
-- Support for iOS 4
 
 
 Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
