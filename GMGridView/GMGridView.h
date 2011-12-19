@@ -50,6 +50,12 @@ typedef enum
 	GMGridViewScrollPositionBottom
 } GMGridViewScrollPosition;
 
+typedef enum
+{
+    GMGridViewItemAnimationNone = 0,
+    GMGridViewItemAnimationFade,
+    GMGridViewItemAnimationScroll = 1<<7 // scroll to the item before showing the animation
+} GMGridViewItemAnimation;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Interface GMGridView
@@ -96,11 +102,14 @@ typedef enum
 
 // Actions
 - (void)reloadData;
-- (void)insertObjectAtIndex:(NSInteger)index;
-- (void)removeObjectAtIndex:(NSInteger)index;
-- (void)reloadObjectAtIndex:(NSInteger)index;
-- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
+- (void)insertObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)removeObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)reloadObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 withAnimation:(GMGridViewItemAnimation)animation;
 - (void)scrollToObjectAtIndex:(NSInteger)index atScrollPosition:(GMGridViewScrollPosition)scrollPosition animated:(BOOL)animated;
+
+// Force the grid to update properties in an (probably) animated way.
+- (void)layoutSubviewsWithAnimation:(GMGridViewItemAnimation)animation;
 
 @end
 

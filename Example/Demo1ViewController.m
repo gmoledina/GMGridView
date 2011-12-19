@@ -385,7 +385,7 @@
     NSString *newItem = [NSString stringWithFormat:@"%d", (int)(arc4random() % 1000)];
     
     [_data addObject:newItem];
-    [_gmGridView insertObjectAtIndex:[_data count] - 1];
+    [_gmGridView insertObjectAtIndex:[_data count] - 1 withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
 }
 
 - (void)removeItem
@@ -395,7 +395,7 @@
     {
         NSInteger index = [_data count] - 1;
         
-        [_gmGridView removeObjectAtIndex:index];
+        [_gmGridView removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
         [_data removeObjectAtIndex:index];
     }
 }
@@ -410,7 +410,7 @@
         NSString *newMessage = [NSString stringWithFormat:@"%d", (arc4random() % 1000)];
         
         [_data replaceObjectAtIndex:index withObject:newMessage];
-        [_gmGridView reloadObjectAtIndex:index];
+        [_gmGridView reloadObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
     }
 }
 
