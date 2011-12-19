@@ -1363,7 +1363,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [self scrollToObjectAtIndex:index animated:NO];
+                         [self scrollToObjectAtIndex:index atScrollPosition:GMGridViewScrollPositionNone animated:NO];
                          currentView.alpha = 0;
                          cell.alpha = 1;
                      } 
@@ -1376,13 +1376,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setSubviewsCacheAsInvalid];
 }
 
-- (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated
+- (void)scrollToObjectAtIndex:(NSInteger)index atScrollPosition:(GMGridViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
     index = MAX(0, index);
     index = MIN(index, _numberTotalItems);
 
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
-    CGRect scrollToRect = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+    CGRect targetRect;
     
     if (_scrollView.pagingEnabled) 
     {
@@ -1401,7 +1401,29 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             originScroll.y += pageSize.height;
         }
         
-        scrollToRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
+        targetRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
+    }else {
+        CGRect gridRect = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+        targetRect = self.bounds;
+        switch (scrollPosition)
+        {
+            case GMGridViewScrollPositionNone:
+            default:
+                targetRect = gridRect; // no special coordinate handling
+                break;
+                
+            case GMGridViewScrollPositionTop:
+                targetRect.origin.y = gridRect.origin.y;	// set target y origin to cell's y origin
+                break;
+                
+            case GMGridViewScrollPositionMiddle:
+                targetRect.origin.y = MAX(gridRect.origin.y - (CGFloat)ceilf((targetRect.size.height - gridRect.size.height) * 0.5), 0.0);
+                break;
+                
+            case GMGridViewScrollPositionBottom:
+                targetRect.origin.y = MAX((CGFloat)floorf(gridRect.origin.y - (targetRect.size.height - gridRect.size.height)), 0.0);
+                break;
+        }
     }
     
     // Better performance animating ourselves instead of using animated:YES in scrollRectToVisible
@@ -1409,7 +1431,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [_scrollView scrollRectToVisible:scrollToRect animated:NO];
+                         [_scrollView scrollRectToVisible:targetRect animated:NO];
                      } 
                      completion:^(BOOL finished){
                      }
@@ -1442,7 +1464,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
-                         [self scrollToObjectAtIndex:index animated:NO];
+                         [self scrollToObjectAtIndex:index atScrollPosition:GMGridViewScrollPositionNone animated:NO];
                      } 
                      completion:^(BOOL finished){
                          [self setNeedsLayout];
@@ -1474,7 +1496,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          cell.contentView.alpha = 0.3;
                          cell.alpha = 0;
 
-                         [self scrollToObjectAtIndex:index animated:NO];
+                         [self scrollToObjectAtIndex:index atScrollPosition:GMGridViewScrollPositionNone animated:NO];
                          
                          [self recomputeSize];
                      } 
@@ -1522,11 +1544,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      animations:^{
                          if (!CGRectIntersectsRect(view2.frame, visibleRect)) 
                          {
-                             [self scrollToObjectAtIndex:index1 animated:NO];
+                             [self scrollToObjectAtIndex:index1 atScrollPosition:GMGridViewScrollPositionNone animated:NO];
                          }
                          else if (!CGRectIntersectsRect(view1.frame, visibleRect)) 
                          {
-                             [self scrollToObjectAtIndex:index2 animated:NO];
+                             [self scrollToObjectAtIndex:index2 atScrollPosition:GMGridViewScrollPositionNone animated:NO];
                          }
                      } 
                      completion:^(BOOL finished){

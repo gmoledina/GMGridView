@@ -42,6 +42,14 @@ typedef enum
     GMGridViewStyleSwap
 } GMGridViewStyle;
 
+typedef enum
+{
+	GMGridViewScrollPositionNone,
+	GMGridViewScrollPositionTop,
+	GMGridViewScrollPositionMiddle,
+	GMGridViewScrollPositionBottom
+} GMGridViewScrollPosition;
+
 
 //////////////////////////////////////////////////////////////
 #pragma mark Interface GMGridView
@@ -92,7 +100,7 @@ typedef enum
 - (void)removeObjectAtIndex:(NSInteger)index;
 - (void)reloadObjectAtIndex:(NSInteger)index;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
-- (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
+- (void)scrollToObjectAtIndex:(NSInteger)index atScrollPosition:(GMGridViewScrollPosition)scrollPosition animated:(BOOL)animated;
 
 @end
 
