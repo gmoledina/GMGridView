@@ -1,12 +1,12 @@
-GM-GRID-VIEW
--------------
+#GM-GRID-VIEW
 
 "Definitely looks like one to watch" [ManiacDev.com]
+
 "Looks like the best 3rd party implementation I have seen so far" [iosDevWeekly.com]
 
 ---
 
-An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in fullsize by pinching them. 
+An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in full-size by pinching them. 
 This view is inspired by the UITableView and uses a datasource and delegates in order to get the data and interact with it.
 
 The cells are reusable and are not loaded until required (only the ones visible on the scrollview are loaded). 
@@ -16,51 +16,53 @@ The best sorting style (swap or push) depends on personal taste and the frame of
 Same applies to the layout strategy (vertical, horizontal, paged,... and more to come).
 
 Many working examples provided in the demo app.
-All the files in the API folder are required. You only need to deal with 2 header files though (the grid and the cell).
 
-Let me know how this component works out for you!
-New feature requests are welcome.
+Let us know how this component works out for you!
+New feature requests are welcome. (ping [@gmoledia](http://twitter.com/gmoledia) or [@steipete](http://twitter.com/steipete))
 
 ---
 
 Fresh from the baking oven:
-- Support for iOS 4
-- Paging!! 2 horizontally paged layout strategies added
-- shaking animation on items when in edit mode
+
+*  Support for iOS 4
+*  Paging!! 2 horizontally paged layout strategies added
+*  shaking animation on items when in edit mode
 
 Coming soon:
-- Changing the zoom scale dynamically (when pinching to go fullscreen)
-- API for adding a pageControl
-- More customization options
+
+*  Changing the zoom scale dynamically (when pinching to go fullscreen)
+*  API for adding a pageControl
+*  More customization options
 
 ---
 
 Requirements:
-- iOS 4 and up
-- ARC (Automatic Reference Counting) enabled
-- Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
+
+* iOS 4 and up
+* Xcode 4.2 (GMGridView uses ARC)
+* Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
 
 Features - General:
-- Works on both the iPhone and iPad (best suited for iPad)
-- Works on both portrait and landscape orientation
-- Reusable cells
-- Edit mode to delete cells
-- Gestures work great inside of the scrollView
-- 4 different layout strategies (Vertical, Horizontal, Horizontal Paged LTR/TTB)
-- Possibility to provide your own layout strategy
-- Demo app provided, with options panel
+
+*  Works on both the iPhone and iPad (best suited for iPad)
+*  Works on both portrait and landscape orientation
+*  Reusable cells
+*  Edit mode to delete cells
+*  Gestures work great inside of the scrollView
+*  4 different layout strategies (Vertical, Horizontal, Horizontal Paged LTR/TTB)
+*  Possibility to provide your own layout strategy
+*  Demo app provided, with options panel
 
 Features - Sorting:
-- Perform a long-touch on a view to be able to move it
-- Two different animation styles ("Swap" or "Push")
-- Sorted view has a shake animation (can be disabled)
-- Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
+
+* Perform a long-touch on a view to be able to move it
+* Two different animation styles ("Swap" or "Push")
+* Sorted view has a shake animation (can be disabled)
+* Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
 
 Features - Fullsize:
-- Pinch, rotate and drag views using 2 fingers
-- Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
-- Provide a different fullsize view (detailed view) for the view via the delegate
-- Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
 
-
-Latest code can be found on GitHub: https://github.com/gmoledina/GMGridView
+* Pinch, rotate and drag views using 2 fingers
+* Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
+* Provide a different fullsize view (detailed view) for the view via the delegate
+* Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
