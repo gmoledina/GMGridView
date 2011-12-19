@@ -30,14 +30,12 @@
 #import "GMGridView-Constants.h"
 
 @interface GMGridViewCell : UIView
-{
-    
-}
 
 @property (nonatomic, strong) UIView *contentView;         // The contentView - default is nil
 @property (nonatomic, strong) UIImage *deleteButtonIcon;   // Delete button image
 @property (nonatomic) CGPoint deleteButtonOffset;          // Delete button offset relative to the origin
 
+/// Override to release custom data before cell is reused.
 - (void)prepareForReuse;
 
 @end
