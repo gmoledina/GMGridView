@@ -352,13 +352,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)setEditing:(BOOL)editing
 {
-    if ([self.dataSource respondsToSelector:@selector(GMGridView:deleteItemAtIndex:)]
+    if ([self.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex:)]
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
         for (GMGridViewCell *cell in [self itemSubviews]) 
         {
-            [cell setEditing:editing];
+            NSUInteger index = [self positionForItemSubview:cell];
+            if (index != GMGV_INVALID_POSITION)
+            {
+                BOOL allowEdit = [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
+                [cell setEditing:editing && allowEdit];
+            }
         }
         
         _editing = editing;
@@ -1079,8 +1084,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         NSInteger index = [weakSelf positionForItemSubview:aCell];
         if (index != GMGV_INVALID_POSITION) 
         {
-            [weakSelf.dataSource GMGridView:self deleteItemAtIndex:index];
-            [weakSelf removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationNone];
+            BOOL shouldDelete = YES;
+            if ([weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:shouldDeleteItemAtIndex:)]) {
+                shouldDelete = [weakSelf.actionDelegate GMGridView:self shouldDeleteItemAtIndex:index];
+            }
+            if (shouldDelete) {
+                [weakSelf removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade];
+            }
         }
     };
     

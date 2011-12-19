@@ -62,9 +62,6 @@ typedef enum
 //////////////////////////////////////////////////////////////
 
 @interface GMGridView : UIView
-{
-    
-}
 
 // Delegates
 @property (nonatomic, gm_weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
@@ -88,11 +85,8 @@ typedef enum
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 @property (nonatomic) BOOL showsVerticalScrollIndicator;              // Default is YES
 @property (nonatomic) BOOL showsHorizontalScrollIndicator;            // Default is YES
-
 @property (nonatomic, readonly) UIScrollView *scrollView;             // Messing with the scrollView can lead to unexpected behavior. Avoid changing any properties
                                                                       // or changing its delegate. You have been warned.
-
-
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
@@ -127,9 +121,8 @@ typedef enum
 - (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
-// Required to enable editing mode
-- (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index;
-
+/// Allow a cell to be deletable. Required to enable editing mode.
+- (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
 @end
 
 
@@ -141,6 +134,10 @@ typedef enum
 
 @required
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
+
+@optional
+/// Called when the delete-button has been pressed. If not implemented, YES is assumed.
+- (BOOL)GMGridView:(GMGridView *)gridView shouldDeleteItemAtIndex:(NSInteger)index;
 
 @end
 

@@ -234,9 +234,9 @@
     return cell;
 }
 
-- (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index
+- (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index
 {
-    [_data removeObjectAtIndex:index];
+    return YES;
 }
 
 //////////////////////////////////////////////////////////////
@@ -248,7 +248,11 @@
     NSLog(@"Did tap at index %d", position);
 }
 
-
+- (BOOL)GMGridView:(GMGridView *)gridView shouldDeleteItemAtIndex:(NSInteger)index
+{
+    [_data removeObjectAtIndex:index];
+    return YES;
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark GMGridViewSortingDelegate
