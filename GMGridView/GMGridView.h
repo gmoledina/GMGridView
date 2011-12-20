@@ -74,6 +74,7 @@ typedef enum
 
 // Editing Mode
 @property (nonatomic, getter=isEditing) BOOL editing; // Default is NO - When set to YES, all gestures are disabled and delete buttons shows up on cells
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated;
 
 // Customizing Options
 @property (nonatomic, gm_weak) UIView *mainSuperView;                 // Default is self

@@ -368,6 +368,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)setEditing:(BOOL)editing
 {
+    [self setEditing:editing animated:NO];
+}
+
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+{
     if ([self.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
@@ -378,7 +383,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             if (index != GMGV_INVALID_POSITION)
             {
                 BOOL allowEdit = [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
-                [cell setEditing:editing && allowEdit];
+                [cell setEditing:editing && allowEdit animated:animated];
             }
         }
         
@@ -1091,17 +1096,17 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      completion:nil];
     
     cell.tag = position + kTagOffset;
-    cell.editing = self.editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:position];
+    BOOL canEdit = self.editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:position];
+    [cell setEditing:canEdit animated:NO];
     
     __gm_weak GMGridView *weakSelf = self; 
-    
     cell.deleteBlock = ^(GMGridViewCell *aCell)
     {
         NSInteger index = [weakSelf positionForItemSubview:aCell];
         if (index != GMGV_INVALID_POSITION) 
         {
             BOOL canDelete = YES;
-            if ([weakSelf.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex::)]) 
+            if ([weakSelf.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex:)]) 
             {
                 canDelete = [weakSelf.dataSource GMGridView:self canDeleteItemAtIndex:index];
             }
