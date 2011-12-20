@@ -33,7 +33,7 @@
 #pragma mark - Interface Private
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewCell()
+@interface GMGridViewCell(Private)
 
 - (void)actionDelete;
 
