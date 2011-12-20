@@ -25,6 +25,7 @@
     UIPopoverController *_optionsPopOver;
     
     NSMutableArray *_data;
+    NSInteger _lastDeleteItemIndexAsked;
 }
 
 - (void)addMoreItem;
@@ -236,7 +237,7 @@
 
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index
 {
-    return YES;
+    return YES; //index % 2 == 0;
 }
 
 //////////////////////////////////////////////////////////////
@@ -248,10 +249,22 @@
     NSLog(@"Did tap at index %d", position);
 }
 
-- (BOOL)GMGridView:(GMGridView *)gridView shouldDeleteItemAtIndex:(NSInteger)index
+- (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index
 {
-    [_data removeObjectAtIndex:index];
-    return YES;
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm" message:@"Are you sure you want to delete this item?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Delete", nil];
+    
+    [alert show];
+    
+    _lastDeleteItemIndexAsked = index;
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 1) 
+    {
+        [_data removeObjectAtIndex:_lastDeleteItemIndexAsked];
+        [_gmGridView removeObjectAtIndex:_lastDeleteItemIndexAsked withAnimation:GMGridViewItemAnimationFade];
+    }
 }
 
 //////////////////////////////////////////////////////////////

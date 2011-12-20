@@ -65,7 +65,7 @@ typedef enum
 
 // Delegates
 @property (nonatomic, gm_weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
-@property (nonatomic, gm_weak) NSObject<GMGridViewActionDelegate> *actionDelegate;            // Optional - to get taps callback
+@property (nonatomic, gm_weak) NSObject<GMGridViewActionDelegate> *actionDelegate;            // Optional - to get taps callback & deleting item
 @property (nonatomic, gm_weak) NSObject<GMGridViewSortingDelegate> *sortingDelegate;          // Optional - to enable sorting
 @property (nonatomic, gm_weak) NSObject<GMGridViewTransformationDelegate> *transformDelegate; // Optional - to enable fullsize mode
 
@@ -121,8 +121,9 @@ typedef enum
 - (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
-/// Allow a cell to be deletable. Required to enable editing mode.
+/// Allow a cell to be deletable. If not implemented, YES is assumed.
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
+
 @end
 
 
@@ -136,8 +137,8 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @optional
-/// Called when the delete-button has been pressed. If not implemented, YES is assumed.
-- (BOOL)GMGridView:(GMGridView *)gridView shouldDeleteItemAtIndex:(NSInteger)index;
+// Called when the delete-button has been pressed. Required to enable editing mode.
+- (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;
 
 @end
 

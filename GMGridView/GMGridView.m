@@ -300,6 +300,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 }
 
 //////////////////////////////////////////////////////////////
+#pragma mark Orientation and memory management
+//////////////////////////////////////////////////////////////
+
+- (void)receivedMemoryWarningNotification:(NSNotification *)notification
+{
+    [self cleanupUnseenItems];
+    [_reusableCells removeAllObjects];
+}
+
+- (void)willRotate:(NSNotification *)notification
+{
+    _rotationActive = YES;
+}
+
+
+//////////////////////////////////////////////////////////////
 #pragma mark Setters / getters
 //////////////////////////////////////////////////////////////
 
@@ -352,7 +368,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)setEditing:(BOOL)editing
 {
-    if ([self.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex:)]
+    if ([self.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
@@ -1075,7 +1091,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      completion:nil];
     
     cell.tag = position + kTagOffset;
-    cell.editing = self.editing;
+    cell.editing = self.editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:position];
     
     __gm_weak GMGridView *weakSelf = self; 
     
@@ -1084,12 +1100,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         NSInteger index = [weakSelf positionForItemSubview:aCell];
         if (index != GMGV_INVALID_POSITION) 
         {
-            BOOL shouldDelete = YES;
-            if ([weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:shouldDeleteItemAtIndex:)]) {
-                shouldDelete = [weakSelf.actionDelegate GMGridView:self shouldDeleteItemAtIndex:index];
+            BOOL canDelete = YES;
+            if ([weakSelf.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex::)]) 
+            {
+                canDelete = [weakSelf.dataSource GMGridView:self canDeleteItemAtIndex:index];
             }
-            if (shouldDelete) {
-                [weakSelf removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade];
+
+            if (canDelete && [weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]) 
+            {
+                [weakSelf.actionDelegate GMGridView:weakSelf processDeleteActionForItemAtIndex:index];
             }
         }
     };
@@ -1167,14 +1186,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         if (animated)
         {
-            [UIView animateWithDuration:animated ? kDefaultAnimationDuration : 0
+            [UIView animateWithDuration:kDefaultAnimationDuration
                                   delay:0 
                                 options:kDefaultAnimationOptions 
                              animations:^{
                                  _scrollView.contentSize = contentSize;
                              }
                              completion:nil];
-        }else
+        }
+        else
         {
             _scrollView.contentSize = contentSize;
         }
@@ -1202,7 +1222,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         }
     };
     
-    if (animated) {
+    if (animated) 
+    {
         [UIView animateWithDuration:kDefaultAnimationDuration 
                               delay:0
                             options:kDefaultAnimationOptions
@@ -1211,7 +1232,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          }
                          completion:nil
          ];
-    }else {
+    }
+    else 
+    {
         layoutBlock();
     }
 }
@@ -1320,17 +1343,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return cell;
 }
 
-- (void)receivedMemoryWarningNotification:(NSNotification *)notification
-{
-    [self cleanupUnseenItems];
-    [_reusableCells removeAllObjects];
-}
-
-- (void)willRotate:(NSNotification *)notification
-{
-    _rotationActive = YES;
-}
-
 //////////////////////////////////////////////////////////////
 #pragma mark public methods
 //////////////////////////////////////////////////////////////
@@ -1424,7 +1436,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         }
         
         targetRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
-    }else {
+    }
+    else 
+    {
         CGRect gridRect = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
         targetRect = self.bounds;
         switch (scrollPosition)
@@ -1495,7 +1509,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                              [self layoutSubviewsWithAnimation:animation];
                          }
          ];
-    }else 
+    }
+    else 
     {
         [self layoutSubviewsWithAnimation:animation];
     }
