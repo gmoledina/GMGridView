@@ -18,7 +18,7 @@ Same applies to the layout strategy (vertical, horizontal, paged,... and more to
 Many working examples provided in the demo app.
 
 Let us know how this component works out for you!
-New feature requests are welcome. (ping [@gmoledia](http://twitter.com/gmoledia) or [@steipete](http://twitter.com/steipete))
+New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledina) or [@steipete](http://twitter.com/steipete))
 
 ---
 
@@ -65,4 +65,4 @@ Features - Fullsize:
 * Pinch, rotate and drag views using 2 fingers
 * Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
 * Provide a different fullsize view (detailed view) for the view via the delegate
-* Every view doesnt have it's own gesture recognizers, the main view handles a set of gestures for ALL views
+* Every view doesn't have it's own gesture recognizers, the main view handles a set of gestures for ALL views
