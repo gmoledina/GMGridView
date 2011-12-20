@@ -35,20 +35,20 @@
 // ARC on iOS 4 and 5 
 //
 
-//#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 /*&& !defined (GM_DONT_USE_ARC_WEAK_FEATURE)*/
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 /*&& !defined (GM_DONT_USE_ARC_WEAK_FEATURE)*/
 
-//#define gm_weak   weak
-//#define __gm_weak __weak
-//#define gm_nil(x)
+#define gm_weak   weak
+#define __gm_weak __weak
+#define gm_nil(x)
 
 
-//#else
+#else
 
 #define gm_weak   unsafe_unretained
 #define __gm_weak __unsafe_unretained
 #define gm_nil(x) x = nil
 
-//#endif
+#endif
 
 
 //
