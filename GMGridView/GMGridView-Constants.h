@@ -35,7 +35,7 @@
 // ARC on iOS 4 and 5 
 //
 
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 /*&& !defined (GM_DONT_USE_ARC_WEAK_FEATURE)*/
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 && !defined (GM_DONT_USE_ARC_WEAK_FEATURE)
 
 #define gm_weak   weak
 #define __gm_weak __weak
