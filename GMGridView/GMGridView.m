@@ -382,8 +382,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             NSUInteger index = [self positionForItemSubview:cell];
             if (index != GMGV_INVALID_POSITION)
             {
-                BOOL allowEdit = [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
-                [cell setEditing:editing && allowEdit animated:animated];
+                BOOL allowEdit = editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
+                [cell setEditing:allowEdit animated:animated];
             }
         }
         
