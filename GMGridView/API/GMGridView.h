@@ -94,6 +94,12 @@ typedef enum
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2;
 - (void)scrollToObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 
+// Geometry
+// converts a point, taking into account the internal scroll view
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view;
+// converts a rect, taking into account the internal scroll position
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view;
+
 @end
 
 
@@ -125,6 +131,9 @@ typedef enum
 @required
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
+@optional
+// tells the delegate that the scroll view just did scroll. similar in concept to [UIScrollView scrollViewDidScroll:]
+- (void)GMGridViewDidScroll:(GMGridView*)gridView;
 @end
 
 

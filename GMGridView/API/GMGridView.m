@@ -390,6 +390,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [self loadRequiredItems];
+    if ([self.actionDelegate respondsToSelector:@selector(GMGridViewDidScroll:)]) {
+        [self.actionDelegate GMGridViewDidScroll:self];
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -1533,5 +1536,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
      ];
 }
 
-
+//////////////////////////////////////////////////////////////
+// Geometry
+//////////////////////////////////////////////////////////////
+- (CGPoint) convertScrolledPoint:(CGPoint)point toView:(UIView*)view 
+{
+  return [_scrollView convertPoint:point toView:view];
+}
+- (CGRect) convertScrolledRect:(CGRect)rect toView:(UIView*)view 
+{
+  return [_scrollView convertRect:rect toView:view];}
 @end
