@@ -1110,7 +1110,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             {
                 canDelete = [weakSelf.dataSource GMGridView:self canDeleteItemAtIndex:index];
             }
-
+            
             if (canDelete && [weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]) 
             {
                 [weakSelf.actionDelegate GMGridView:weakSelf processDeleteActionForItemAtIndex:index];
@@ -1254,10 +1254,17 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: _scrollView.contentOffset];
     NSRange loadedPositionsRange = NSMakeRange(self.firstPositionLoaded, self.lastPositionLoaded - self.firstPositionLoaded);
     
+    // calculate new position range
+    self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, rangeOfPositions.location);
+    self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, rangeOfPositions.length + rangeOfPositions.location);
+    
+    // remove now invisible items
+    [self setSubviewsCacheAsInvalid];
+    [self cleanupUnseenItems];
+    
+    // add new cells
     BOOL forceLoad = self.firstPositionLoaded == GMGV_INVALID_POSITION || self.lastPositionLoaded == GMGV_INVALID_POSITION;
-    
     NSInteger positionToLoad;
-    
     for (int i = 0; i < rangeOfPositions.length; i++) 
     {
         positionToLoad = i + rangeOfPositions.location;
@@ -1270,59 +1277,48 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 [_scrollView addSubview:cell];
             }
         }
-    }
-    
-    self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, rangeOfPositions.location);
-    self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, rangeOfPositions.length + rangeOfPositions.location);
-    
-    [self setSubviewsCacheAsInvalid];
-    
-    [self cleanupUnseenItems];
+    }    
 }
 
 
 - (void)cleanupUnseenItems
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: _scrollView.contentOffset];
-        GMGridViewCell *cell;
-        
-        if (rangeOfPositions.location > self.firstPositionLoaded) 
+    NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: _scrollView.contentOffset];
+    GMGridViewCell *cell;
+    
+    if (rangeOfPositions.location > self.firstPositionLoaded) 
+    {
+        for (int i = self.firstPositionLoaded; i < rangeOfPositions.location; i++) 
         {
-            for (int i = self.firstPositionLoaded; i < rangeOfPositions.location; i++) 
+            cell = [self cellForItemAtIndex:i];
+            if(cell)
             {
-                cell = [self cellForItemAtIndex:i];
-                if(cell)
-                {
-                    //NSLog(@"Removing item at position %d", i);
-                    [self queueReusableCell:cell];
-                    [cell removeFromSuperview];
-                }
+                //NSLog(@"Removing item at position %d", i);
+                [self queueReusableCell:cell];
+                [cell removeFromSuperview];
             }
-            
-            self.firstPositionLoaded = rangeOfPositions.location;
-            [self setSubviewsCacheAsInvalid];
         }
         
-        if (NSMaxRange(rangeOfPositions) < self.lastPositionLoaded) 
+        self.firstPositionLoaded = rangeOfPositions.location;
+        [self setSubviewsCacheAsInvalid];
+    }
+    
+    if (NSMaxRange(rangeOfPositions) < self.lastPositionLoaded) 
+    {
+        for (int i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
         {
-            for (int i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
+            cell = [self cellForItemAtIndex:i];
+            if(cell)
             {
-                cell = [self cellForItemAtIndex:i];
-                if(cell)
-                {
-                    //NSLog(@"Removing item at position %d", i);
-                    [self queueReusableCell:cell];
-                    [cell removeFromSuperview];
-                }
+                //NSLog(@"Removing item at position %d", i);
+                [self queueReusableCell:cell];
+                [cell removeFromSuperview];
             }
-            
-            self.lastPositionLoaded = NSMaxRange(rangeOfPositions);
-            [self setSubviewsCacheAsInvalid];
         }
         
-    });
+        self.lastPositionLoaded = NSMaxRange(rangeOfPositions);
+        [self setSubviewsCacheAsInvalid];
+    }
 }
 
 - (void)queueReusableCell:(GMGridViewCell *)cell
@@ -1358,6 +1354,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [[self itemSubviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop){
         [(UIView *)obj removeFromSuperview];
+        if ([obj isKindOfClass:[GMGridViewCell class]]) {
+            [self queueReusableCell:(GMGridViewCell *)obj];
+        }
     }];
     
     self.firstPositionLoaded = GMGV_INVALID_POSITION;
