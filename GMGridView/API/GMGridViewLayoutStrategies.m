@@ -511,6 +511,10 @@
     return NSMakeRange(firstPosition, (lastPosition - firstPosition));
 }
 
+- (NSUInteger) pageForContentOffset:(CGPoint)offset
+{
+  return floor(offset.x / self.gridBounds.size.width);
+}
 @end
 
 
