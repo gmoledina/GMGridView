@@ -1037,7 +1037,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     CGPoint locationTouch = [_tapGesture locationInView:_scrollView];
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-    
+
     if (position != GMGV_INVALID_POSITION) 
     {
         [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];
