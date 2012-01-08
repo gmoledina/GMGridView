@@ -155,7 +155,7 @@
     
     _numberOfItemsPerRow = 1;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing < actualBounds.size.width)
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing <= actualBounds.size.width)
     {
         _numberOfItemsPerRow++;
     }
@@ -271,7 +271,7 @@
     
     _numberOfItemsPerColumn = 1;
     
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing < actualBounds.size.height)
+    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing <= actualBounds.size.height)
     {
         _numberOfItemsPerColumn++;
     }

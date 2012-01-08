@@ -38,8 +38,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 
 //////////////////////////////////////////////////////////////
-#pragma -
-#pragma mark Private interface
+#pragma mark - Private interface
 //////////////////////////////////////////////////////////////
 
 @interface GMGridView () <UIGestureRecognizerDelegate, UIScrollViewDelegate>
@@ -128,8 +127,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 
 //////////////////////////////////////////////////////////////
-#pragma -
-#pragma mark Implementation
+#pragma mark - Implementation
 //////////////////////////////////////////////////////////////
 
 @implementation GMGridView
