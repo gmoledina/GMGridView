@@ -105,6 +105,17 @@
     }
 }
 
+- (void)setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+    
+    if(!self.inFullSizeMode)
+    {
+        self.contentView.frame = self.bounds;
+    }
+}
+
+
 //////////////////////////////////////////////////////////////
 #pragma mark Setters / getters
 //////////////////////////////////////////////////////////////

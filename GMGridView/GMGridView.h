@@ -118,11 +118,11 @@ typedef enum
 @required
 // Populating subview items 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
-- (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView;
+- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
 - (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
-/// Allow a cell to be deletable. If not implemented, YES is assumed.
+// Allow a cell to be deletable. If not implemented, YES is assumed.
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
 
 @end
@@ -173,7 +173,7 @@ typedef enum
 
 @required
 // Fullsize
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index inInterfaceOrientation:(UIInterfaceOrientation)orientation;
 - (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
 
 // Transformation (pinch, drag, rotate) of the item

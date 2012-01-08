@@ -277,12 +277,47 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     if (_rotationActive) 
     {
+        _rotationActive = NO;
+        
+        // Updating all the items size
+        
+        CGSize itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+        
+        if (!CGSizeEqualToSize(_itemSize, itemSize)) 
+        {
+            _itemSize = itemSize;
+            
+            [[self itemSubviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                
+                if (obj != _transformingItem) 
+                {
+                    ((UIView *)obj).bounds = CGRectMake(0, 0, _itemSize.width, _itemSize.height);
+                }
+            }];
+        }
+        
+        // Updating the fullview size
+        
+        if (_transformingItem) 
+        {
+            NSInteger position = _transformingItem.tag - kTagOffset;
+            CGSize fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:position inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+            
+            if (!CGSizeEqualToSize(fullSize, _transformingItem.fullSize)) 
+            {
+                CGPoint center = _transformingItem.fullSizeView.center;
+                _transformingItem.fullSize = fullSize;
+                _transformingItem.fullSizeView.center = center;
+            }
+        }
+        
+        // Adding alpha animation to make the relayouting more smooth
+        
         CATransition *transition = [CATransition animation];
         transition.duration = 0.25f;
         transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         transition.type = kCATransitionFade;
         [_scrollView.layer addAnimation:transition forKey:@"rotationAnimation"];
-        _rotationActive = NO;
         
         [UIView animateWithDuration:0 
                               delay:0
@@ -950,7 +985,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self.mainSuperView addSubview:_transformingItem];
         [self.mainSuperView bringSubviewToFront:_transformingItem];
         
-        _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:positionTouch];
+        _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:positionTouch inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
         _transformingItem.fullSizeView = [self.transformDelegate GMGridView:self fullSizeViewForCell:_transformingItem atIndex:positionTouch];
         
         if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingCell:)]) 
@@ -1365,7 +1400,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setSubviewsCacheAsInvalid];
     
     NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];    
-    _itemSize = [self.dataSource sizeForItemsInGMGridView:self];
+    _itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     _numberTotalItems = numberItems;
     
     [self recomputeSizeAnimated:NO];

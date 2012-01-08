@@ -183,15 +183,29 @@
     return [_data count];
 }
 
-- (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView
+- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation
 {
     if (INTERFACE_IS_PHONE) 
     {
-        return CGSizeMake(140, 110);
+        if (UIInterfaceOrientationIsLandscape(orientation)) 
+        {
+            return CGSizeMake(170, 135);
+        }
+        else
+        {
+            return CGSizeMake(140, 110);
+        }
     }
     else
     {
-        return CGSizeMake(230, 175);
+        if (UIInterfaceOrientationIsLandscape(orientation)) 
+        {
+            return CGSizeMake(285, 205);
+        }
+        else
+        {
+            return CGSizeMake(230, 175);
+        }
     }
 }
 
@@ -199,7 +213,7 @@
 {
     //NSLog(@"Creating view indx %d", index);
     
-    CGSize size = [self sizeForItemsInGMGridView:gridView];
+    CGSize size = [self GMGridView:gridView sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     
     GMGridViewCell *cell = [gridView dequeueReusableCell];
     
@@ -213,10 +227,6 @@
         view.backgroundColor = [UIColor redColor];
         view.layer.masksToBounds = NO;
         view.layer.cornerRadius = 8;
-        view.layer.shadowColor = [UIColor grayColor].CGColor;
-        view.layer.shadowOffset = CGSizeMake(5, 5);
-        view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
-        view.layer.shadowRadius = 8;
         
         cell.contentView = view;
     }
@@ -234,6 +244,7 @@
     
     return cell;
 }
+
 
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index
 {
@@ -319,15 +330,29 @@
 #pragma mark DraggableGridViewTransformingDelegate
 //////////////////////////////////////////////////////////////
 
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index inInterfaceOrientation:(UIInterfaceOrientation)orientation
 {
     if (INTERFACE_IS_PHONE) 
     {
-        return CGSizeMake(310, 310);
+        if (UIInterfaceOrientationIsLandscape(orientation)) 
+        {
+            return CGSizeMake(310, 310);
+        }
+        else
+        {
+            return CGSizeMake(210, 410);
+        }
     }
     else
     {
-        return CGSizeMake(700, 530);
+        if (UIInterfaceOrientationIsLandscape(orientation)) 
+        {
+            return CGSizeMake(700, 530);
+        }
+        else
+        {
+            return CGSizeMake(600, 500);
+        }
     }
 }
 
@@ -338,7 +363,7 @@
     fullView.layer.masksToBounds = NO;
     fullView.layer.cornerRadius = 8;
     
-    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell atIndex:index];
+    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell atIndex:index inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     fullView.bounds = CGRectMake(0, 0, size.width, size.height);
     
     UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];

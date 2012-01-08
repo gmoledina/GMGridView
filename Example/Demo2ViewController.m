@@ -115,8 +115,8 @@
     _gmGridView2.transformDelegate = self;
     _gmGridView2.dataSource = self;
     
-    _gmGridView1.mainSuperView = self.navigationController.view;
-    _gmGridView2.mainSuperView = self.navigationController.view;
+    _gmGridView1.mainSuperView = self.view;
+    _gmGridView2.mainSuperView = self.view;
     
     
     OptionsViewController *optionsController = [[OptionsViewController alloc] init];
@@ -164,7 +164,8 @@
 
 - (void)computeViewFrames
 {
-    CGSize itemSize = [self sizeForItemsInGMGridView:_gmGridView1];
+    CGSize itemSize = [self GMGridView:_gmGridView1 sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    
     CGSize minSize  = CGSizeMake(itemSize.width  + _gmGridView1.minEdgeInsets.right + _gmGridView1.minEdgeInsets.left, 
                                  itemSize.height + _gmGridView1.minEdgeInsets.top   + _gmGridView1.minEdgeInsets.bottom);
     
@@ -232,7 +233,7 @@
     return 50;
 }
 
-- (CGSize)sizeForItemsInGMGridView:(GMGridView *)gridView
+- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation
 {
     if (INTERFACE_IS_PHONE) 
     {
@@ -246,7 +247,7 @@
 
 - (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index
 {
-    CGSize size = [self sizeForItemsInGMGridView:gridView];
+    CGSize size = [self GMGridView:gridView sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     
     GMGridViewCell *cell = [gridView dequeueReusableCell];
     
@@ -331,16 +332,10 @@
 #pragma mark DraggableGridViewTransformingDelegate
 //////////////////////////////////////////////////////////////
 
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
+- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index inInterfaceOrientation:(UIInterfaceOrientation)orientation
 {
-    if (INTERFACE_IS_PHONE) 
-    {
-        return CGSizeMake(310, 310);
-    }
-    else
-    {
-        return CGSizeMake(700, 530);
-    }
+    CGSize viewSize = self.view.bounds.size;
+    return CGSizeMake(viewSize.width - 50, viewSize.height - 50);
 }
 
 - (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index
@@ -350,7 +345,7 @@
     fullView.layer.masksToBounds = NO;
     fullView.layer.cornerRadius = 8;
     
-    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell atIndex:index];
+    CGSize size = [self GMGridView:gridView sizeInFullSizeForCell:cell atIndex:index inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     fullView.bounds = CGRectMake(0, 0, size.width, size.height);
     
     UILabel *label = [[UILabel alloc] initWithFrame:fullView.bounds];
