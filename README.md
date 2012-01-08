@@ -24,6 +24,7 @@ New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledin
 
 Fresh from the baking oven:
 
+*  Support for different item sizes per interface orientation
 *  Support for iOS 4
 *  Paging!! 2 horizontally paged layout strategies added
 *  shaking animation on items when in edit mode

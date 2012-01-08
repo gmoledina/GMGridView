@@ -74,6 +74,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGFloat _lastRotation;
     CGFloat _lastScale;
     BOOL _inFullSizeMode;
+    BOOL _inTransformingState;
+    
+    // Rotation
     BOOL _rotationActive;
 }
 
@@ -289,14 +292,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 
                 if (obj != _transformingItem) 
                 {
-                    ((UIView *)obj).bounds = CGRectMake(0, 0, _itemSize.width, _itemSize.height);
+                    GMGridViewCell *cell = (GMGridViewCell *)obj;
+                    cell.bounds = CGRectMake(0, 0, _itemSize.width, _itemSize.height);
+                    cell.contentView.frame = cell.bounds;
                 }
             }];
         }
         
         // Updating the fullview size
         
-        if (_transformingItem) 
+        if (_transformingItem && _inFullSizeMode) 
         {
             NSInteger position = _transformingItem.tag - kTagOffset;
             CGSize fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:position inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
@@ -952,14 +957,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture
 {
-    if (_inFullSizeMode && [gesture isKindOfClass:[UIPinchGestureRecognizer class]]) 
+    _inFullSizeMode = NO;
+    
+    if (_inTransformingState && [gesture isKindOfClass:[UIPinchGestureRecognizer class]]) 
     {
         _pinchGesture.scale = 2.5;
     }
     
-    if (_inFullSizeMode)
+    if (_inTransformingState)
     {        
-        _inFullSizeMode = NO;
+        _inTransformingState = NO;
         
         CGPoint center = _transformingItem.fullSizeView.center;
         
@@ -1002,7 +1009,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     if ([self isInTransformingState]) 
     {
-        if (_lastScale > 2 && !_inFullSizeMode) 
+        if (_lastScale > 2 && !_inTransformingState) 
         {            
             _lastRotation = 0;
             _lastScale = 1;
@@ -1027,6 +1034,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                              completion:nil
              ];
             
+            _inTransformingState = YES;
             _inFullSizeMode = YES;
             
             if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
@@ -1039,7 +1047,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             [_transformingItem.fullSizeView addGestureRecognizer:_rotationGesture];
             [_transformingItem.fullSizeView addGestureRecognizer:_panGesture];
         }
-        else if (!_inFullSizeMode)
+        else if (!_inTransformingState)
         {
             _lastRotation = 0;
             _lastScale = 1.0;
@@ -1072,6 +1080,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                                  [_scrollView addSubview:transformingView];
                                  
                                  transformingView.fullSizeView = nil;
+                                 _inFullSizeMode = NO;
                                  
                                  if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEndTransformingCell:)])
                                  {

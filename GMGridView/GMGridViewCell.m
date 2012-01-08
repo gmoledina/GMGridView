@@ -105,17 +105,6 @@
     }
 }
 
-- (void)setFrame:(CGRect)frame
-{
-    [super setFrame:frame];
-    
-    if(!self.inFullSizeMode)
-    {
-        self.contentView.frame = self.bounds;
-    }
-}
-
-
 //////////////////////////////////////////////////////////////
 #pragma mark Setters / getters
 //////////////////////////////////////////////////////////////
@@ -129,6 +118,11 @@
     {
         contentView.frame = self.contentView.frame;
     }
+    else
+    {
+        contentView.frame = self.bounds;
+    }
+    
     _contentView = contentView;
     
     self.contentView.autoresizingMask = UIViewAutoresizingNone;
