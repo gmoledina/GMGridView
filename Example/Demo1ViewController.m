@@ -336,11 +336,11 @@
     {
         if (UIInterfaceOrientationIsLandscape(orientation)) 
         {
-            return CGSizeMake(310, 310);
+            return CGSizeMake(320, 210);
         }
         else
         {
-            return CGSizeMake(210, 410);
+            return CGSizeMake(300, 310);
         }
     }
     else
