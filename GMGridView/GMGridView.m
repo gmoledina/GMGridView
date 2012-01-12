@@ -280,6 +280,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 #pragma mark Layout
 //////////////////////////////////////////////////////////////
 
+- (void)applyWithoutAnimation:(void (^)(void))animations {
+    [CATransaction begin];
+    [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+    animations();
+    [CATransaction commit];
+}
+
 - (void)layoutSubviewsWithAnimation:(GMGridViewItemAnimation)animation
 {
     [self recomputeSizeAnimated:!(animation & GMGridViewItemAnimationNone)];
@@ -337,14 +344,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         transition.type = kCATransitionFade;
         [_scrollView.layer addAnimation:transition forKey:@"rotationAnimation"];
         
-        [UIView animateWithDuration:0 
-                              delay:0
-                            options:UIViewAnimationOptionOverrideInheritedDuration
-                         animations:^{
-                             [self layoutSubviewsWithAnimation:GMGridViewItemAnimationNone];
-                         }
-                         completion:nil
-         ];
+        [self applyWithoutAnimation:^{
+            [self layoutSubviewsWithAnimation:GMGridViewItemAnimationNone];
+        }];
     }
     else 
     {
@@ -1143,15 +1145,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGRect frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     
     // To make sure the frame is not animated
-    [UIView animateWithDuration:0 
-                          delay:0 
-                        options:kDefaultAnimationOptions | UIViewAnimationOptionOverrideInheritedDuration 
-                     animations:^{
-                         cell.frame = frame;
-                         cell.contentView.frame = cell.bounds;
-                     } 
-                     completion:nil];
-    
+    [self applyWithoutAnimation:^{
+        cell.frame = frame;
+        cell.contentView.frame = cell.bounds;
+    }];
+
     cell.tag = position + kTagOffset;
     BOOL canEdit = self.editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:position];
     [cell setEditing:canEdit animated:NO];
