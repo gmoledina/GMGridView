@@ -269,12 +269,7 @@
                                      bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
                                      bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
     
-    _numberOfItemsPerColumn = 1;
-    
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing <= actualBounds.size.height)
-    {
-        _numberOfItemsPerColumn++;
-    }
+    _numberOfItemsPerColumn = floor((actualBounds.size.height + self.itemSpacing) / (self.itemSize.height + self.itemSpacing));
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
             
