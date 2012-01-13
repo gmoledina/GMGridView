@@ -367,14 +367,9 @@
 {
     [super rebaseWithItemCount:count insideOfBounds:bounds];
     
-    _numberOfItemsPerRow = 1;
-    
     NSInteger gridContentMaxWidth = self.gridBounds.size.width - self.minEdgeInsets.right - self.minEdgeInsets.left;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing <= gridContentMaxWidth)
-    {
-        _numberOfItemsPerRow++;
-    }
+    _numberOfItemsPerRow = floor((gridContentMaxWidth + self.itemSpacing) / (self.itemSize.width + self.itemSpacing));
     
     _numberOfItemsPerPage = _numberOfItemsPerRow * _numberOfItemsPerColumn;
     _numberOfPages = ceil(self.itemCount * 1.0 / self.numberOfItemsPerPage);
