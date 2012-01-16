@@ -26,7 +26,7 @@
 //  THE SOFTWARE.
 //
 
-#import <Quartzcore/QuartzCore.h>
+#import <QuartzCore/QuartzCore.h>
 #import "UIView+GMGridViewAdditions.h"
 
 @interface UIView (GMGridViewAdditions_Privates)
