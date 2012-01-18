@@ -18,8 +18,8 @@ Same applies to the layout strategy (vertical, horizontal, paged,... and more to
 Many working examples provided in the demo app.
 All the files in the API folder are required. You only need to deal with 2 header files though (the grid and the cell).
 
-Let me know how this component works out for you!
-New feature requests are welcome.
+Let us know how this component works out for you! 
+New feature requests are welcome. (ping @gmoledina or @steipete)
 
 ---
 
@@ -32,6 +32,8 @@ Coming soon:
 - Changing the zoom scale dynamically (when pinching to go fullscreen)
 - API for adding a pageControl
 - More customization options
+
+[Check the develop branch (unstable) for features in development]
 
 ---
 
