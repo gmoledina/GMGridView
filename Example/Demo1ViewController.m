@@ -12,6 +12,7 @@
 #import "OptionsViewController.h"
 
 #define NUMBER_ITEMS_ON_LOAD 250
+#define NUMBER_ITEMS_ON_LOAD2 30
 
 //////////////////////////////////////////////////////////////
 #pragma mark -
@@ -25,6 +26,8 @@
     UIPopoverController *_optionsPopOver;
     
     NSMutableArray *_data;
+    NSMutableArray *_data2;
+    __gm_weak NSMutableArray *_currentData;
     NSInteger _lastDeleteItemIndexAsked;
 }
 
@@ -34,6 +37,7 @@
 - (void)presentInfo;
 - (void)presentOptions:(UIBarButtonItem *)barButton;
 - (void)optionsDoneAction;
+- (void)dataSetChange:(UISegmentedControl *)control;
 
 @end
 
@@ -82,9 +86,17 @@
         
         for (int i = 0; i < NUMBER_ITEMS_ON_LOAD; i ++) 
         {
-            [_data addObject:[NSString stringWithFormat:@"%d", i]];
+            [_data addObject:[NSString stringWithFormat:@"A %d", i]];
         }
         
+        _data2 = [[NSMutableArray alloc] init];
+        
+        for (int i = 0; i < NUMBER_ITEMS_ON_LOAD2; i ++) 
+        {
+            [_data2 addObject:[NSString stringWithFormat:@"B %d", i]];
+        }
+        
+        _currentData = _data;
     }
     
     return self;
@@ -124,6 +136,18 @@
     infoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
     [infoButton addTarget:self action:@selector(presentInfo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:infoButton];
+    
+    UISegmentedControl *dataSegmentedControl = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"DataSet 1", @"DataSet 2", nil]];
+    [dataSegmentedControl sizeToFit];
+    dataSegmentedControl.frame = CGRectMake(5, 
+                                            self.view.bounds.size.height - dataSegmentedControl.bounds.size.height - 5,
+                                            dataSegmentedControl.bounds.size.width, 
+                                            dataSegmentedControl.bounds.size.height);
+    dataSegmentedControl.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+    dataSegmentedControl.tintColor = [UIColor greenColor];
+    dataSegmentedControl.selectedSegmentIndex = 0;
+    [dataSegmentedControl addTarget:self action:@selector(dataSetChange:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:dataSegmentedControl];
     
     
     OptionsViewController *optionsController = [[OptionsViewController alloc] init];
@@ -180,7 +204,7 @@
 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView
 {
-    return [_data count];
+    return [_currentData count];
 }
 
 - (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation
@@ -235,7 +259,7 @@
     
     UILabel *label = [[UILabel alloc] initWithFrame:cell.contentView.bounds];
     label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    label.text = (NSString *)[_data objectAtIndex:index];
+    label.text = (NSString *)[_currentData objectAtIndex:index];
     label.textAlignment = UITextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
     label.textColor = [UIColor blackColor];
@@ -273,7 +297,7 @@
 {
     if (buttonIndex == 1) 
     {
-        [_data removeObjectAtIndex:_lastDeleteItemIndexAsked];
+        [_currentData removeObjectAtIndex:_lastDeleteItemIndexAsked];
         [_gmGridView removeObjectAtIndex:_lastDeleteItemIndexAsked withAnimation:GMGridViewItemAnimationFade];
     }
 }
@@ -315,14 +339,14 @@
 
 - (void)GMGridView:(GMGridView *)gridView moveItemAtIndex:(NSInteger)oldIndex toIndex:(NSInteger)newIndex
 {
-    NSObject *object = [_data objectAtIndex:oldIndex];
-    [_data removeObject:object];
-    [_data insertObject:object atIndex:newIndex];
+    NSObject *object = [_currentData objectAtIndex:oldIndex];
+    [_currentData removeObject:object];
+    [_currentData insertObject:object atIndex:newIndex];
 }
 
 - (void)GMGridView:(GMGridView *)gridView exchangeItemAtIndex:(NSInteger)index1 withItemAtIndex:(NSInteger)index2
 {
-    [_data exchangeObjectAtIndex:index1 withObjectAtIndex:index2];
+    [_currentData exchangeObjectAtIndex:index1 withObjectAtIndex:index2];
 }
 
 
@@ -426,32 +450,32 @@
     // Example: adding object at the last position
     NSString *newItem = [NSString stringWithFormat:@"%d", (int)(arc4random() % 1000)];
     
-    [_data addObject:newItem];
-    [_gmGridView insertObjectAtIndex:[_data count] - 1 withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
+    [_currentData addObject:newItem];
+    [_gmGridView insertObjectAtIndex:[_currentData count] - 1 withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
 }
 
 - (void)removeItem
 {
     // Example: removing last item
-    if ([_data count] > 0) 
+    if ([_currentData count] > 0) 
     {
-        NSInteger index = [_data count] - 1;
+        NSInteger index = [_currentData count] - 1;
         
         [_gmGridView removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
-        [_data removeObjectAtIndex:index];
+        [_currentData removeObjectAtIndex:index];
     }
 }
 
 - (void)refreshItem
 {
     // Example: reloading last item
-    if ([_data count] > 0) 
+    if ([_currentData count] > 0) 
     {
-        int index = [_data count] - 1;
+        int index = [_currentData count] - 1;
         
         NSString *newMessage = [NSString stringWithFormat:@"%d", (arc4random() % 1000)];
         
-        [_data replaceObjectAtIndex:index withObject:newMessage];
+        [_currentData replaceObjectAtIndex:index withObject:newMessage];
         [_gmGridView reloadObjectAtIndex:index withAnimation:GMGridViewItemAnimationFade | GMGridViewItemAnimationScroll];
     }
 }
@@ -467,6 +491,13 @@
                                               otherButtonTitles:nil];
     
     [alertView show];
+}
+
+- (void)dataSetChange:(UISegmentedControl *)control
+{
+    _currentData = ([control selectedSegmentIndex] == 0) ? _data : _data2;
+
+    [_gmGridView reloadData];
 }
 
 - (void)presentOptions:(UIBarButtonItem *)barButton
