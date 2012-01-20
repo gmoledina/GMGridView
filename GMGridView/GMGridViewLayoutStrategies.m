@@ -407,8 +407,8 @@
         _edgeInsets = self.minEdgeInsets;
     }
     
-    _contentSize = CGSizeMake((onePageSize.width  + self.edgeInsets.left + self.edgeInsets.right) * self.numberOfPages, 
-                              onePageSize.height + self.edgeInsets.top  + self.edgeInsets.bottom);
+    _contentSize = CGSizeMake(bounds.size.width * self.numberOfPages, 
+                              bounds.size.height);
 }
 
 - (NSInteger)pageForItemAtIndex:(NSInteger)index
