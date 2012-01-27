@@ -91,6 +91,7 @@ typedef enum
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
+- (GMGridViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier;
 
 // Cells
 - (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded for the specific index

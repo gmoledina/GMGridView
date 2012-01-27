@@ -1399,6 +1399,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return cell;
 }
 
+- (GMGridViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier
+{
+    for (GMGridViewCell *reusableCell in [_reusableCells allObjects]) {
+        if ([reusableCell.reuseIdentifier isEqualToString:identifier]) {
+            [_reusableCells removeObject:reusableCell];
+            return reusableCell;
+        }
+    }
+    
+    return nil;
+}
+
 //////////////////////////////////////////////////////////////
 #pragma mark public methods
 //////////////////////////////////////////////////////////////
