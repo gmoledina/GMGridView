@@ -1,4 +1,4 @@
-#GM-GRID-VIEW
+#[GM-GRID-VIEW](http://www.gmoledina.ca/projects/gmgridview/)
 
 "Definitely looks like one to watch" [ManiacDev.com]
 
@@ -24,6 +24,7 @@ New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledin
 
 Fresh from the baking oven:
 
+*  The component now inherits from UIScrollView and changing the scroll delegate is now allowed
 *  Support for different item sizes per interface orientation
 *  Support for iOS 4
 *  Paging!! 2 horizontally paged layout strategies added
@@ -32,7 +33,6 @@ Fresh from the baking oven:
 Coming soon:
 
 *  Changing the zoom scale dynamically (when pinching to go fullscreen)
-*  API for adding a pageControl
 *  More customization options
 
 ---
@@ -47,6 +47,7 @@ Features - General:
 
 *  Works on both the iPhone and iPad (best suited for iPad)
 *  Works on both portrait and landscape orientation
+*  Inherits from UIScrollView - you can override the UIScrollViewDelegate if you wish
 *  Reusable cells
 *  Edit mode to delete cells
 *  Gestures work great inside of the scrollView

@@ -1164,7 +1164,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             BOOL canDelete = YES;
             if ([weakSelf.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex:)]) 
             {
-                canDelete = [weakSelf.dataSource GMGridView:self canDeleteItemAtIndex:index];
+                canDelete = [weakSelf.dataSource GMGridView:weakSelf canDeleteItemAtIndex:index];
             }
             
             if (canDelete && [weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]) 
