@@ -1402,14 +1402,23 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (GMGridViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier
 {
-    for (GMGridViewCell *reusableCell in [_reusableCells allObjects]) {
-        if ([reusableCell.reuseIdentifier isEqualToString:identifier]) {
-            [_reusableCells removeObject:reusableCell];
-            return reusableCell;
+    GMGridViewCell *cell = nil;
+    
+    for (GMGridViewCell *reusableCell in [_reusableCells allObjects]) 
+    {
+        if ([reusableCell.reuseIdentifier isEqualToString:identifier]) 
+        {
+            cell = reusableCell;
+            break;
         }
     }
     
-    return nil;
+    if (cell) 
+    {
+        [_reusableCells removeObject:cell];
+    }
+    
+    return cell;
 }
 
 //////////////////////////////////////////////////////////////

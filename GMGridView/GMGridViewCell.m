@@ -56,6 +56,7 @@
 @synthesize deleteBlock = _deleteBlock;
 @synthesize deleteButtonIcon = _deleteButtonIcon;
 @synthesize deleteButtonOffset;
+@synthesize reuseIdentifier;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors
