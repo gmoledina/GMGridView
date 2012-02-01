@@ -61,7 +61,7 @@ typedef enum
 #pragma mark Interface GMGridView
 //////////////////////////////////////////////////////////////
 
-@interface GMGridView : UIView
+@interface GMGridView : UIScrollView
 
 // Delegates
 @property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewDataSource> *dataSource;                    // Required
@@ -84,10 +84,8 @@ typedef enum
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
-@property (nonatomic) BOOL showsVerticalScrollIndicator;              // Default is YES
-@property (nonatomic) BOOL showsHorizontalScrollIndicator;            // Default is YES
-@property (nonatomic, readonly) UIScrollView *scrollView;             // Messing with the scrollView can lead to unexpected behavior. Avoid changing any 
-                                                                      // properties or changing its delegate. You have been warned.
+
+@property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
