@@ -32,7 +32,7 @@
 #import "GMGridViewLayoutStrategies.h"
 #import "UIGestureRecognizer+GMGridViewAdditions.h"
 
-static const NSUInteger kTagOffset = 50;
+static const NSInteger kTagOffset = 50;
 static const CGFloat kDefaultAnimationDuration = 0.3;
 static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction;
 
@@ -429,7 +429,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         for (GMGridViewCell *cell in [self itemSubviews]) 
         {
-            NSUInteger index = [self positionForItemSubview:cell];
+            NSInteger index = [self positionForItemSubview:cell];
             if (index != GMGV_INVALID_POSITION)
             {
                 BOOL allowEdit = editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
@@ -1296,8 +1296,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSRange loadedPositionsRange = NSMakeRange(self.firstPositionLoaded, self.lastPositionLoaded - self.firstPositionLoaded);
     
     // calculate new position range
-    self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, rangeOfPositions.location);
-    self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, rangeOfPositions.length + rangeOfPositions.location);
+    self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, (NSInteger)rangeOfPositions.location);
+    self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, (NSInteger)(rangeOfPositions.length + rangeOfPositions.location));
     
     // remove now invisible items
     [self setSubviewsCacheAsInvalid];
@@ -1306,7 +1306,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     // add new cells
     BOOL forceLoad = self.firstPositionLoaded == GMGV_INVALID_POSITION || self.lastPositionLoaded == GMGV_INVALID_POSITION;
     NSInteger positionToLoad;
-    for (int i = 0; i < rangeOfPositions.length; i++) 
+    for (NSUInteger i = 0; i < rangeOfPositions.length; i++) 
     {
         positionToLoad = i + rangeOfPositions.location;
         
@@ -1327,9 +1327,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: self.contentOffset];
     GMGridViewCell *cell;
     
-    if (rangeOfPositions.location > self.firstPositionLoaded) 
+    if ((NSInteger)rangeOfPositions.location > self.firstPositionLoaded) 
     {
-        for (int i = self.firstPositionLoaded; i < rangeOfPositions.location; i++) 
+        for (NSInteger i = self.firstPositionLoaded; i < (NSInteger)rangeOfPositions.location; i++) 
         {
             cell = [self cellForItemAtIndex:i];
             if(cell)
@@ -1343,9 +1343,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self setSubviewsCacheAsInvalid];
     }
     
-    if (NSMaxRange(rangeOfPositions) < self.lastPositionLoaded) 
+    if ((NSInteger)NSMaxRange(rangeOfPositions) < self.lastPositionLoaded) 
     {
-        for (int i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
+        for (NSInteger i = NSMaxRange(rangeOfPositions); i <= self.lastPositionLoaded; i++)
         {
             cell = [self cellForItemAtIndex:i];
             if(cell)
