@@ -456,6 +456,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 
                 NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
                 
+                // Ask the delegate if moving is permitted
+                if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:atIndex:)])
+                {
+                    GMGridViewCell *item = [self cellForItemAtIndex:position];
+                    if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item atIndex:position])
+                        position = GMGV_INVALID_POSITION;
+                }
+
                 if (position != GMGV_INVALID_POSITION) 
                 {
                     [self sortingMoveDidStartAtPoint:location];
@@ -671,6 +679,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     int position = [self.layoutStrategy itemPositionFromLocation:point];
     int tag = position + kTagOffset;
     
+    // Ask the delegate if inserting item is permitted
+    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:toIndex:)])
+    {
+        GMGridViewCell *item = [self cellForItemAtIndex:position];
+        if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item toIndex:position])
+            position = GMGV_INVALID_POSITION;
+    }
+
     if (position != GMGV_INVALID_POSITION && position != _sortFuturePosition && position < _numberTotalItems) 
     {
         BOOL positionTaken = NO;
