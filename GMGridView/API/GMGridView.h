@@ -112,7 +112,7 @@ typedef enum
 @optional
 // Required to enable editing mode
 - (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index;
-
+- (BOOL)GMGridView:(GMGridView *)gridView shouldEditItemAtIndex:(NSInteger)index;
 @end
 
 

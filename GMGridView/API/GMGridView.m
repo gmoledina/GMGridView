@@ -353,9 +353,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
+        NSInteger index = 0;
         for (GMGridViewCell *cell in [self itemSubviews]) 
         {
-            [cell setEditing:editing];
+            if (editing && [self.dataSource respondsToSelector:@selector(GMGridView:shouldEditItemAtIndex:)])
+            {
+                if ([self.dataSource GMGridView:self shouldEditItemAtIndex:index])
+                {
+                    [cell setEditing:editing];
+                }
+            } 
+            else
+            {
+                [cell setEditing:editing];
+            }
+            
+            index++;
         }
         
         _editing = editing;
