@@ -132,6 +132,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 @implementation GMGridView
 
+@synthesize didLongTouchOnItemBlock = _didLongTouchOnItemBlock;
+
 @synthesize sortingDelegate = _sortingDelegate, dataSource = _dataSource, transformDelegate = _transformDelegate, actionDelegate = _actionDelegate;
 @synthesize mainSuperView = _mainSuperView;
 @synthesize layoutStrategy = _layoutStrategy;
@@ -413,7 +415,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _sortingLongPressGesture)
     {
-        valid = !isScrolling && !self.isEditing && (self.sortingDelegate != nil);
+        valid = !isScrolling && !self.isEditing && ((self.sortingDelegate != nil) || (_didLongTouchOnItemBlock != NULL));
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -450,19 +452,31 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         case UIGestureRecognizerStateBegan:
         {
-            if (!_sortMovingItem) 
-            { 
-                CGPoint location = [longPressGesture locationInView:_scrollView];
-                
-                NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
-                
-                if (position != GMGV_INVALID_POSITION) 
-                {
-                    [self sortingMoveDidStartAtPoint:location];
-                }
-            }
-            
-            break;
+			if (_didLongTouchOnItemBlock != NULL)
+			{
+				CGPoint location = [longPressGesture locationInView:_scrollView];
+				
+				NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
+				
+				if (position != GMGV_INVALID_POSITION)
+					_didLongTouchOnItemBlock(position);
+			}
+			else
+			{
+				if (!_sortMovingItem) 
+				{ 
+					CGPoint location = [longPressGesture locationInView:_scrollView];
+					
+					NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
+					
+					if (position != GMGV_INVALID_POSITION) 
+					{
+						[self sortingMoveDidStartAtPoint:location];
+					}
+				}
+			}
+			
+			break;
         }
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:

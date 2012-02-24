@@ -42,6 +42,7 @@ typedef enum
     GMGridViewStyleSwap
 } GMGridViewStyle;
 
+typedef void (^ DidLongTouchOnItemBlock)(int index);
 
 //////////////////////////////////////////////////////////////
 #pragma mark Interface GMGridView
@@ -51,6 +52,9 @@ typedef enum
 {
     
 }
+
+// Blocks
+@property (nonatomic, copy) DidLongTouchOnItemBlock didLongTouchOnItemBlock;
 
 // Delegates
 @property (nonatomic, gm_weak) NSObject<GMGridViewDataSource> *dataSource;                    // Required
