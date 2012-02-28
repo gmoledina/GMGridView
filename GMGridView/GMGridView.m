@@ -136,7 +136,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize sortingDelegate = _sortingDelegate, dataSource = _dataSource, transformDelegate = _transformDelegate, actionDelegate = _actionDelegate;
 @synthesize mainSuperView = _mainSuperView;
 @synthesize layoutStrategy = _layoutStrategy;
-@synthesize itemSpacing = _itemSpacing;
+@synthesize horizontalItemSpacing = _horizontalItemSpacing;
+@synthesize verticalItemSpacing = _verticalItemSpacing;
 @synthesize style = _style;
 @synthesize minimumPressDuration;
 @synthesize centerGrid = _centerGrid;
@@ -238,7 +239,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     self.mainSuperView = self;
     self.editing = NO;
-    self.itemSpacing = 10;
+    self.horizontalItemSpacing = 10;
+	self.verticalItemSpacing = 10;
     self.style = GMGridViewStyleSwap;
     self.minimumPressDuration = 0.2;
     self.showFullSizeViewWithAlphaWhenTransforming = YES;
@@ -388,9 +390,15 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setNeedsLayout];
 }
 
-- (void)setItemSpacing:(NSInteger)itemSpacing
+- (void)setHorizontalItemSpacing:(NSInteger)itemSpacing
 {
-    _itemSpacing = itemSpacing;
+    _horizontalItemSpacing = itemSpacing;
+    [self setNeedsLayout];
+}
+
+- (void)setVerticalItemSpacing:(NSInteger)itemSpacing
+{
+    _verticalItemSpacing = itemSpacing;
     [self setNeedsLayout];
 }
 
@@ -1217,7 +1225,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)recomputeSizeAnimated:(BOOL)animated
 {
-    [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
+    [self.layoutStrategy setupItemSize:_itemSize horizontalItemSpacing:self.horizontalItemSpacing verticalItemSpacing:self.verticalItemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
     [self.layoutStrategy rebaseWithItemCount:_numberTotalItems insideOfBounds:self.bounds];
     
     CGSize contentSize = [self.layoutStrategy contentSize];

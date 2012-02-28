@@ -68,25 +68,27 @@
 
 @implementation GMGridViewLayoutStrategyBase
 
-@synthesize type          = _type;
+@synthesize type                  = _type;
 
-@synthesize itemSize      = _itemSize;
-@synthesize itemSpacing   = _itemSpacing;
-@synthesize minEdgeInsets = _minEdgeInsets;
-@synthesize centeredGrid  = _centeredGrid;
+@synthesize itemSize              = _itemSize;
+@synthesize horizontalItemSpacing = _horizontalItemSpacing;
+@synthesize verticalItemSpacing   = _verticalItemSpacing;
+@synthesize minEdgeInsets         = _minEdgeInsets;
+@synthesize centeredGrid          = _centeredGrid;
 
-@synthesize itemCount     = _itemCount;
-@synthesize edgeInsets    = _edgeInsets;
-@synthesize gridBounds    = _gridBounds;
-@synthesize contentSize   = _contentSize;
+@synthesize itemCount             = _itemCount;
+@synthesize edgeInsets            = _edgeInsets;
+@synthesize gridBounds            = _gridBounds;
+@synthesize contentSize           = _contentSize;
 
 
-- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered
+- (void)setupItemSize:(CGSize)itemSize horizontalItemSpacing:(NSInteger)hSpacing verticalItemSpacing:(NSInteger)vSpacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
 {
-    _itemSize      = itemSize;
-    _itemSpacing   = spacing;
-    _minEdgeInsets = edgeInsets;
-    _centeredGrid  = centered;
+    _itemSize              = itemSize;
+    _horizontalItemSpacing = hSpacing;
+	_verticalItemSpacing   = vSpacing;
+    _minEdgeInsets         = edgeInsets;
+    _centeredGrid          = centered;
 }
 
 - (void)setEdgeAndContentSizeFromAbsoluteContentSize:(CGSize)actualContentSize
@@ -155,15 +157,15 @@
     
     _numberOfItemsPerRow = 1;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing <= actualBounds.size.width)
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.horizontalItemSpacing) - self.horizontalItemSpacing <= actualBounds.size.width)
     {
         _numberOfItemsPerRow++;
     }
     
     NSInteger numberOfRows = ceil(self.itemCount / (1.0 * self.numberOfItemsPerRow));
     
-    CGSize actualContentSize = CGSizeMake(ceil(MIN(self.itemCount, self.numberOfItemsPerRow) * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
-                               ceil(numberOfRows * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    CGSize actualContentSize = CGSizeMake(ceil(MIN(self.itemCount, self.numberOfItemsPerRow) * (self.itemSize.width + self.horizontalItemSpacing)) - self.horizontalItemSpacing, 
+                               ceil(numberOfRows * (self.itemSize.height + self.verticalItemSpacing)) - self.verticalItemSpacing);
     
     [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
 }
@@ -177,8 +179,8 @@
         NSUInteger col = position % self.numberOfItemsPerRow; 
         NSUInteger row = position / self.numberOfItemsPerRow;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing) + self.edgeInsets.left,
-                             row * (self.itemSize.height + self.itemSpacing) + self.edgeInsets.top);
+        origin = CGPointMake(col * (self.itemSize.width + self.horizontalItemSpacing) + self.edgeInsets.left,
+                             row * (self.itemSize.height + self.verticalItemSpacing) + self.edgeInsets.top);
     }
     
     return origin;
@@ -189,8 +191,8 @@
     CGPoint relativeLocation = CGPointMake(location.x - self.edgeInsets.left,
                                            location.y - self.edgeInsets.top);
     
-    int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
-    int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
+    int col = (int) (relativeLocation.x / (self.itemSize.width + self.horizontalItemSpacing)); 
+    int row = (int) (relativeLocation.y / (self.itemSize.height + self.verticalItemSpacing));
     
     int position = col + row * self.numberOfItemsPerRow;
     
@@ -220,7 +222,7 @@
     CGPoint contentOffset = CGPointMake(MAX(0, offset.x), 
                                         MAX(0, offset.y));
     
-    CGFloat itemHeight = self.itemSize.height + self.itemSpacing;
+    CGFloat itemHeight = self.itemSize.height + self.verticalItemSpacing;
     
     CGFloat firstRow = MAX(0, (int)(contentOffset.y / itemHeight) - 1);
 
@@ -271,15 +273,15 @@
     
     _numberOfItemsPerColumn = 1;
     
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing <= actualBounds.size.height)
+    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.verticalItemSpacing) - self.verticalItemSpacing <= actualBounds.size.height)
     {
         _numberOfItemsPerColumn++;
     }
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
             
-    CGSize actualContentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
-                               ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
+    CGSize actualContentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.horizontalItemSpacing)) - self.horizontalItemSpacing, 
+                               ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.verticalItemSpacing)) - self.verticalItemSpacing);
     
     [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
 }
@@ -293,8 +295,8 @@
         NSUInteger col = position / self.numberOfItemsPerColumn; 
         NSUInteger row = position % self.numberOfItemsPerColumn;
         
-        origin = CGPointMake(col * (self.itemSize.width + self.itemSpacing) + self.edgeInsets.left,
-                             row * (self.itemSize.height + self.itemSpacing) + self.edgeInsets.top);
+        origin = CGPointMake(col * (self.itemSize.width + self.horizontalItemSpacing) + self.edgeInsets.left,
+                             row * (self.itemSize.height + self.verticalItemSpacing) + self.edgeInsets.top);
     }
     
     return origin;
@@ -305,8 +307,8 @@
     CGPoint relativeLocation = CGPointMake(location.x - self.edgeInsets.left,
                                            location.y - self.edgeInsets.top);
 
-    int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
-    int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
+    int col = (int) (relativeLocation.x / (self.itemSize.width + self.horizontalItemSpacing)); 
+    int row = (int) (relativeLocation.y / (self.itemSize.height + self.verticalItemSpacing));
     
     int position = row + col * self.numberOfItemsPerColumn;
     
@@ -336,7 +338,7 @@
     CGPoint contentOffset = CGPointMake(MAX(0, offset.x), 
                                         MAX(0, offset.y));
     
-    CGFloat itemWidth = self.itemSize.width + self.itemSpacing;
+    CGFloat itemWidth = self.itemSize.width + self.horizontalItemSpacing;
     
     CGFloat firstCol = MAX(0, (int)(contentOffset.x / itemWidth) - 1);
     
@@ -376,7 +378,7 @@
     
     NSInteger gridContentMaxWidth = self.gridBounds.size.width - self.minEdgeInsets.right - self.minEdgeInsets.left;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing <= gridContentMaxWidth)
+    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.horizontalItemSpacing) - self.horizontalItemSpacing <= gridContentMaxWidth)
     {
         _numberOfItemsPerRow++;
     }
@@ -384,8 +386,8 @@
     _numberOfItemsPerPage = _numberOfItemsPerRow * _numberOfItemsPerColumn;
     _numberOfPages = ceil(self.itemCount * 1.0 / self.numberOfItemsPerPage);
     
-    CGSize onePageSize = CGSizeMake(self.numberOfItemsPerRow * (self.itemSize.width + self.itemSpacing) - self.itemSpacing, 
-                                    self.numberOfItemsPerColumn * (self.itemSize.height + self.itemSpacing) - self.itemSpacing);
+    CGSize onePageSize = CGSizeMake(self.numberOfItemsPerRow * (self.itemSize.width + self.horizontalItemSpacing) - self.horizontalItemSpacing, 
+                                    self.numberOfItemsPerColumn * (self.itemSize.height + self.verticalItemSpacing) - self.verticalItemSpacing);
     
     if (self.centeredGrid)
     {
@@ -421,8 +423,8 @@
     CGPoint offset = CGPointMake(page * self.gridBounds.size.width, 
                                  0);
     
-    CGFloat x = column * (self.itemSize.width + self.itemSpacing) + self.edgeInsets.left;
-    CGFloat y = row * (self.itemSize.height + self.itemSpacing) + self.edgeInsets.top;
+    CGFloat x = column * (self.itemSize.width + self.horizontalItemSpacing) + self.edgeInsets.left;
+    CGFloat y = row * (self.itemSize.height + self.verticalItemSpacing) + self.edgeInsets.top;
     
     return CGPointMake(x + offset.x, 
                        y + offset.y);
@@ -472,8 +474,8 @@
     CGPoint relativeLocation = CGPointMake(location.x - originForFirstItemInPage.x,
                                            location.y - originForFirstItemInPage.y);
 
-    int col = (int) (relativeLocation.x / (self.itemSize.width + self.itemSpacing)); 
-    int row = (int) (relativeLocation.y / (self.itemSize.height + self.itemSpacing));
+    int col = (int) (relativeLocation.x / (self.itemSize.width + self.horizontalItemSpacing)); 
+    int row = (int) (relativeLocation.y / (self.itemSize.height + self.verticalItemSpacing));
     
     int position = [self positionForItemAtColumn:col row:row page:page];
  

@@ -64,7 +64,7 @@ typedef enum {
 - (GMGridViewLayoutStrategyType)type;
 
 // Setup
-- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
+- (void)setupItemSize:(CGSize)itemSize horizontalItemSpacing:(NSInteger)hSpacing verticalItemSpacing:(NSInteger)vSpacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
 
 // Recomputing
 - (void)rebaseWithItemCount:(NSInteger)count insideOfBounds:(CGRect)bounds;
@@ -91,7 +91,8 @@ typedef enum {
     
     // All of these vars should be set in the setup method of the child class
     CGSize _itemSize;
-    NSInteger _itemSpacing;
+    NSInteger _horizontalItemSpacing;
+    NSInteger _verticalItemSpacing;
     UIEdgeInsets _minEdgeInsets;
     BOOL _centeredGrid;
     
@@ -105,7 +106,8 @@ typedef enum {
 @property (nonatomic, readonly) GMGridViewLayoutStrategyType type;
 
 @property (nonatomic, readonly) CGSize itemSize;
-@property (nonatomic, readonly) NSInteger itemSpacing;
+@property (nonatomic, readonly) NSInteger horizontalItemSpacing;
+@property (nonatomic, readonly) NSInteger verticalItemSpacing;
 @property (nonatomic, readonly) UIEdgeInsets minEdgeInsets;
 @property (nonatomic, readonly) BOOL centeredGrid;
 
@@ -115,7 +117,7 @@ typedef enum {
 @property (nonatomic, readonly) CGSize contentSize;
 
 // Protocol methods implemented in base class
-- (void)setupItemSize:(CGSize)itemSize andItemSpacing:(NSInteger)spacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
+- (void)setupItemSize:(CGSize)itemSize horizontalItemSpacing:(NSInteger)hSpacing verticalItemSpacing:(NSInteger)vSpacing withMinEdgeInsets:(UIEdgeInsets)edgeInsets andCenteredGrid:(BOOL)centered;
 
 // Helpers
 - (void)setEdgeAndContentSizeFromAbsoluteContentSize:(CGSize)actualContentSize;
