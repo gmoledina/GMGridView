@@ -1418,12 +1418,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         CGSize pageSize = CGSizeMake(_scrollView.bounds.size.width  - _scrollView.contentInset.left - _scrollView.contentInset.right, 
                                      _scrollView.bounds.size.height - _scrollView.contentInset.top  - _scrollView.contentInset.bottom);
         
-        while (originScroll.x + pageSize.width < origin.x) 
+        while (originScroll.x + pageSize.width <= origin.x) 
         {
             originScroll.x += pageSize.width;
         }
         
-        while (originScroll.y + pageSize.height < origin.y) 
+        while (originScroll.y + pageSize.height <= origin.y) 
         {
             originScroll.y += pageSize.height;
         }
