@@ -159,94 +159,104 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return [self initWithFrame:CGRectZero];
 }
 
-- (id)initWithFrame:(CGRect)frame 
-{
-    if ((self = [super initWithFrame:frame])) 
+- (void)loadContentViews {
+    _scrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
+    _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _scrollView.backgroundColor = [UIColor clearColor];
+    _scrollView.delegate = self;
+    [self addSubview:_scrollView];
+    
+    _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
+    _tapGesture.delegate = self;
+    _tapGesture.numberOfTapsRequired = 1;
+    _tapGesture.numberOfTouchesRequired = 1;
+    [_scrollView addGestureRecognizer:_tapGesture];
+    
+    /////////////////////////////
+    // Transformation gestures :
+    _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
+    _pinchGesture.delegate = self;
+    [self addGestureRecognizer:_pinchGesture];
+    
+    _rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureUpdated:)];
+    _rotationGesture.delegate = self;
+    [self addGestureRecognizer:_rotationGesture];
+    
+    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
+    _panGesture.delegate = self;
+    [_panGesture setMaximumNumberOfTouches:2];
+    [_panGesture setMinimumNumberOfTouches:2];
+    [self addGestureRecognizer:_panGesture];
+    
+    //////////////////////
+    // Sorting gestures :
+    
+    _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
+    _sortingPanGesture.delegate = self;
+    [_scrollView addGestureRecognizer:_sortingPanGesture];
+    
+    _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
+    _sortingLongPressGesture.numberOfTouchesRequired = 1;
+    _sortingLongPressGesture.delegate = self;
+    [_scrollView addGestureRecognizer:_sortingLongPressGesture];
+    
+    ////////////////////////
+    // Gesture dependencies
+    UIPanGestureRecognizer *panGestureRecognizer = nil;
+    if ([_scrollView respondsToSelector:@selector(panGestureRecognizer)]) // iOS5 only
+    { 
+        panGestureRecognizer = _scrollView.panGestureRecognizer;
+    }
+    else 
     {
-        _scrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
-        _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        _scrollView.backgroundColor = [UIColor clearColor];
-        _scrollView.delegate = self;
-        [self addSubview:_scrollView];
-        
-        _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
-        _tapGesture.delegate = self;
-        _tapGesture.numberOfTapsRequired = 1;
-        _tapGesture.numberOfTouchesRequired = 1;
-        [_scrollView addGestureRecognizer:_tapGesture];
-        
-        /////////////////////////////
-        // Transformation gestures :
-        _pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureUpdated:)];
-        _pinchGesture.delegate = self;
-        [self addGestureRecognizer:_pinchGesture];
-        
-        _rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureUpdated:)];
-        _rotationGesture.delegate = self;
-        [self addGestureRecognizer:_rotationGesture];
-        
-        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureUpdated:)];
-        _panGesture.delegate = self;
-        [_panGesture setMaximumNumberOfTouches:2];
-        [_panGesture setMinimumNumberOfTouches:2];
-        [self addGestureRecognizer:_panGesture];
-        
-        //////////////////////
-        // Sorting gestures :
-        
-        _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
-        _sortingPanGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_sortingPanGesture];
-        
-        _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
-        _sortingLongPressGesture.numberOfTouchesRequired = 1;
-        _sortingLongPressGesture.delegate = self;
-        [_scrollView addGestureRecognizer:_sortingLongPressGesture];
-
-        ////////////////////////
-        // Gesture dependencies
-        UIPanGestureRecognizer *panGestureRecognizer = nil;
-        if ([_scrollView respondsToSelector:@selector(panGestureRecognizer)]) // iOS5 only
+        for (UIGestureRecognizer *gestureRecognizer in _scrollView.gestureRecognizers) 
         { 
-            panGestureRecognizer = _scrollView.panGestureRecognizer;
-        }
-        else 
-        {
-            for (UIGestureRecognizer *gestureRecognizer in _scrollView.gestureRecognizers) 
-            { 
-                if ([gestureRecognizer  isKindOfClass:NSClassFromString(@"UIScrollViewPanGestureRecognizer")]) 
-                {
-                    panGestureRecognizer = (UIPanGestureRecognizer *) gestureRecognizer;
-                }
+            if ([gestureRecognizer  isKindOfClass:NSClassFromString(@"UIScrollViewPanGestureRecognizer")]) 
+            {
+                panGestureRecognizer = (UIPanGestureRecognizer *) gestureRecognizer;
             }
         }
-        [panGestureRecognizer setMaximumNumberOfTouches:1];
-        [panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
+    }
+    [panGestureRecognizer setMaximumNumberOfTouches:1];
+    [panGestureRecognizer requireGestureRecognizerToFail:_sortingPanGesture];
+    
+    self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
+    
+    self.mainSuperView = self;
+    self.editing = NO;
+    self.itemSpacing = 10;
+    self.style = GMGridViewStyleSwap;
+    self.minimumPressDuration = 0.2;
+    self.showFullSizeViewWithAlphaWhenTransforming = YES;
+    self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+    self.clipsToBounds = NO;
+    
+    _sortFuturePosition = GMGV_INVALID_POSITION;
+    _itemSize = CGSizeZero;
+    
+    _lastScale = 1.0;
+    _lastRotation = 0.0;
+    
+    _minPossibleContentOffset = CGPointMake(0, 0);
+    _maxPossibleContentOffset = CGPointMake(0, 0);
+    
+    _reusableCells = [[NSMutableSet alloc] init];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+}
 
-        self.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
-        
-        self.mainSuperView = self;
-        self.editing = NO;
-        self.itemSpacing = 10;
-        self.style = GMGridViewStyleSwap;
-        self.minimumPressDuration = 0.2;
-        self.showFullSizeViewWithAlphaWhenTransforming = YES;
-        self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-        self.clipsToBounds = NO;
-        
-        _sortFuturePosition = GMGV_INVALID_POSITION;
-        _itemSize = CGSizeZero;
-        
-        _lastScale = 1.0;
-        _lastRotation = 0.0;
-        
-        _minPossibleContentOffset = CGPointMake(0, 0);
-        _maxPossibleContentOffset = CGPointMake(0, 0);
-        
-        _reusableCells = [[NSMutableSet alloc] init];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if ((self = [super initWithCoder:aDecoder])) {
+        [self loadContentViews];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(CGRect)frame 
+{
+    if ((self = [super initWithFrame:frame])) {
+        [self loadContentViews];
     }
     return self;
 }
