@@ -391,6 +391,7 @@ typedef enum {
             self.gridView.layoutStrategy = [GMGridViewLayoutStrategyFactory strategyFromType:GMGridViewLayoutVertical];
             break;
     }
+    [self.gridView layoutSubviewsWithAnimation:GMGridViewItemAnimationFade];
 }
 
 - (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
@@ -436,6 +437,7 @@ typedef enum {
 {
     self.gridView.editing = control.on;
     control.on = self.gridView.isEditing;
+    [self.gridView layoutSubviewsWithAnimation:GMGridViewItemAnimationFade];
 }
 
 - (void)sortStyleSegmentedControlChanged:(UISegmentedControl *)control
@@ -455,16 +457,19 @@ typedef enum {
 - (void)layoutCenterSwitchChanged:(UISwitch *)control
 {
     self.gridView.centerGrid = control.on;
+    [self.gridView layoutSubviewsWithAnimation:GMGridViewItemAnimationFade];
 }
 
 - (void)layoutSpacingSliderChanged:(UISlider *)control
 {
     self.gridView.itemSpacing = control.value;
+    [self.gridView layoutSubviewsWithAnimation:GMGridViewItemAnimationFade];
 }
 
 - (void)layoutInsetsSliderChanged:(UISlider *)control
 {
     self.gridView.minEdgeInsets = UIEdgeInsetsMake(control.value, control.value, control.value, control.value);
+    [self.gridView layoutSubviewsWithAnimation:GMGridViewItemAnimationFade];
 }
 
 - (void)debugGridBackgroundSwitchChanged:(UISwitch *)control

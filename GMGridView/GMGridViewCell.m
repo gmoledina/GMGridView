@@ -30,19 +30,17 @@
 #import "UIView+GMGridViewAdditions.h"
 
 //////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark Interface Private
+#pragma mark - Interface Private
 //////////////////////////////////////////////////////////////
 
-@interface GMGridViewCell (Privates) 
+@interface GMGridViewCell(Private)
 
 - (void)actionDelete;
 
 @end
 
 //////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark Implementation GMGridViewCell
+#pragma mark - Implementation GMGridViewCell
 //////////////////////////////////////////////////////////////
 
 @implementation GMGridViewCell
@@ -58,6 +56,7 @@
 @synthesize deleteBlock = _deleteBlock;
 @synthesize deleteButtonIcon = _deleteButtonIcon;
 @synthesize deleteButtonOffset;
+@synthesize reuseIdentifier;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors
@@ -65,11 +64,7 @@
 
 - (id)init
 {
-    if (self = [self initWithFrame:CGRectZero]) 
-    {
-
-    }
-    return self;
+    return self = [self initWithFrame:CGRectZero];
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -94,7 +89,7 @@
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark 
+#pragma mark UIView
 //////////////////////////////////////////////////////////////
 
 - (void)layoutSubviews
@@ -124,6 +119,11 @@
     {
         contentView.frame = self.contentView.frame;
     }
+    else
+    {
+        contentView.frame = self.bounds;
+    }
+    
     _contentView = contentView;
     
     self.contentView.autoresizingMask = UIViewAutoresizingNone;
@@ -165,18 +165,28 @@
 
 - (void)setEditing:(BOOL)editing
 {
-    _editing = editing;
-    
-    [UIView animateWithDuration:0.2 
-                          delay:0 
-                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseOut
-                     animations:^{
-                         self.deleteButton.alpha = editing ? 1 : 0;
-                     } 
-                     completion:nil];
-    
-    self.contentView.userInteractionEnabled = !editing;
-    [self shakeStatus:editing];
+    [self setEditing:editing animated:NO];
+}
+
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+{
+    if (editing != _editing) {
+        _editing = editing;
+        if (animated) {
+            [UIView animateWithDuration:0.2f
+                                  delay:0.f
+                                options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseOut
+                             animations:^{
+                                 self.deleteButton.alpha = editing ? 1.f : 0.f;
+                             }
+                             completion:nil];
+        }else {
+            self.deleteButton.alpha = editing ? 1.f : 0.f;
+        }
+
+        self.contentView.userInteractionEnabled = !editing;
+        [self shakeStatus:editing];
+    }
 }
 
 - (void)setDeleteButtonOffset:(CGPoint)offset
