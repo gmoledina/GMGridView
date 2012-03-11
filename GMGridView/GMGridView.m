@@ -111,6 +111,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position;
 - (NSInteger)positionForItemSubview:(GMGridViewCell *)view;
 - (void)setSubviewsCacheAsInvalid;
+- (CGRect)rectForPoint:(CGPoint)point inPaggingMode:(BOOL)pagging;
 
 // Lazy loading
 - (void)loadRequiredItems;
@@ -121,7 +122,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)receivedMemoryWarningNotification:(NSNotification *)notification;
 
 // Rotation handling
-- (void)willRotate:(NSNotification *)notification;
+- (void)receivedWillRotateNotification:(NSNotification *)notification;
 
 @end
 
@@ -258,7 +259,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _reusableCells = [[NSMutableSet alloc] init];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarningNotification:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedWillRotateNotification:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
 }
 
 - (void)dealloc
@@ -342,6 +343,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self applyWithoutAnimation:^{
             [self layoutSubviewsWithAnimation:GMGridViewItemAnimationNone];
         }];
+        
+        // Fixing the contentOffset when pagging enabled
+        
+        if (self.pagingEnabled) 
+        {
+            [self setContentOffset:[self rectForPoint:self.contentOffset inPaggingMode:YES].origin animated:YES];
+        }
     }
     else 
     {
@@ -359,11 +367,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [_reusableCells removeAllObjects];
 }
 
-- (void)willRotate:(NSNotification *)notification
+- (void)receivedWillRotateNotification:(NSNotification *)notification
 {
     _rotationActive = YES;
 }
-
 
 //////////////////////////////////////////////////////////////
 #pragma mark Setters / getters
@@ -1101,7 +1108,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 }
 
 //////////////////////////////////////////////////////////////
-#pragma mark Tap
+#pragma mark Tap gesture
 //////////////////////////////////////////////////////////////
 
 - (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture
@@ -1112,6 +1119,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     if (position != GMGV_INVALID_POSITION) 
     {
         [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];
+    }
+    else if([self.actionDelegate respondsToSelector:@selector(GMGridViewDidTapOnEmptySpace:)])
+    {
+        [self.actionDelegate GMGridViewDidTapOnEmptySpace:self];
     }
 }
 
@@ -1285,6 +1296,43 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
 }
 
+- (CGRect)rectForPoint:(CGPoint)point inPaggingMode:(BOOL)pagging
+{
+    CGRect targetRect = CGRectZero;
+    
+    if (self.pagingEnabled) 
+    {
+        CGPoint originScroll = CGPointZero;
+        
+        CGSize pageSize =  CGSizeMake(self.bounds.size.width  - self.contentInset.left - self.contentInset.right, 
+                                           self.bounds.size.height - self.contentInset.top  - self.contentInset.bottom);
+        
+        CGFloat pageX = ceilf(point.x / pageSize.width);
+        CGFloat pageY = ceilf(point.y / pageSize.height);
+        
+        originScroll = CGPointMake(pageX * pageSize.width, 
+                                   pageY *pageSize.height);
+        
+        /*
+        while (originScroll.x + pageSize.width < point.x) 
+        {
+            originScroll.x += pageSize.width;
+        }
+        
+        while (originScroll.y + pageSize.height < point.y) 
+        {
+            originScroll.y += pageSize.height;
+        }
+        */
+        targetRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
+    }
+    else 
+    {
+        targetRect = CGRectMake(point.x, point.y, _itemSize.width, _itemSize.height);
+    }
+    
+    return targetRect;
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark loading/destroying items & reusing cells
@@ -1482,38 +1530,19 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     index = MIN(index, _numberTotalItems);
     
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
-    CGRect targetRect;
+    CGRect targetRect = [self rectForPoint:origin inPaggingMode:self.pagingEnabled];
     
-    if (self.pagingEnabled) 
-    {
-        CGPoint originScroll = CGPointZero;
-        
-        CGSize pageSize = CGSizeMake(self.bounds.size.width  - self.contentInset.left - self.contentInset.right, 
-                                     self.bounds.size.height - self.contentInset.top  - self.contentInset.bottom);
-        
-        while (originScroll.x + pageSize.width < origin.x) 
-        {
-            originScroll.x += pageSize.width;
-        }
-        
-        while (originScroll.y + pageSize.height < origin.y) 
-        {
-            originScroll.y += pageSize.height;
-        }
-        
-        targetRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
-    }
-    else 
+    if (!self.pagingEnabled)
     {
         CGRect gridRect = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-        targetRect = self.bounds;
+
         switch (scrollPosition)
         {
             case GMGridViewScrollPositionNone:
             default:
                 targetRect = gridRect; // no special coordinate handling
                 break;
-                
+
             case GMGridViewScrollPositionTop:
                 targetRect.origin.y = gridRect.origin.y;	// set target y origin to cell's y origin
                 break;
@@ -1674,7 +1703,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 
 //////////////////////////////////////////////////////////////
-#pragma mark public methods
+#pragma mark depracated public methods
 //////////////////////////////////////////////////////////////
 
 - (UIScrollView *)scrollView

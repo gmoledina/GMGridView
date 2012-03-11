@@ -137,6 +137,8 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @optional
+// Tap on space without any items
+- (void)GMGridViewDidTapOnEmptySpace:(GMGridView *)gridView;
 // Called when the delete-button has been pressed. Required to enable editing mode.
 // This method wont delete the cell automatically. Call the delete method of the gridView when appropriate.
 - (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;

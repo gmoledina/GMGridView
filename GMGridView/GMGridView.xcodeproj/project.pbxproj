@@ -60,6 +60,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		16B1745C150D3460005928D5 /* Additions */ = {
+			isa = PBXGroup;
+			children = (
+				16A0360E14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.h */,
+				16A0360F14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.m */,
+				16A0361314A012EF0062437D /* UIView+GMGridViewAdditions.h */,
+				16A0361414A012EF0062437D /* UIView+GMGridViewAdditions.m */,
+			);
+			name = Additions;
+			sourceTree = "<group>";
+		};
 		78509307149FAC2E000787E4 = {
 			isa = PBXGroup;
 			children = (
@@ -91,6 +102,7 @@
 		78509317149FAC2E000787E4 /* GMGridView */ = {
 			isa = PBXGroup;
 			children = (
+				16B1745C150D3460005928D5 /* Additions */,
 				78509335149FAC61000787E4 /* GMGridView-Constants.h */,
 				78509336149FAC61000787E4 /* GMGridView.h */,
 				78509337149FAC61000787E4 /* GMGridView.m */,
@@ -99,10 +111,6 @@
 				7850933A149FAC61000787E4 /* GMGridViewCell+Extended.h */,
 				7850933B149FAC61000787E4 /* GMGridViewLayoutStrategies.h */,
 				7850933C149FAC61000787E4 /* GMGridViewLayoutStrategies.m */,
-				16A0360E14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.h */,
-				16A0360F14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.m */,
-				16A0361314A012EF0062437D /* UIView+GMGridViewAdditions.h */,
-				16A0361414A012EF0062437D /* UIView+GMGridViewAdditions.m */,
 			);
 			path = GMGridView;
 			sourceTree = "<group>";
