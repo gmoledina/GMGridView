@@ -1424,7 +1424,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {        
         cell = [self newItemSubViewForPosition:index];
         
-        for (int i = index; i < _numberTotalItems; i++)
+        for (int i = _numberToTotalItems - 1; i >= index; i--)
         {
             UIView *oldView = [self cellForItemAtIndex:i];
             oldView.tag = oldView.tag + 1;
