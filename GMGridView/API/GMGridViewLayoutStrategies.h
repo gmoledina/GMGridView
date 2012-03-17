@@ -172,7 +172,7 @@ typedef enum {
 - (NSInteger)positionForItemAtColumn:(NSInteger)column row:(NSInteger)row page:(NSInteger)page;
 - (NSInteger)columnForItemAtPosition:(NSInteger)position;
 - (NSInteger)rowForItemAtPosition:(NSInteger)position;
-
+- (NSUInteger) pageForContentOffset:(CGPoint)offset;
 @end
 
 

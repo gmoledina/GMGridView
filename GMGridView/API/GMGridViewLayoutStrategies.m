@@ -269,12 +269,7 @@
                                      bounds.size.width  - self.minEdgeInsets.right - self.minEdgeInsets.left, 
                                      bounds.size.height - self.minEdgeInsets.top   - self.minEdgeInsets.bottom);
     
-    _numberOfItemsPerColumn = 1;
-    
-    while ((_numberOfItemsPerColumn + 1) * (self.itemSize.height + self.itemSpacing) - self.itemSpacing <= actualBounds.size.height)
-    {
-        _numberOfItemsPerColumn++;
-    }
+    _numberOfItemsPerColumn = floor((actualBounds.size.height + self.itemSpacing) / (self.itemSize.height + self.itemSpacing));
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
             
@@ -372,14 +367,9 @@
 {
     [super rebaseWithItemCount:count insideOfBounds:bounds];
     
-    _numberOfItemsPerRow = 1;
-    
     NSInteger gridContentMaxWidth = self.gridBounds.size.width - self.minEdgeInsets.right - self.minEdgeInsets.left;
     
-    while ((self.numberOfItemsPerRow + 1) * (self.itemSize.width + self.itemSpacing) - self.itemSpacing <= gridContentMaxWidth)
-    {
-        _numberOfItemsPerRow++;
-    }
+    _numberOfItemsPerRow = floor((gridContentMaxWidth + self.itemSpacing) / (self.itemSize.width + self.itemSpacing));
     
     _numberOfItemsPerPage = _numberOfItemsPerRow * _numberOfItemsPerColumn;
     _numberOfPages = ceil(self.itemCount * 1.0 / self.numberOfItemsPerPage);
@@ -511,6 +501,10 @@
     return NSMakeRange(firstPosition, (lastPosition - firstPosition));
 }
 
+- (NSUInteger) pageForContentOffset:(CGPoint)offset
+{
+  return floor(offset.x / self.gridBounds.size.width);
+}
 @end
 
 
@@ -571,4 +565,3 @@
 }
 
 @end
-
