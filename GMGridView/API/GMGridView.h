@@ -112,7 +112,7 @@ typedef enum
 @optional
 // Required to enable editing mode
 - (void)GMGridView:(GMGridView *)gridView deleteItemAtIndex:(NSInteger)index;
-
+- (BOOL)GMGridView:(GMGridView *)gridView shouldEditItemAtIndex:(NSInteger)index;
 @end
 
 
@@ -145,6 +145,10 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didEndMovingCell:(GMGridViewCell *)cell;
 // Enable/Disable the shaking behavior of an item being moved
 - (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
+// Allow/Disallow moving of an item
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
+// Allow/Disallow placing item at index
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowMovingCell:(GMGridViewCell *)view toIndex:(NSInteger)index;
 
 @end
 

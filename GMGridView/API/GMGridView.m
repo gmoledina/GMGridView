@@ -353,9 +353,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
+        NSInteger index = 0;
         for (GMGridViewCell *cell in [self itemSubviews]) 
         {
-            [cell setEditing:editing];
+            if (editing && [self.dataSource respondsToSelector:@selector(GMGridView:shouldEditItemAtIndex:)])
+            {
+                if ([self.dataSource GMGridView:self shouldEditItemAtIndex:index])
+                {
+                    [cell setEditing:editing];
+                }
+            } 
+            else
+            {
+                [cell setEditing:editing];
+            }
+            
+            index++;
         }
         
         _editing = editing;
@@ -456,6 +469,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 
                 NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
                 
+                // Ask the delegate if moving is permitted
+                if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:atIndex:)])
+                {
+                    GMGridViewCell *item = [self cellForItemAtIndex:position];
+                    if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item atIndex:position])
+                        position = GMGV_INVALID_POSITION;
+                }
+
                 if (position != GMGV_INVALID_POSITION) 
                 {
                     [self sortingMoveDidStartAtPoint:location];
@@ -671,6 +692,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     int position = [self.layoutStrategy itemPositionFromLocation:point];
     int tag = position + kTagOffset;
     
+    // Ask the delegate if inserting item is permitted
+    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:toIndex:)])
+    {
+        GMGridViewCell *item = [self cellForItemAtIndex:position];
+        if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item toIndex:position])
+            position = GMGV_INVALID_POSITION;
+    }
+
     if (position != GMGV_INVALID_POSITION && position != _sortFuturePosition && position < _numberTotalItems) 
     {
         BOOL positionTaken = NO;
@@ -1389,12 +1418,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         CGSize pageSize = CGSizeMake(_scrollView.bounds.size.width  - _scrollView.contentInset.left - _scrollView.contentInset.right, 
                                      _scrollView.bounds.size.height - _scrollView.contentInset.top  - _scrollView.contentInset.bottom);
         
-        while (originScroll.x + pageSize.width < origin.x) 
+        while (originScroll.x + pageSize.width <= origin.x) 
         {
             originScroll.x += pageSize.width;
         }
         
-        while (originScroll.y + pageSize.height < origin.y) 
+        while (originScroll.y + pageSize.height <= origin.y) 
         {
             originScroll.y += pageSize.height;
         }
