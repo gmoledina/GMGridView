@@ -1342,7 +1342,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: self.contentOffset];
     NSRange loadedPositionsRange = NSMakeRange(self.firstPositionLoaded, self.lastPositionLoaded - self.firstPositionLoaded);
-    
+   
+   if ((self.firstPositionLoaded != GMGV_INVALID_POSITION) &&
+               (self.lastPositionLoaded != GMGV_INVALID_POSITION) &&
+                      NSEqualRanges(rangeOfPositions, loadedPositionsRange) ) {
+               return; // No need to load anything... 
+   }
+
     // calculate new position range
     self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, (NSInteger)rangeOfPositions.location);
     self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, (NSInteger)(rangeOfPositions.length + rangeOfPositions.location));
