@@ -1491,6 +1491,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setNeedsLayout];
 }
 
+- (void)reloadObjectAtIndex:(NSInteger)index animated:(BOOL)animated
+{
+    [self reloadObjectAtIndex:index withAnimation:animated ? GMGridViewItemAnimationScroll : GMGridViewItemAnimationNone];
+}
+
 - (void)reloadObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation
 {    
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index");
@@ -1569,6 +1574,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
      ];
 }
 
+- (void)insertObjectAtIndex:(NSInteger)index animated:(BOOL)animated
+{
+    [self insertObjectAtIndex:index withAnimation: animated ? GMGridViewItemAnimationScroll : GMGridViewItemAnimationNone];
+}
+
 - (void)insertObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation
 {
     NSAssert((index >= 0 && index <= _numberTotalItems), @"Invalid index specified");
@@ -1613,6 +1623,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [self setSubviewsCacheAsInvalid];
 }
 
+- (void)removeObjectAtIndex:(NSInteger)index animated:(BOOL)animated
+{
+    [self removeObjectAtIndex:index withAnimation:GMGridViewItemAnimationNone];
+}
+
 - (void)removeObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation
 {
     NSAssert((index >= 0 && index < _numberTotalItems), @"Invalid index specified");
@@ -1654,6 +1669,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
      ];
     
     [self setSubviewsCacheAsInvalid];
+}
+
+- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 animated:(BOOL)animated
+{
+    [self swapObjectAtIndex:index1 withObjectAtIndex:index2 withAnimation:animated ? GMGridViewItemAnimationScroll : GMGridViewItemAnimationNone];
 }
 
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 withAnimation:(GMGridViewItemAnimation)animation

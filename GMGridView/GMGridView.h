@@ -82,7 +82,7 @@ typedef enum
 @property (nonatomic) NSInteger itemSpacing;                          // Default is 10
 @property (nonatomic) BOOL centerGrid;                                // Default is YES
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
-@property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the scrollView will not be scrollable
+@property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the view wont be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 
 @property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
@@ -92,13 +92,17 @@ typedef enum
 - (GMGridViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier;
 
 // Cells
-- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded for the specific index
+- (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded yet
 
 // Actions
 - (void)reloadData;
+- (void)insertObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)insertObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)removeObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)removeObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)reloadObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)reloadObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 animated:(BOOL)animated;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 withAnimation:(GMGridViewItemAnimation)animation;
 - (void)scrollToObjectAtIndex:(NSInteger)index atScrollPosition:(GMGridViewScrollPosition)scrollPosition animated:(BOOL)animated;
 
