@@ -1,8 +1,8 @@
 #[GM-GRID-VIEW](http://www.gmoledina.ca/projects/gmgridview/)
 
-"Definitely looks like one to watch" [ManiacDev.com]
+"**Definitely looks like one to watch**" [ManiacDev.com]
 
-"Looks like the best 3rd party implementation I have seen so far" [iosDevWeekly.com]
+"**Looks like the best 3rd party implementation I have seen so far**" [iosDevWeekly.com]
 
 ---
 
@@ -22,28 +22,33 @@ New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledin
 
 ---
 
-Fresh from the baking oven:
+**Fresh from the baking oven**:
 
-*  The component now inherits from UIScrollView and changing the scroll delegate is now allowed
+*  The component is now shipped as a static library
+*  The component now inherits from UIScrollView and changing the scroll delegate is now allowed!
 *  Support for different item sizes per interface orientation
-*  Support for iOS 4
-*  Paging!! 2 horizontally paged layout strategies added
-*  shaking animation on items when in edit mode
 
-Coming soon:
+**Coming soon**:
 
 *  Changing the zoom scale dynamically (when pinching to go fullscreen)
+*  Better performance of items scalling on pinch
 *  More customization options
+
 
 ---
 
-Requirements:
+**Consider making a small donation to [support future developement](http://www.gmoledina.ca/projects/gmgridview/) of this component.**
+
+---
+
+
+**Requirements**:
 
 * iOS 4 and up
 * Xcode 4.2 (GMGridView uses ARC)
 * Frameworks: Foundation, UIKit, CoreGraphics and QuartzCore
 
-Features - General:
+**Features - General**:
 
 *  Works on both the iPhone and iPad (best suited for iPad)
 *  Works on both portrait and landscape orientation
@@ -53,16 +58,19 @@ Features - General:
 *  Gestures work great inside of the scrollView
 *  4 different layout strategies (Vertical, Horizontal, Horizontal Paged LTR/TTB)
 *  Possibility to provide your own layout strategy
+*  Paging!! 2 horizontally paged layout strategies added
+*  shaking animation on items when in edit mode
+*  Changing the scrollview delegate is allowed!
 *  Demo app provided, with options panel
 
-Features - Sorting:
+**Features - Sorting**:
 
 * Perform a long-touch on a view to be able to move it
 * Two different animation styles ("Swap" or "Push")
 * Sorted view has a shake animation (can be disabled)
 * Only one UIPanGestureRecognizer and one UILongTouchGestureRecognizer used to track ALL views
 
-Features - Fullsize:
+**Features - Fullsize**:
 
 * Pinch, rotate and drag views using 2 fingers
 * Switch to fullsize mode on the view at the end of these gestures if the view scaled enough
