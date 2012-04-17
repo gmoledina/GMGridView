@@ -481,8 +481,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     if (gestureRecognizer == _tapGesture) 
     {
-        CGPoint locationTouch = [_tapGesture locationInView:self];
-        valid = !isScrolling && !self.isEditing && [self.layoutStrategy itemPositionFromLocation:locationTouch] != GMGV_INVALID_POSITION;
+        valid = !isScrolling && !self.isEditing && ![_sortingLongPressGesture hasRecognizedValidGesture];
     }
     else if (gestureRecognizer == _sortingLongPressGesture)
     {

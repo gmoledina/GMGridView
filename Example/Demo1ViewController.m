@@ -284,6 +284,11 @@
     NSLog(@"Did tap at index %d", position);
 }
 
+- (void)GMGridViewDidTapOnEmptySpace:(GMGridView *)gridView
+{
+    NSLog(@"Tap on empty space");
+}
+
 - (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index
 {
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm" message:@"Are you sure you want to delete this item?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Delete", nil];
