@@ -250,6 +250,53 @@
 //////////////////////////////////////////////////////////////
 #pragma mark Public methods
 //////////////////////////////////////////////////////////////
+- (void)prepareContentToFullSize
+{
+    // Transfer center, rotation and scale to the full size view
+    CGFloat rotationValue = atan2f(self.contentView.transform.b, self.contentView.transform.a); 
+    CGFloat sx = self.contentView.frame.size.width / self.fullSizeView.frame.size.width;
+    CGFloat sy = self.contentView.frame.size.height / self.fullSizeView.frame.size.height;
+    CGFloat tx = self.contentView.center.x - self.fullSizeView.center.x;
+    CGFloat ty = self.contentView.center.y - self.fullSizeView.center.y;
+    
+    CGAffineTransform transform = CGAffineTransformMakeTranslation(tx,ty);
+    transform                   = CGAffineTransformScale(transform, sx, sy);
+    self.fullSizeView.transform = CGAffineTransformRotate(transform, rotationValue);
+    
+    // Reset the resize mask for full screen mode
+    self.fullSizeView.autoresizingMask = self.defaultFullsizeViewResizingMask;
+    
+    // Put the fullsize view at the top alpha level and hide contentView
+    self.fullSizeView.alpha = MAX(self.fullSizeView.alpha, self.contentView.alpha);
+    self.contentView.alpha  = 0;
+}
+
+- (void)transitionContentToFullSize
+{
+    // Animate fullSizeView back to it's intended state
+    CGPoint center = self.fullSizeView.center;
+    self.fullSizeView.alpha = 1;
+    self.fullSizeView.transform = CGAffineTransformIdentity;
+    self.fullSizeView.center = center;
+    self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, 
+                                         self.fullSizeView.frame.origin.y, 
+                                         self.fullSize.width, 
+                                         self.fullSize.height);
+}
+
+- (void)prepareFullSizeToContent
+{
+    self.fullSizeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
+    self.fullSizeView.alpha = 0;
+    self.contentView.alpha  = 0.6;
+}
+
+- (void)transitionFullSizeToContent
+{
+    self.contentView.alpha  = 1;
+    self.fullSizeView.frame = self.bounds;
+}
 
 - (void)prepareForReuse
 {
@@ -272,45 +319,11 @@
 {
     if (fullSizeEnabled) 
     {
-        self.fullSizeView.autoresizingMask = self.defaultFullsizeViewResizingMask;
-        
-        CGPoint center = self.fullSizeView.center;
-        self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, self.fullSizeView.frame.origin.y, self.fullSize.width, self.fullSize.height);
-        self.fullSizeView.center = center;
-        
-        _inFullSizeMode = YES;
-        
-        self.fullSizeView.alpha = MAX(self.fullSizeView.alpha, self.contentView.alpha);
-        self.contentView.alpha  = 0;
-        
-        [UIView animateWithDuration:0.3 
-                         animations:^{
-                             self.fullSizeView.alpha = 1;
-                             self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, self.fullSizeView.frame.origin.y, self.fullSize.width, self.fullSize.height);
-                             self.fullSizeView.center = center;
-                         } 
-                         completion:^(BOOL finished){
-                             [self setNeedsLayout];
-                         }
-        ];
+        _inFullSizeMode = YES;        
     }
     else
     {
-        self.fullSizeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
         _inFullSizeMode = NO;
-        self.fullSizeView.alpha = 0;
-        self.contentView.alpha  = 0.6;
-        
-        [UIView animateWithDuration:0.3 
-                         animations:^{
-                             self.contentView.alpha  = 1;
-                             self.fullSizeView.frame = self.bounds;
-                         } 
-                         completion:^(BOOL finished){
-                             [self setNeedsLayout];
-                         }
-         ];
     }
 }
 

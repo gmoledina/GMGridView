@@ -58,5 +58,10 @@ typedef void (^GMGridViewCellDeleteBlock)(GMGridViewCell*);
 
 - (void)switchToFullSizeMode:(BOOL)fullSizeEnabled;
 - (void)stepToFullsizeWithAlpha:(CGFloat)alpha; // not supported yet
+- (void)prepareContentToFullSize;
+- (void)transitionContentToFullSize;
+
+- (void)prepareFullSizeToContent;
+- (void)transitionFullSizeToContent;
 
 @end

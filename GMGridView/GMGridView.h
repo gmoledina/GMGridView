@@ -94,6 +94,10 @@ typedef enum
 // Cells
 - (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded yet
 
+- (void)openTransformAtIndex:(NSInteger)position;
+- (void)closeTransform;
+- (BOOL)isInTransformingState;
+
 // Actions
 - (void)reloadData;
 - (void)insertObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
@@ -185,6 +189,8 @@ typedef enum
 @optional
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell;
 - (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell;
+- (void)GMGridView:(GMGridView *)gridView willExitFullSizeForCell:(GMGridViewCell *)cell;
+
 - (void)GMGridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell;
 
 @end
