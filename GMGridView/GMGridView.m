@@ -838,7 +838,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         case UIGestureRecognizerStateFailed:
         {
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(transformingGestureDidFinish) object:nil];
-            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.1];
+            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.0];
             
             self.scrollEnabled = YES;
             
@@ -879,7 +879,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         case UIGestureRecognizerStateFailed:
         {
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(transformingGestureDidFinish) object:nil];
-            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.1];
+            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.0];
             
             break;
         }
@@ -939,7 +939,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         case UIGestureRecognizerStateFailed:
         {
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(transformingGestureDidFinish) object:nil];
-            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.1];
+            [self performSelector:@selector(transformingGestureDidFinish) withObject:nil afterDelay:0.0];
             
             break;
         }
@@ -963,6 +963,102 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         }
     }
 }
+- (void)startOpenTransformAtIndex:(NSInteger)index
+{
+    _transformingItem = [self cellForItemAtIndex:index];
+    
+    CGRect frameInMainView = [self convertRect:_transformingItem.frame toView:self.mainSuperView];
+    
+    [_transformingItem removeFromSuperview];
+    _transformingItem.frame = self.mainSuperView.bounds;
+    _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _transformingItem.contentView.frame = frameInMainView;
+    [self.mainSuperView addSubview:_transformingItem];
+    [self.mainSuperView bringSubviewToFront:_transformingItem];
+    
+    _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:index inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    _transformingItem.fullSizeView = [self.transformDelegate GMGridView:self fullSizeViewForCell:_transformingItem atIndex:index];
+    
+    if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingCell:)]) 
+    {
+        [self.transformDelegate GMGridView:self didStartTransformingCell:_transformingItem];
+    }
+}
+- (void)completeOpenTransform
+{
+    _lastRotation = 0;
+    _lastScale = 1;
+    
+    [self bringSubviewToFront:_transformingItem];
+
+    [_transformingItem animateContentToFullSize];
+    
+    _inTransformingState = YES;
+    _inFullSizeMode = YES;
+    
+    if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
+    {
+        [self.transformDelegate GMGridView:self didEnterFullSizeForCell:_transformingItem];
+    }
+    
+    // Transfer the gestures on the fullscreen to make is they are accessible (depends on self.mainSuperView)
+    [_transformingItem.fullSizeView addGestureRecognizer:_pinchGesture];
+    [_transformingItem.fullSizeView addGestureRecognizer:_rotationGesture];
+    [_transformingItem.fullSizeView addGestureRecognizer:_panGesture];
+}
+
+- (void)startCloseTransform
+{
+    _inTransformingState = NO;
+    [_transformingItem animateFullSizeToContent];
+}
+
+- (void)completeCloseTransform
+{
+    _lastRotation = 0;
+    _lastScale = 1.0;
+    
+    GMGridViewCell *transformingView = _transformingItem;
+    _transformingItem = nil;
+    
+    NSInteger position = [self positionForItemSubview:transformingView];
+    CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
+    
+    CGRect finalFrameInScroll = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
+    CGRect finalFrameInSuperview = [self convertRect:finalFrameInScroll toView:self.mainSuperView];
+    
+//    [transformingView switchToFullSizeMode:NO];
+    transformingView.autoresizingMask = UIViewAutoresizingNone;
+    [UIView animateWithDuration: kDefaultAnimationDuration
+                          delay:0
+                        options: kDefaultAnimationOptions
+                     animations:^{
+                         transformingView.contentView.transform = CGAffineTransformIdentity;
+                         transformingView.contentView.frame = finalFrameInSuperview;
+                         transformingView.backgroundColor = [UIColor clearColor];
+                     } 
+                     completion:^(BOOL finished){
+                         [transformingView removeFromSuperview];
+                         transformingView.frame = finalFrameInScroll;
+                         transformingView.contentView.frame = transformingView.bounds;
+                         
+                         transformingView.fullSizeView = nil;
+                         [self addSubview:transformingView];
+                         
+                         _inFullSizeMode = NO;
+                         
+                         if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEndTransformingCell:)])
+                         {
+                             [self.transformDelegate GMGridView:self didEndTransformingCell:transformingView];
+                         }
+                         
+                         // Transfer the gestures back
+                         [self addGestureRecognizer:_pinchGesture];
+                         [self addGestureRecognizer:_rotationGesture];
+                         [self addGestureRecognizer:_panGesture];
+                     }
+     ];
+}
 
 - (void)transformingGestureDidBeginWithGesture:(UIGestureRecognizer *)gesture
 {
@@ -975,37 +1071,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     if (_inTransformingState)
     {        
-        _inTransformingState = NO;
-        
-        CGPoint center = _transformingItem.fullSizeView.center;
-        
-        [_transformingItem switchToFullSizeMode:NO];
-        CGAffineTransform newTransform = CGAffineTransformMakeScale(2.5, 2.5);
-        _transformingItem.contentView.transform = newTransform;
-        _transformingItem.contentView.center = center;
+        [self startCloseTransform];
     }
     else if (!_transformingItem) 
     {        
         CGPoint locationTouch = [gesture locationOfTouch:0 inView:self];            
         NSInteger positionTouch = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-        _transformingItem = [self cellForItemAtIndex:positionTouch];
-        
-        CGRect frameInMainView = [self convertRect:_transformingItem.frame toView:self.mainSuperView];
-        
-        [_transformingItem removeFromSuperview];
-        _transformingItem.frame = self.mainSuperView.bounds;
-        _transformingItem.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        _transformingItem.contentView.frame = frameInMainView;
-        [self.mainSuperView addSubview:_transformingItem];
-        [self.mainSuperView bringSubviewToFront:_transformingItem];
-        
-        _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:positionTouch inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
-        _transformingItem.fullSizeView = [self.transformDelegate GMGridView:self fullSizeViewForCell:_transformingItem atIndex:positionTouch];
-        
-        if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingCell:)]) 
-        {
-            [self.transformDelegate GMGridView:self didStartTransformingCell:_transformingItem];
-        }
+
+        [self startOpenTransformAtIndex:positionTouch];
     }
 }
 
@@ -1019,91 +1092,25 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     if ([self isInTransformingState]) 
     {
         if (_lastScale > 2 && !_inTransformingState) 
-        {            
-            _lastRotation = 0;
-            _lastScale = 1;
-            
-            [self bringSubviewToFront:_transformingItem];
-            
-            CGFloat rotationValue = atan2f(_transformingItem.contentView.transform.b, _transformingItem.contentView.transform.a); 
-            
-            _transformingItem.contentView.transform = CGAffineTransformIdentity;
-            
-            [_transformingItem switchToFullSizeMode:YES];
-            _transformingItem.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.9];
-            
-            _transformingItem.fullSizeView.transform =  CGAffineTransformMakeRotation(rotationValue);
-            
-            [UIView animateWithDuration:kDefaultAnimationDuration 
-                                  delay:0
-                                options:kDefaultAnimationOptions
-                             animations:^{
-                                 _transformingItem.fullSizeView.transform = CGAffineTransformIdentity;
-                             }
-                             completion:nil
-             ];
-            
-            _inTransformingState = YES;
-            _inFullSizeMode = YES;
-            
-            if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
-            {
-                [self.transformDelegate GMGridView:self didEnterFullSizeForCell:_transformingItem];
-            }
-            
-            // Transfer the gestures on the fullscreen to make is they are accessible (depends on self.mainSuperView)
-            [_transformingItem.fullSizeView addGestureRecognizer:_pinchGesture];
-            [_transformingItem.fullSizeView addGestureRecognizer:_rotationGesture];
-            [_transformingItem.fullSizeView addGestureRecognizer:_panGesture];
+        {     
+            [self completeOpenTransform];
         }
         else if (!_inTransformingState)
         {
-            _lastRotation = 0;
-            _lastScale = 1.0;
-            
-            GMGridViewCell *transformingView = _transformingItem;
-            _transformingItem = nil;
-            
-            NSInteger position = [self positionForItemSubview:transformingView];
-            CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
-            
-            CGRect finalFrameInScroll = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
-            CGRect finalFrameInSuperview = [self convertRect:finalFrameInScroll toView:self.mainSuperView];
-            
-            [transformingView switchToFullSizeMode:NO];
-            transformingView.autoresizingMask = UIViewAutoresizingNone;
-            
-            [UIView animateWithDuration: kDefaultAnimationDuration
-                                  delay:0
-                                options: kDefaultAnimationOptions
-                             animations:^{
-                                 transformingView.contentView.transform = CGAffineTransformIdentity;
-                                 transformingView.contentView.frame = finalFrameInSuperview;
-                                 transformingView.backgroundColor = [UIColor clearColor];
-                             } 
-                             completion:^(BOOL finished){
-                                 
-                                 [transformingView removeFromSuperview];
-                                 transformingView.frame = finalFrameInScroll;
-                                 transformingView.contentView.frame = transformingView.bounds;
-                                 [self addSubview:transformingView];
-                                 
-                                 transformingView.fullSizeView = nil;
-                                 _inFullSizeMode = NO;
-                                 
-                                 if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEndTransformingCell:)])
-                                 {
-                                     [self.transformDelegate GMGridView:self didEndTransformingCell:transformingView];
-                                 }
-                                 
-                                 // Transfer the gestures back
-                                 [self addGestureRecognizer:_pinchGesture];
-                                 [self addGestureRecognizer:_rotationGesture];
-                                 [self addGestureRecognizer:_panGesture];
-                             }
-             ];
+            [self completeCloseTransform];
         }
     }
+}
+
+- (void)openTransformAtIndex:(NSInteger)position
+{
+    [self startOpenTransformAtIndex:position];
+    [self completeOpenTransform];
+}
+- (void)closeTransform
+{
+    [self startCloseTransform];
+    [self completeCloseTransform];
 }
 
 //////////////////////////////////////////////////////////////
