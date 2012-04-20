@@ -189,6 +189,8 @@ typedef enum
 @optional
 - (void)GMGridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell;
 - (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell;
+- (void)GMGridView:(GMGridView *)gridView willExitFullSizeForCell:(GMGridViewCell *)cell;
+
 - (void)GMGridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell;
 
 @end

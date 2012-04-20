@@ -94,16 +94,16 @@
 
 - (void)layoutSubviews
 {
-//    if(self.inFullSizeMode)
-//    {
-//        CGPoint origin = CGPointMake((self.bounds.size.width - self.fullSize.width) / 2, 
-//                                     (self.bounds.size.height - self.fullSize.height) / 2);
-//        self.fullSizeView.frame = CGRectMake(origin.x, origin.y, self.fullSize.width, self.fullSize.height);
-//    }
-//    else
-//    {
-//        self.fullSizeView.frame = self.bounds;
-//    }
+    if(self.inFullSizeMode)
+    {
+        CGPoint origin = CGPointMake((self.bounds.size.width - self.fullSize.width) / 2, 
+                                     (self.bounds.size.height - self.fullSize.height) / 2);
+        self.fullSizeView.frame = CGRectMake(origin.x, origin.y, self.fullSize.width, self.fullSize.height);
+    }
+    else
+    {
+        self.fullSizeView.frame = self.bounds;
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@
 //////////////////////////////////////////////////////////////
 #pragma mark Public methods
 //////////////////////////////////////////////////////////////
-- (void)animateContentToFullSize
+- (void)prepareContentToFullSize
 {
     // Transfer center, rotation and scale to the full size view
     CGFloat rotationValue = atan2f(self.contentView.transform.b, self.contentView.transform.a); 
@@ -269,42 +269,33 @@
     // Put the fullsize view at the top alpha level and hide contentView
     self.fullSizeView.alpha = MAX(self.fullSizeView.alpha, self.contentView.alpha);
     self.contentView.alpha  = 0;
+}
 
+- (void)transitionContentToFullSize
+{
     // Animate fullSizeView back to it's intended state
     CGPoint center = self.fullSizeView.center;
-    [UIView animateWithDuration:0.3 
-                     animations:^{
-                         self.fullSizeView.alpha = 1;
-                         self.fullSizeView.transform = CGAffineTransformIdentity;
-                         self.fullSizeView.center = center;
-                         self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, 
-                                                              self.fullSizeView.frame.origin.y, 
-                                                              self.fullSize.width, 
-                                                              self.fullSize.height);
-                     } 
-                     completion:^(BOOL finished){
-                         [self setNeedsLayout];
-                     }
-     ];
-
+    self.fullSizeView.alpha = 1;
+    self.fullSizeView.transform = CGAffineTransformIdentity;
+    self.fullSizeView.center = center;
+    self.fullSizeView.frame = CGRectMake(self.fullSizeView.frame.origin.x, 
+                                         self.fullSizeView.frame.origin.y, 
+                                         self.fullSize.width, 
+                                         self.fullSize.height);
 }
-- (void)animateFullSizeToContent
+
+- (void)prepareFullSizeToContent
 {
     self.fullSizeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     self.fullSizeView.alpha = 0;
     self.contentView.alpha  = 0.6;
-    
-    [UIView animateWithDuration:0.3 
-                     animations:^{
-                         self.contentView.alpha  = 1;
-                         self.fullSizeView.frame = self.bounds;
-                     } 
-                     completion:^(BOOL finished){
-                         [self setNeedsLayout];
-                     }
-     ];
+}
 
+- (void)transitionFullSizeToContent
+{
+    self.contentView.alpha  = 1;
+    self.fullSizeView.frame = self.bounds;
 }
 
 - (void)prepareForReuse

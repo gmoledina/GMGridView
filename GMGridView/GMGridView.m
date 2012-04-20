@@ -990,16 +990,25 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _lastScale = 1;
     
     [self bringSubviewToFront:_transformingItem];
+    
+    [_transformingItem prepareContentToFullSize];
+    
+    [UIView animateWithDuration:0.3 
+                     animations:^{
+                         [_transformingItem transitionContentToFullSize];
+                     } 
+                     completion:^(BOOL finished){
+                         [self setNeedsLayout];
+                         if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
+                         {
+                             [self.transformDelegate GMGridView:self didEnterFullSizeForCell:_transformingItem];
+                         }
+                     }
+     ];
 
-    [_transformingItem animateContentToFullSize];
     
     _inTransformingState = YES;
     _inFullSizeMode = YES;
-    
-    if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
-    {
-        [self.transformDelegate GMGridView:self didEnterFullSizeForCell:_transformingItem];
-    }
     
     // Transfer the gestures on the fullscreen to make is they are accessible (depends on self.mainSuperView)
     [_transformingItem.fullSizeView addGestureRecognizer:_pinchGesture];
@@ -1010,7 +1019,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)startCloseTransform
 {
     _inTransformingState = NO;
-    [_transformingItem animateFullSizeToContent];
+    [_transformingItem prepareFullSizeToContent];
+    
+    if ([self.transformDelegate respondsToSelector:@selector(GMGridView:willExitFullSizeForCell:)])
+    {
+        [self.transformDelegate GMGridView:self willExitFullSizeForCell:_transformingItem];
+    }
+
+
+    [UIView animateWithDuration:0.3 
+                     animations:^{
+                         [_transformingItem transitionFullSizeToContent];
+                     } 
+                     completion:^(BOOL finished){
+                         [self setNeedsLayout];
+                     }
+     ];
 }
 
 - (void)completeCloseTransform
