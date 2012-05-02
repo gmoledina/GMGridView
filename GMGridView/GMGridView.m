@@ -1594,6 +1594,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             oldView.tag = oldView.tag + 1;
         }
         
+		if (animation & GMGridViewItemAnimationFade) {
+			cell.alpha = 0;
+			[UIView beginAnimations:nil context:NULL];
+			[UIView setAnimationDelay:kDefaultAnimationDuration];
+			[UIView setAnimationDuration:kDefaultAnimationDuration];
+			cell.alpha = 1.0;
+			[UIView commitAnimations];
+		}
         [self addSubview:cell];
     }
     
