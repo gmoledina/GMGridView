@@ -84,6 +84,8 @@ typedef enum
 @property (nonatomic) UIEdgeInsets minEdgeInsets;                     // Default is (5, 5, 5, 5)
 @property (nonatomic) CFTimeInterval minimumPressDuration;            // Default is 0.2; if set to 0, the view wont be scrollable
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
+@property (nonatomic) BOOL enableEditOnLongPress;                     // Default is NO
+@property (nonatomic) BOOL disableEditOnEmptySpaceTap;                // Default is NO
 
 @property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
 
@@ -146,6 +148,8 @@ typedef enum
 // Called when the delete-button has been pressed. Required to enable editing mode.
 // This method wont delete the cell automatically. Call the delete method of the gridView when appropriate.
 - (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;
+
+- (void)GMGridView:(GMGridView *)gridView changedEdit:(BOOL)edit;
 
 @end
 
