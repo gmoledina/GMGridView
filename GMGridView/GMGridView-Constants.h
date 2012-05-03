@@ -41,6 +41,7 @@
 #define __gm_weak __weak
 #define gm_nil(x)
 
+
 #else
 
 #define gm_weak   unsafe_unretained
