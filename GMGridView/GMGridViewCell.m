@@ -57,6 +57,7 @@
 @synthesize deleteButtonIcon = _deleteButtonIcon;
 @synthesize deleteButtonOffset;
 @synthesize reuseIdentifier;
+@synthesize highlighted;
 
 //////////////////////////////////////////////////////////////
 #pragma mark Constructors
@@ -77,7 +78,6 @@
         UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.deleteButton = deleteButton;
         [self.deleteButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        self.deleteButton.showsTouchWhenHighlighted = YES;
         self.deleteButtonIcon = nil;
         self.deleteButtonOffset = CGPointMake(-5, -5);
         self.deleteButton.alpha = 0;
@@ -104,6 +104,21 @@
     {
         self.fullSizeView.frame = self.bounds;
     }
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    self.highlighted = YES;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    self.highlighted = NO;
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    self.highlighted = NO;
 }
 
 //////////////////////////////////////////////////////////////
@@ -183,7 +198,7 @@
         }else {
             self.deleteButton.alpha = editing ? 1.f : 0.f;
         }
-
+		
         self.contentView.userInteractionEnabled = !editing;
         [self shakeStatus:editing];
     }
@@ -234,6 +249,18 @@
 {
     return [self.deleteButton currentImage];
 }
+
+
+- (void)setHighlighted:(BOOL)aHighlighted {
+    highlighted = aHighlighted;
+	
+	[self.contentView recursiveEnumerateSubviewsUsingBlock:^(UIView *view, BOOL *stop) {
+		if ([view respondsToSelector:@selector(setHighlighted:)]) {
+			[(UIControl*)view setHighlighted:highlighted];
+		}
+	}];
+}
+
 
 //////////////////////////////////////////////////////////////
 #pragma mark Private methods
@@ -292,7 +319,7 @@
                          completion:^(BOOL finished){
                              [self setNeedsLayout];
                          }
-        ];
+		 ];
     }
     else
     {
