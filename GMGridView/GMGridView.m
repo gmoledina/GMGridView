@@ -1626,12 +1626,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {        
         cell = [self newItemSubViewForPosition:index];
         
-        for (int i = _numberTotalItems - 1; i >= index; i--)
-        {
-            UIView *oldView = [self cellForItemAtIndex:i];
-            oldView.tag = oldView.tag + 1;
-        }
-        
         if (animation & GMGridViewItemAnimationFade) {
             cell.alpha = 0;
             [UIView beginAnimations:nil context:NULL];
@@ -1641,6 +1635,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             [UIView commitAnimations];
         }
         [self addSubview:cell];
+    }
+  
+    for (int i = _numberTotalItems - 1; i >= index; i--)
+    {
+        UIView *oldView = [self cellForItemAtIndex:i];
+        oldView.tag = oldView.tag + 1;
     }
     
     _numberTotalItems++;
