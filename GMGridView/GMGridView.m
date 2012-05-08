@@ -1383,7 +1383,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     // calculate new position range
     self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, (NSInteger)rangeOfPositions.location);
     self.lastPositionLoaded  = self.lastPositionLoaded == GMGV_INVALID_POSITION ? NSMaxRange(rangeOfPositions) : MAX(self.lastPositionLoaded, (NSInteger)(rangeOfPositions.length + rangeOfPositions.location));
-    
+
+    // return if all items was already loaded
+    if( self.firstPositionLoaded != GMGV_INVALID_POSITION &&
+        self.lastPositionLoaded != GMGV_INVALID_POSITION &&
+        self.firstPositionLoaded == loadedPositionsRange.location && 
+        self.lastPositionLoaded == loadedPositionsRange.location + loadedPositionsRange.length)
+    {
+        return;
+    }    
+
     // remove now invisible items
     [self setSubviewsCacheAsInvalid];
     [self cleanupUnseenItems];
