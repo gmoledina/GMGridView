@@ -211,6 +211,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     _sortingPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(sortingPanGestureUpdated:)];
     _sortingPanGesture.delegate = self;
+    _sortingPanGesture.maximumNumberOfTouches = 1;
     [self addGestureRecognizer:_sortingPanGesture];
     
     _longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGestureUpdated:)];
