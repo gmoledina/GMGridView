@@ -740,14 +740,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     _sortMovingItem.tag = _sortFuturePosition + kTagOffset;
     
-    CGRect frameInScroll = [self.mainSuperView convertRect:_sortMovingItem.frame toView:self];
-    
-    [_sortMovingItem removeFromSuperview];
-    _sortMovingItem.frame = frameInScroll;
-    [self addSubview:_sortMovingItem];
-    
     CGPoint newOrigin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
-    CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
+    CGRect newFrame = [self convertRect:CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height) toView:[self mainSuperView]];
     
     [UIView animateWithDuration:kDefaultAnimationDuration 
                           delay:0
@@ -757,6 +751,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          _sortMovingItem.frame = newFrame;
                      }
                      completion:^(BOOL finished){
+                         
+                         CGRect frameInScroll = [self.mainSuperView convertRect:_sortMovingItem.frame toView:self];
+                         
+                         [_sortMovingItem removeFromSuperview];
+                         _sortMovingItem.frame = frameInScroll;
+                         [self addSubview:_sortMovingItem];
+                         
                          if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didEndMovingCell:)])
                          {
                              [self.sortingDelegate GMGridView:self didEndMovingCell:_sortMovingItem];
@@ -769,7 +770,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      }
      ];
 }
-
 - (void)sortingMoveDidContinueToPoint:(CGPoint)point
 {
     int position = [self.layoutStrategy itemPositionFromLocation:point];
