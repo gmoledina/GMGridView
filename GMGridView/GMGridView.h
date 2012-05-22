@@ -102,6 +102,7 @@ typedef enum
 - (void)insertObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
 - (void)removeObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)removeObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
+- (void)moveObjectAtIndex:(NSInteger)index1 toIndex:(NSInteger)index2;
 - (void)reloadObjectAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)reloadObjectAtIndex:(NSInteger)index withAnimation:(GMGridViewItemAnimation)animation;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 animated:(BOOL)animated;
