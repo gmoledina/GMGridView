@@ -32,5 +32,5 @@
 @interface UIView (GMGridViewAdditions)
 
 - (void)shakeStatus:(BOOL)enabled;
-
+- (void)recursiveEnumerateSubviewsUsingBlock:(void (^)(UIView *view, BOOL *stop))block;
 @end
