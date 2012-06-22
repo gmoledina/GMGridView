@@ -146,6 +146,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize editing = _editing;
 @synthesize enableEditOnLongPress;
 @synthesize disableEditOnEmptySpaceTap;
+@synthesize heightScaleFactor = _heightScaleFactor;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
@@ -259,6 +260,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     _minPossibleContentOffset = CGPointMake(0, 0);
     _maxPossibleContentOffset = CGPointMake(0, 0);
+	
+	_heightScaleFactor = 2.0 / 3.0;
     
     _reusableCells = [[NSMutableSet alloc] init];
     
@@ -304,7 +307,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         // Updating all the items size
         
-        CGSize itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+        CGSize itemSize = [self itemSizeInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
         
         if (!CGSizeEqualToSize(_itemSize, itemSize)) 
         {
@@ -1374,6 +1377,29 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     return targetRect;
 }
 
+- (CGSize)itemSizeInInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	if ([_dataSource respondsToSelector:@selector(GMGridView:sizeForItemsInInterfaceOrientation:)])
+		return [_dataSource GMGridView:self sizeForItemsInInterfaceOrientation:interfaceOrientation];
+	
+	if ([_dataSource respondsToSelector:@selector(GMGridView:numberOfColumnsInInterfaceOrientation:)])
+	{
+		int columns = [_dataSource GMGridView:self numberOfColumnsInInterfaceOrientation:interfaceOrientation];
+		float sideEdges = _minEdgeInsets.right + _minEdgeInsets.left;
+		float emptySpace = ((columns - 1) * _itemSpacing) + sideEdges;
+		
+		if (emptySpace > self.bounds.size.width || columns == 0) 
+			@throw [[NSException alloc] initWithName:@"Column overflow exception" reason:@"[GMGridView columnCount] throws that the returned column count is out of bounds" userInfo:nil]; 
+		
+		float width = (self.bounds.size.width - emptySpace) / columns;
+		float height = width * _heightScaleFactor;
+		
+		return (CGSize){width, height};
+	}
+	
+	@throw [[NSException alloc] initWithName:@"Data source exception" reason:@"[GMGridView dataSource] throws that is no 'item size' or 'column count' method implemented in data source" userInfo:nil];
+}
+
 //////////////////////////////////////////////////////////////
 #pragma mark loading/destroying items & reusing cells
 //////////////////////////////////////////////////////////////
@@ -1514,8 +1540,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self setSubviewsCacheAsInvalid];
     
-    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];    
-    _itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
+    _itemSize = [self itemSizeInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     _numberTotalItems = numberItems;
     
     [self recomputeSizeAnimated:NO];
