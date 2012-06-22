@@ -42,8 +42,6 @@ typedef enum
     GMGridViewStyleSwap
 } GMGridViewStyle;
 
-typedef void (^ DidLongTouchOnItemBlock)(int index);
-
 typedef enum
 {
 	GMGridViewScrollPositionNone,
@@ -64,9 +62,6 @@ typedef enum
 //////////////////////////////////////////////////////////////
 
 @interface GMGridView : UIScrollView
-
-// Blocks
-@property (nonatomic, copy) DidLongTouchOnItemBlock didLongTouchOnItemBlock;
 
 // Delegates
 @property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewDataSource> *dataSource;                    // Required
@@ -148,6 +143,7 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @optional
+- (void)GMGridView:(GMGridView *)gridView didLongTouchOnItemAtIndex:(NSInteger)position;
 // Tap on space without any items
 - (void)GMGridViewDidTapOnEmptySpace:(GMGridView *)gridView;
 // Called when the delete-button has been pressed. Required to enable editing mode.
