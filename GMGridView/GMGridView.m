@@ -556,18 +556,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 			CGPoint location = [longPressGesture locationInView:self];
 			NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
 			
-			if (!_sortMovingItem) 
+			if ([_actionDelegate respondsToSelector:@selector(GMGridView:didLongTouchOnItemAtIndex:)])
+			{
+				if (position != GMGV_INVALID_POSITION)
+					[_actionDelegate GMGridView:self didLongTouchOnItemAtIndex:position];
+			}
+			else if (!_sortMovingItem) 
             {  
                 if (position != GMGV_INVALID_POSITION) 
                 {
                     [self sortingMoveDidStartAtPoint:location];
                 }
             }
-			else if ([_actionDelegate respondsToSelector:@selector(GMGridView:didLongTouchOnItemAtIndex:)])
-			{
-				if (position != GMGV_INVALID_POSITION)
-					[_actionDelegate GMGridView:self didLongTouchOnItemAtIndex:position];
-			}
 			break;
         }
         case UIGestureRecognizerStateEnded:
