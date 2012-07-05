@@ -1395,7 +1395,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 			@throw [[NSException alloc] initWithName:@"Column overflow exception" reason:@"[GMGridView columnCount] throws that the returned column count is out of bounds" userInfo:nil]; 
 		
 		float width = (self.bounds.size.width - emptySpace) / columns;
-		float height = width * _heightScaleFactor;
+		float height = ceilf(width * _heightScaleFactor);
 		
 		return (CGSize){width, height};
 	}
