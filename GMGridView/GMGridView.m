@@ -482,6 +482,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
+	if ([_actionDelegate respondsToSelector:@selector(GMGridView:shouldRecognizeSimultaneouslyWithGestureRecognizer:)])
+		return [_actionDelegate GMGridView:self shouldRecognizeSimultaneouslyWithGestureRecognizer:otherGestureRecognizer];
+	
     return YES;
 }
 

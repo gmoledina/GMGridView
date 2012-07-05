@@ -155,6 +155,8 @@ typedef enum
 
 - (void)GMGridView:(GMGridView *)gridView changedEdit:(BOOL)edit;
 
+- (BOOL)GMGridView:(GMGridView *)gridView shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
+
 @end
 
 
