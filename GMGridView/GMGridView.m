@@ -31,6 +31,7 @@
 #import "GMGridViewCell+Extended.h"
 #import "GMGridViewLayoutStrategies.h"
 #import "UIGestureRecognizer+GMGridViewAdditions.h"
+#import "UIView+GMGridViewAdditions.h"
 
 static const NSInteger kTagOffset = 50;
 static const CGFloat kDefaultAnimationDuration = 0.3;
@@ -60,6 +61,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     // Moving (sorting) control vars
     GMGridViewCell *_sortMovingItem;
+	NSInteger _sortOriginalPosition;
     NSInteger _sortFuturePosition;
     BOOL _autoScrollActive;
     
@@ -500,7 +502,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _longPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling;
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -533,19 +535,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)longPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture
 {
-    if (self.enableEditOnLongPress && !self.editing) {
+	if (self.enableEditOnLongPress && !self.editing) {
         CGPoint locationTouch = [longPressGesture locationInView:self];
         NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
         
-        if (position != GMGV_INVALID_POSITION) 
+        if (position != GMGV_INVALID_POSITION)
         {
             if (!self.editing) {
                 self.editing = YES;
             }
         }
-        return;
     }
-    
+	
     switch (longPressGesture.state) 
     {
         case UIGestureRecognizerStateBegan:
@@ -615,7 +616,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             CGPoint offset = translation;
             CGPoint locationInScroll = [panGesture locationInView:self];
             
-            _sortMovingItem.transform = CGAffineTransformMakeTranslation(offset.x, offset.y);
+			CGPoint originalOrigin = [self.layoutStrategy originForItemAtPosition:_sortOriginalPosition];
+			_sortMovingItem.frame = CGRectMake(originalOrigin.x + offset.x, originalOrigin.y + offset.y, _sortMovingItem.frame.size.width, _sortMovingItem.frame.size.height);
+			
             [self sortingMoveDidContinueToPoint:locationInScroll];
             
             break;
@@ -714,15 +717,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:point];
     
     GMGridViewCell *item = [self cellForItemAtIndex:position];
+	[item shakeStatus:NO];
     
     [self bringSubviewToFront:item];
     _sortMovingItem = item;
+	_sortOriginalPosition = position;
     
     CGRect frameInMainView = [self convertRect:_sortMovingItem.frame toView:self.mainSuperView];
     
     [_sortMovingItem removeFromSuperview];
     _sortMovingItem.frame = frameInMainView;
     [self.mainSuperView addSubview:_sortMovingItem];
+	
+	[UIView animateWithDuration:0.2f
+					 animations:^{
+						 _sortMovingItem.transform = CGAffineTransformMakeScale(1.2f, 1.2f);
+					 }];
     
     _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
     _sortMovingItem.tag = 0;
@@ -745,6 +755,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)sortingMoveDidStopAtPoint:(CGPoint)point
 {
     [_sortMovingItem shake:NO];
+	[UIView animateWithDuration:0.2f
+					 animations:^{
+						 _sortMovingItem.transform = CGAffineTransformIdentity;
+					 }];
     
     _sortMovingItem.tag = _sortFuturePosition + kTagOffset;
     
@@ -771,6 +785,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          }
                          
                          _sortMovingItem = nil;
+						 _sortOriginalPosition = GMGV_INVALID_POSITION;
                          _sortFuturePosition = GMGV_INVALID_POSITION;
                          
                          [self setSubviewsCacheAsInvalid];
