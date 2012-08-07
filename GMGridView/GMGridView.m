@@ -61,7 +61,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     // Moving (sorting) control vars
     GMGridViewCell *_sortMovingItem;
-	NSInteger _sortOriginalPosition;
+	CGRect _sortOriginalFrame;
     NSInteger _sortFuturePosition;
     BOOL _autoScrollActive;
     
@@ -252,6 +252,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
     self.clipsToBounds = NO;
     
+	_sortOriginalFrame = CGRectZero;
     _sortFuturePosition = GMGV_INVALID_POSITION;
     _itemSize = CGSizeZero;
     _centerGrid = YES;
@@ -616,8 +617,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             CGPoint offset = translation;
             CGPoint locationInScroll = [panGesture locationInView:self];
             
-			CGPoint originalOrigin = [self.layoutStrategy originForItemAtPosition:_sortOriginalPosition];
-			_sortMovingItem.frame = CGRectMake(originalOrigin.x + offset.x, originalOrigin.y + offset.y, _sortMovingItem.frame.size.width, _sortMovingItem.frame.size.height);
+			_sortMovingItem.frame = CGRectMake(_sortOriginalFrame.origin.x + offset.x, _sortOriginalFrame.origin.y + offset.y, _sortOriginalFrame.size.width, _sortOriginalFrame.size.height);
 			
             [self sortingMoveDidContinueToPoint:locationInScroll];
             
@@ -634,8 +634,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         CGPoint locationInMainView = [_sortingPanGesture locationInView:self];
         locationInMainView = CGPointMake(locationInMainView.x - self.contentOffset.x,
-                                         locationInMainView.y -self.contentOffset.y
-        );
+                                         locationInMainView.y - self.contentOffset.y);
         
         
         CGFloat threshhold = _itemSize.height;
@@ -721,12 +720,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self bringSubviewToFront:item];
     _sortMovingItem = item;
-	_sortOriginalPosition = position;
     
     CGRect frameInMainView = [self convertRect:_sortMovingItem.frame toView:self.mainSuperView];
     
     [_sortMovingItem removeFromSuperview];
     _sortMovingItem.frame = frameInMainView;
+	_sortOriginalFrame = frameInMainView;
     [self.mainSuperView addSubview:_sortMovingItem];
 	
 	[UIView animateWithDuration:0.2f
@@ -785,7 +784,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          }
                          
                          _sortMovingItem = nil;
-						 _sortOriginalPosition = GMGV_INVALID_POSITION;
+						 _sortOriginalFrame = CGRectZero;
                          _sortFuturePosition = GMGV_INVALID_POSITION;
                          
                          [self setSubviewsCacheAsInvalid];
