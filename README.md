@@ -21,7 +21,7 @@ Same applies to the layout strategy (vertical, horizontal, paged,... and more to
 Many working examples provided in the demo app.
 
 Let us know how this component works out for you!
-New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledina) or [@steipete](http://twitter.com/steipete))
+New feature requests are welcome. (ping [@gmoledina](http://twitter.com/gmoledina))
 
 ---
 
