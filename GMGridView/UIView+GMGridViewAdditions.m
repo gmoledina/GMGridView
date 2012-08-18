@@ -43,10 +43,10 @@
 {
     if (enabled) 
     {
-        CGFloat rotation = 0.03;
+        CGFloat rotation = 0.02;
         
         CABasicAnimation *shake = [CABasicAnimation animationWithKeyPath:@"transform"];
-        shake.duration = 0.13;
+        shake.duration = 0.09;
         shake.autoreverses = YES;
         shake.repeatCount  = MAXFLOAT;
         shake.removedOnCompletion = NO;
