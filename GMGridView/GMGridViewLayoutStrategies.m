@@ -511,6 +511,11 @@
     return NSMakeRange(firstPosition, (lastPosition - firstPosition));
 }
 
+- (NSInteger)numberOfPages
+{
+    return _numberOfPages;
+}
+
 @end
 
 

@@ -107,6 +107,7 @@ typedef enum
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 animated:(BOOL)animated;
 - (void)swapObjectAtIndex:(NSInteger)index1 withObjectAtIndex:(NSInteger)index2 withAnimation:(GMGridViewItemAnimation)animation;
 - (void)scrollToObjectAtIndex:(NSInteger)index atScrollPosition:(GMGridViewScrollPosition)scrollPosition animated:(BOOL)animated;
+- (void)scrollToPageIndex:(NSInteger)index animated:(BOOL)animated;
 
 // Force the grid to update properties in an (probably) animated way.
 - (void)layoutSubviewsWithAnimation:(GMGridViewItemAnimation)animation;

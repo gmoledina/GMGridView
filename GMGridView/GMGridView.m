@@ -1611,6 +1611,26 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
      ];
 }
 
+- (void)scrollToPageIndex:(NSInteger)index animated:(BOOL)animated
+{    
+    int pages = [self.layoutStrategy numberOfPages];    
+    if(index >= 0 && index < pages)
+    {
+        int orientationOffset = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation])?768:1024;
+        int scrollToX = orientationOffset * index;
+        [UIView animateWithDuration:animated ? kDefaultAnimationDuration : 0
+                              delay:0
+                            options:kDefaultAnimationOptions
+                         animations:^{
+                             [self setContentOffset:CGPointMake(scrollToX, 0) animated:NO];
+                         }
+                         completion:^(BOOL finished){
+                         }
+         ];
+        
+    }
+}
+
 - (void)insertObjectAtIndex:(NSInteger)index animated:(BOOL)animated
 {
     [self insertObjectAtIndex:index withAnimation: animated ? GMGridViewItemAnimationScroll : GMGridViewItemAnimationNone];
