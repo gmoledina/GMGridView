@@ -76,12 +76,12 @@
         self.editing = NO;
         
         UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [self addSubview:deleteButton];
         self.deleteButton = deleteButton;
         [self.deleteButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         self.deleteButtonIcon = nil;
         self.deleteButtonOffset = CGPointMake(-5, -5);
         self.deleteButton.alpha = 0;
-        [self addSubview:deleteButton];
         [deleteButton addTarget:self action:@selector(actionDelete) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
