@@ -1396,7 +1396,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 		      
         float heightScaleFactor = [_dataSource respondsToSelector:@selector(GMGridView:heightScaleFactorForOrientation:)] ? [_dataSource GMGridView:self heightScaleFactorForOrientation:interfaceOrientation] : _heightScaleFactor;
         
-		float width = (self.bounds.size.width - emptySpace) / columns;
+		float width = floorf((self.bounds.size.width - emptySpace) / columns);
         float height = ceilf(width * heightScaleFactor);
 
 		return (CGSize){width, height};
