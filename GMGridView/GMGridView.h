@@ -132,6 +132,7 @@ typedef enum
 - (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
 // Allow a cell to be deletable. If not implemented, YES is assumed.
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
+- (float)GMGridView:(GMGridView *)gridView heightScaleFactorForOrientation:(UIInterfaceOrientation)orientation;
 
 @end
 
