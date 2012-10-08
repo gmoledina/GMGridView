@@ -277,10 +277,11 @@
     }
     
     NSInteger numberOfColumns = ceil(self.itemCount / (1.0 * self.numberOfItemsPerColumn));
-            
+    
+    
     CGSize actualContentSize = CGSizeMake(ceil(numberOfColumns * (self.itemSize.width + self.itemSpacing)) - self.itemSpacing, 
                                ceil(MIN(self.itemCount, self.numberOfItemsPerColumn) * (self.itemSize.height + self.itemSpacing)) - self.itemSpacing);
-    
+
     [self setEdgeAndContentSizeFromAbsoluteContentSize:actualContentSize];
 }
 
@@ -409,6 +410,7 @@
     
     _contentSize = CGSizeMake(bounds.size.width * self.numberOfPages, 
                               bounds.size.height);
+
 }
 
 - (NSInteger)pageForItemAtIndex:(NSInteger)index

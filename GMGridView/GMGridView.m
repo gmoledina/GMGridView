@@ -1276,9 +1276,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
     [self.layoutStrategy rebaseWithItemCount:_numberTotalItems insideOfBounds:self.bounds];
-    
+
     CGSize contentSize = [self.layoutStrategy contentSize];
-    
+
     _minPossibleContentOffset = CGPointMake(0, 0);
     _maxPossibleContentOffset = CGPointMake(contentSize.width - self.bounds.size.width + self.contentInset.right, 
                                             contentSize.height - self.bounds.size.height + self.contentInset.bottom);
@@ -1393,10 +1393,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 		
 		if (emptySpace > self.bounds.size.width || columns == 0) 
 			@throw [[NSException alloc] initWithName:@"Column overflow exception" reason:@"[GMGridView columnCount] throws that the returned column count is out of bounds" userInfo:nil]; 
-		
+		      
+        float heightScaleFactor = [_dataSource respondsToSelector:@selector(GMGridView:heightScaleFactorForOrientation:)] ? [_dataSource GMGridView:self heightScaleFactorForOrientation:interfaceOrientation] : _heightScaleFactor;
+        
 		float width = (self.bounds.size.width - emptySpace) / columns;
-		float height = ceilf(width * _heightScaleFactor);
-		
+        float height = ceilf(width * heightScaleFactor);
+
 		return (CGSize){width, height};
 	}
 	
