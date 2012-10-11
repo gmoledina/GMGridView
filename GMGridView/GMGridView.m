@@ -111,7 +111,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position;
 - (NSInteger)positionForItemSubview:(GMGridViewCell *)view;
 - (void)setSubviewsCacheAsInvalid;
-- (CGRect)rectForPoint:(CGPoint)point inPaggingMode:(BOOL)pagging;
+- (CGRect)rectForPoint:(CGPoint)point;
 
 // Lazy loading
 - (void)loadRequiredItems;
@@ -348,11 +348,11 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             [self layoutSubviewsWithAnimation:GMGridViewItemAnimationNone];
         }];
         
-        // Fixing the contentOffset when pagging enabled
+        // Fixing the contentOffset when paging enabled
         
         if (self.pagingEnabled) 
         {
-            [self setContentOffset:[self rectForPoint:self.contentOffset inPaggingMode:YES].origin animated:YES];
+            [self setContentOffset:[self rectForPoint:self.contentOffset].origin animated:YES];
         }
     }
     else 
@@ -1333,7 +1333,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
 }
 
-- (CGRect)rectForPoint:(CGPoint)point inPaggingMode:(BOOL)pagging
+- (CGRect)rectForPoint:(CGPoint)point
 {
     CGRect targetRect = CGRectZero;
     
@@ -1344,23 +1344,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         CGSize pageSize =  CGSizeMake(self.bounds.size.width  - self.contentInset.left - self.contentInset.right, 
                                            self.bounds.size.height - self.contentInset.top  - self.contentInset.bottom);
         
-        CGFloat pageX = ceilf(point.x / pageSize.width);
-        CGFloat pageY = ceilf(point.y / pageSize.height);
+        CGFloat pageX = floorf(point.x / pageSize.width);
+        CGFloat pageY = floorf(point.y / pageSize.height);
         
         originScroll = CGPointMake(pageX * pageSize.width, 
-                                   pageY *pageSize.height);
-        
-        /*
-        while (originScroll.x + pageSize.width < point.x) 
-        {
-            originScroll.x += pageSize.width;
-        }
-        
-        while (originScroll.y + pageSize.height < point.y) 
-        {
-            originScroll.y += pageSize.height;
-        }
-        */
+                                   pageY * pageSize.height);
+
         targetRect = CGRectMake(originScroll.x, originScroll.y, pageSize.width, pageSize.height);
     }
     else 
@@ -1572,7 +1561,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     index = MIN(index, _numberTotalItems);
     
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:index];
-    CGRect targetRect = [self rectForPoint:origin inPaggingMode:self.pagingEnabled];
+    CGRect targetRect = [self rectForPoint:origin];
     
     if (!self.pagingEnabled)
     {
