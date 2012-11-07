@@ -88,6 +88,7 @@ typedef enum
 @property (nonatomic) BOOL disableEditOnEmptySpaceTap;                // Default is NO
 
 @property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
+@property (nonatomic, strong) UIView *gridHeaderView;                 // Default is nil
 
 // Reusable cells
 - (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
