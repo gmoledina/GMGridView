@@ -1629,7 +1629,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     int pages = [self.layoutStrategy numberOfPages];    
     if(index >= 0 && index < pages)
     {
-        int scrollToX = self.view.bounds.width * index;
+        int scrollToX = self.frame.size.width * index;
         [UIView animateWithDuration:animated ? kDefaultAnimationDuration : 0
                               delay:0
                             options:kDefaultAnimationOptions
