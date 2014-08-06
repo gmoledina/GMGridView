@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
   s.source_files  = "GMGridView", "GMGridView/*.{h,m}"
   s.exclude_files = "Classes/Exclude"
   s.requires_arc = true
-  s.frameworks = QuartzCore
+  s.framework = 'QuartzCore'
 end
