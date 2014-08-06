@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.author             = { "Gulam Moledina" => "http://www.gmoledina.ca" }
   s.source       = { :git => "https://github.com/gmoledina/GMGridView.git", :tag => "1.1.2" }
   s.source_files  = "GMGridView", "GMGridView/*.{h,m}"
-  s.exclude_files = "Classes/Exclude"
+  s.public_header_files = "GMGridView", "GMGridView/*.h"
   s.requires_arc = true
   s.framework = 'QuartzCore'
 end
