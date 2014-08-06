@@ -90,7 +90,7 @@ typedef enum
 @property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
 
 // Reusable cells
-- (GMGridViewCell *)dequeueReusableCell;                              // Should be called in GMGridView:cellForItemAtIndex: to reuse a cell
+- (GMGridViewCell *)dequeueReusableCell;                              // Should be called in gridView:cellForItemAtIndex: to reuse a cell
 - (GMGridViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier;
 
 // Cells
@@ -122,13 +122,13 @@ typedef enum
 
 @required
 // Populating subview items 
-- (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
-- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
-- (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
+- (NSInteger)numberOfItemsInGridView:(GMGridView *)gridView;
+- (CGSize)gridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
+- (GMGridViewCell *)gridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
 // Allow a cell to be deletable. If not implemented, YES is assumed.
-- (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
+- (BOOL)gridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
 
 @end
 
@@ -140,16 +140,16 @@ typedef enum
 @protocol GMGridViewActionDelegate <NSObject>
 
 @required
-- (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
+- (void)gridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @optional
 // Tap on space without any items
-- (void)GMGridViewDidTapOnEmptySpace:(GMGridView *)gridView;
+- (void)gridViewDidTapOnEmptySpace:(GMGridView *)gridView;
 // Called when the delete-button has been pressed. Required to enable editing mode.
 // This method wont delete the cell automatically. Call the delete method of the gridView when appropriate.
-- (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;
+- (void)gridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;
 
-- (void)GMGridView:(GMGridView *)gridView changedEdit:(BOOL)edit;
+- (void)gridView:(GMGridView *)gridView changedEdit:(BOOL)edit;
 
 @end
 
@@ -162,15 +162,15 @@ typedef enum
 
 @required
 // Item moved - right place to update the data structure
-- (void)GMGridView:(GMGridView *)gridView moveItemAtIndex:(NSInteger)oldIndex toIndex:(NSInteger)newIndex;
-- (void)GMGridView:(GMGridView *)gridView exchangeItemAtIndex:(NSInteger)index1 withItemAtIndex:(NSInteger)index2;
+- (void)gridView:(GMGridView *)gridView moveItemAtIndex:(NSInteger)oldIndex toIndex:(NSInteger)newIndex;
+- (void)gridView:(GMGridView *)gridView exchangeItemAtIndex:(NSInteger)index1 withItemAtIndex:(NSInteger)index2;
 
 @optional
 // Sorting started/ended - indexes are not specified on purpose (not the right place to update data structure)
-- (void)GMGridView:(GMGridView *)gridView didStartMovingCell:(GMGridViewCell *)cell;
-- (void)GMGridView:(GMGridView *)gridView didEndMovingCell:(GMGridViewCell *)cell;
+- (void)gridView:(GMGridView *)gridView didStartMovingCell:(GMGridViewCell *)cell;
+- (void)gridView:(GMGridView *)gridView didEndMovingCell:(GMGridViewCell *)cell;
 // Enable/Disable the shaking behavior of an item being moved
-- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
+- (BOOL)gridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
 
 @end
 
@@ -182,13 +182,13 @@ typedef enum
 
 @required
 // Fullsize
-- (CGSize)GMGridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index inInterfaceOrientation:(UIInterfaceOrientation)orientation;
-- (UIView *)GMGridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
+- (CGSize)gridView:(GMGridView *)gridView sizeInFullSizeForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index inInterfaceOrientation:(UIInterfaceOrientation)orientation;
+- (UIView *)gridView:(GMGridView *)gridView fullSizeViewForCell:(GMGridViewCell *)cell atIndex:(NSInteger)index;
 
 // Transformation (pinch, drag, rotate) of the item
 @optional
-- (void)GMGridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell;
-- (void)GMGridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell;
-- (void)GMGridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell;
+- (void)gridView:(GMGridView *)gridView didStartTransformingCell:(GMGridViewCell *)cell;
+- (void)gridView:(GMGridView *)gridView didEnterFullSizeForCell:(GMGridViewCell *)cell;
+- (void)gridView:(GMGridView *)gridView didEndTransformingCell:(GMGridViewCell *)cell;
 
 @end

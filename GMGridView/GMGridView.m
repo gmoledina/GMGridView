@@ -304,7 +304,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         // Updating all the items size
         
-        CGSize itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+        CGSize itemSize = [self.dataSource gridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
         
         if (!CGSizeEqualToSize(_itemSize, itemSize)) 
         {
@@ -326,7 +326,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         if (_transformingItem && _inFullSizeMode) 
         {
             NSInteger position = _transformingItem.tag - kTagOffset;
-            CGSize fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:position inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+            CGSize fullSize = [self.transformDelegate gridView:self sizeInFullSizeForCell:_transformingItem atIndex:position inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
             
             if (!CGSizeEqualToSize(fullSize, _transformingItem.fullSize)) 
             {
@@ -431,14 +431,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     [self setEditing:editing animated:NO];
 	
-    if ([self.actionDelegate respondsToSelector:@selector(GMGridView:changedEdit:)]) {
-        [self.actionDelegate GMGridView:self changedEdit:editing];
+    if ([self.actionDelegate respondsToSelector:@selector(gridView:changedEdit:)]) {
+        [self.actionDelegate gridView:self changedEdit:editing];
     }
 }
 
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated
 {
-    if ([self.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]
+    if ([self.actionDelegate respondsToSelector:@selector(gridView:processDeleteActionForItemAtIndex:)]
         &&![self isInTransformingState] 
         && ((self.isEditing && !editing) || (!self.isEditing && editing))) 
     {
@@ -447,7 +447,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             NSInteger index = [self positionForItemSubview:cell];
             if (index != GMGV_INVALID_POSITION)
             {
-                BOOL allowEdit = editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:index];
+                BOOL allowEdit = editing && [self.dataSource gridView:self canDeleteItemAtIndex:index];
                 [cell setEditing:allowEdit animated:animated];
             }
         }
@@ -719,14 +719,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
     _sortMovingItem.tag = 0;
     
-    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didStartMovingCell:)])
+    if ([self.sortingDelegate respondsToSelector:@selector(gridView:didStartMovingCell:)])
     {
-        [self.sortingDelegate GMGridView:self didStartMovingCell:_sortMovingItem];
+        [self.sortingDelegate gridView:self didStartMovingCell:_sortMovingItem];
     }
     
-    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowShakingBehaviorWhenMovingCell:atIndex:)]) 
+    if ([self.sortingDelegate respondsToSelector:@selector(gridView:shouldAllowShakingBehaviorWhenMovingCell:atIndex:)]) 
     {
-        [_sortMovingItem shake:[self.sortingDelegate GMGridView:self shouldAllowShakingBehaviorWhenMovingCell:_sortMovingItem atIndex:position]];
+        [_sortMovingItem shake:[self.sortingDelegate gridView:self shouldAllowShakingBehaviorWhenMovingCell:_sortMovingItem atIndex:position]];
     }
     else
     {
@@ -757,9 +757,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          _sortMovingItem.frame = newFrame;
                      }
                      completion:^(BOOL finished){
-                         if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:didEndMovingCell:)])
+                         if ([self.sortingDelegate respondsToSelector:@selector(gridView:didEndMovingCell:)])
                          {
-                             [self.sortingDelegate GMGridView:self didEndMovingCell:_sortMovingItem];
+                             [self.sortingDelegate gridView:self didEndMovingCell:_sortMovingItem];
                          }
                          
                          _sortMovingItem = nil;
@@ -817,7 +817,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                         }
                     }
                     
-                    [self.sortingDelegate GMGridView:self moveItemAtIndex:_sortFuturePosition toIndex:position];
+                    [self.sortingDelegate gridView:self moveItemAtIndex:_sortFuturePosition toIndex:position];
                     [self relayoutItemsAnimated:YES];
                     
                     break;
@@ -842,7 +842,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          ];
                     }
                     
-                    [self.sortingDelegate GMGridView:self exchangeItemAtIndex:_sortFuturePosition withItemAtIndex:position];
+                    [self.sortingDelegate gridView:self exchangeItemAtIndex:_sortFuturePosition withItemAtIndex:position];
                     
                     break;
                 }
@@ -1027,12 +1027,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         [self.mainSuperView addSubview:_transformingItem];
         [self.mainSuperView bringSubviewToFront:_transformingItem];
         
-        _transformingItem.fullSize = [self.transformDelegate GMGridView:self sizeInFullSizeForCell:_transformingItem atIndex:positionTouch inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
-        _transformingItem.fullSizeView = [self.transformDelegate GMGridView:self fullSizeViewForCell:_transformingItem atIndex:positionTouch];
+        _transformingItem.fullSize = [self.transformDelegate gridView:self sizeInFullSizeForCell:_transformingItem atIndex:positionTouch inInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+        _transformingItem.fullSizeView = [self.transformDelegate gridView:self fullSizeViewForCell:_transformingItem atIndex:positionTouch];
         
-        if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didStartTransformingCell:)]) 
+        if ([self.transformDelegate respondsToSelector:@selector(gridView:didStartTransformingCell:)]) 
         {
-            [self.transformDelegate GMGridView:self didStartTransformingCell:_transformingItem];
+            [self.transformDelegate gridView:self didStartTransformingCell:_transformingItem];
         }
     }
 }
@@ -1074,9 +1074,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             _inTransformingState = YES;
             _inFullSizeMode = YES;
             
-            if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEnterFullSizeForCell:)])
+            if ([self.transformDelegate respondsToSelector:@selector(gridView:didEnterFullSizeForCell:)])
             {
-                [self.transformDelegate GMGridView:self didEnterFullSizeForCell:_transformingItem];
+                [self.transformDelegate gridView:self didEnterFullSizeForCell:_transformingItem];
             }
             
             // Transfer the gestures on the fullscreen to make is they are accessible (depends on self.mainSuperView)
@@ -1119,9 +1119,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                                  transformingView.fullSizeView = nil;
                                  _inFullSizeMode = NO;
                                  
-                                 if ([self.transformDelegate respondsToSelector:@selector(GMGridView:didEndTransformingCell:)])
+                                 if ([self.transformDelegate respondsToSelector:@selector(gridView:didEndTransformingCell:)])
                                  {
-                                     [self.transformDelegate GMGridView:self didEndTransformingCell:transformingView];
+                                     [self.transformDelegate gridView:self didEndTransformingCell:transformingView];
                                  }
                                  
                                  // Transfer the gestures back
@@ -1147,14 +1147,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         if (!self.editing) {
             [self cellForItemAtIndex:position].highlighted = NO;
-            [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];
+            [self.actionDelegate gridView:self didTapOnItemAtIndex:position];
         }
     }
     else
     { 
         if([self.actionDelegate respondsToSelector:@selector(GMGridViewDidTapOnEmptySpace:)])
         {
-            [self.actionDelegate GMGridViewDidTapOnEmptySpace:self];
+            [self.actionDelegate gridViewDidTapOnEmptySpace:self];
         }
         
         if (self.disableEditOnEmptySpaceTap) {
@@ -1174,7 +1174,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position
 {
-    GMGridViewCell *cell = [self.dataSource GMGridView:self cellForItemAtIndex:position];
+    GMGridViewCell *cell = [self.dataSource gridView:self cellForItemAtIndex:position];
     CGPoint origin = [self.layoutStrategy originForItemAtPosition:position];
     CGRect frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);
     
@@ -1185,7 +1185,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }];
 
     cell.tag = position + kTagOffset;
-    BOOL canEdit = self.editing && [self.dataSource GMGridView:self canDeleteItemAtIndex:position];
+    BOOL canEdit = self.editing && [self.dataSource gridView:self canDeleteItemAtIndex:position];
     [cell setEditing:canEdit animated:NO];
     
     __gm_weak GMGridView *weakSelf = self; 
@@ -1195,14 +1195,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         if (index != GMGV_INVALID_POSITION) 
         {
             BOOL canDelete = YES;
-            if ([weakSelf.dataSource respondsToSelector:@selector(GMGridView:canDeleteItemAtIndex:)]) 
+            if ([weakSelf.dataSource respondsToSelector:@selector(gridView:canDeleteItemAtIndex:)]) 
             {
-                canDelete = [weakSelf.dataSource GMGridView:weakSelf canDeleteItemAtIndex:index];
+                canDelete = [weakSelf.dataSource gridView:weakSelf canDeleteItemAtIndex:index];
             }
             
-            if (canDelete && [weakSelf.actionDelegate respondsToSelector:@selector(GMGridView:processDeleteActionForItemAtIndex:)]) 
+            if (canDelete && [weakSelf.actionDelegate respondsToSelector:@selector(gridView:processDeleteActionForItemAtIndex:)]) 
             {
-                [weakSelf.actionDelegate GMGridView:weakSelf processDeleteActionForItemAtIndex:index];
+                [weakSelf.actionDelegate gridView:weakSelf processDeleteActionForItemAtIndex:index];
             }
         }
     };
@@ -1511,8 +1511,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self setSubviewsCacheAsInvalid];
     
-    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];    
-    _itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    NSUInteger numberItems = [self.dataSource numberOfItemsInGridView:self];
+    _itemSize = [self.dataSource gridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     _numberTotalItems = numberItems;
     
     [self recomputeSizeAnimated:NO];
