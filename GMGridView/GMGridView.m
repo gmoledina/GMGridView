@@ -146,6 +146,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize editing = _editing;
 @synthesize enableEditOnLongPress;
 @synthesize disableEditOnEmptySpaceTap;
+@synthesize heightScaleFactor = _heightScaleFactor;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
@@ -259,6 +260,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     _minPossibleContentOffset = CGPointMake(0, 0);
     _maxPossibleContentOffset = CGPointMake(0, 0);
+	
+	_heightScaleFactor = 2.0 / 3.0;
     
     _reusableCells = [[NSMutableSet alloc] init];
     
@@ -304,7 +307,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         
         // Updating all the items size
         
-        CGSize itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+        CGSize itemSize = [self itemSizeInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
         
         if (!CGSizeEqualToSize(_itemSize, itemSize)) 
         {
@@ -479,6 +482,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
+	if ([_actionDelegate respondsToSelector:@selector(GMGridView:shouldRecognizeSimultaneouslyWithGestureRecognizer:)])
+		return [_actionDelegate GMGridView:self shouldRecognizeSimultaneouslyWithGestureRecognizer:otherGestureRecognizer];
+	
     return YES;
 }
 
@@ -500,7 +506,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _longPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = (self.sortingDelegate || self.enableEditOnLongPress || self.actionDelegate) && !isScrolling && !self.isEditing;
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -550,19 +556,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         case UIGestureRecognizerStateBegan:
         {
-            if (!_sortMovingItem) 
-            { 
-                CGPoint location = [longPressGesture locationInView:self];
-                
-                NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
-                
+			CGPoint location = [longPressGesture locationInView:self];
+			NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
+			
+			if ([_actionDelegate respondsToSelector:@selector(GMGridView:didLongTouchOnItemAtIndex:)])
+			{
+				if (position != GMGV_INVALID_POSITION)
+					[_actionDelegate GMGridView:self didLongTouchOnItemAtIndex:position];
+			}
+			else if (!_sortMovingItem) 
+            {  
                 if (position != GMGV_INVALID_POSITION) 
                 {
                     [self sortingMoveDidStartAtPoint:location];
                 }
             }
-            
-            break;
+			break;
         }
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
@@ -1267,9 +1276,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
     [self.layoutStrategy rebaseWithItemCount:_numberTotalItems insideOfBounds:self.bounds];
-    
+
     CGSize contentSize = [self.layoutStrategy contentSize];
-    
+
     _minPossibleContentOffset = CGPointMake(0, 0);
     _maxPossibleContentOffset = CGPointMake(contentSize.width - self.bounds.size.width + self.contentInset.right, 
                                             contentSize.height - self.bounds.size.height + self.contentInset.bottom);
@@ -1369,6 +1378,31 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     
     return targetRect;
+}
+
+- (CGSize)itemSizeInInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	if ([_dataSource respondsToSelector:@selector(GMGridView:sizeForItemsInInterfaceOrientation:)])
+		return [_dataSource GMGridView:self sizeForItemsInInterfaceOrientation:interfaceOrientation];
+	
+	if ([_dataSource respondsToSelector:@selector(GMGridView:numberOfColumnsInInterfaceOrientation:)])
+	{
+		int columns = [_dataSource GMGridView:self numberOfColumnsInInterfaceOrientation:interfaceOrientation];
+		float sideEdges = _minEdgeInsets.right + _minEdgeInsets.left;
+		float emptySpace = ((columns - 1) * _itemSpacing) + sideEdges;
+		
+		if (emptySpace > self.bounds.size.width || columns == 0) 
+			@throw [[NSException alloc] initWithName:@"Column overflow exception" reason:@"[GMGridView columnCount] throws that the returned column count is out of bounds" userInfo:nil]; 
+		      
+        float heightScaleFactor = [_dataSource respondsToSelector:@selector(GMGridView:heightScaleFactorForOrientation:)] ? [_dataSource GMGridView:self heightScaleFactorForOrientation:interfaceOrientation] : _heightScaleFactor;
+        
+		float width = floorf((self.bounds.size.width - emptySpace) / columns);
+        float height = ceilf(width * heightScaleFactor);
+
+		return (CGSize){width, height};
+	}
+	
+	@throw [[NSException alloc] initWithName:@"Data source exception" reason:@"[GMGridView dataSource] throws that is no 'item size' or 'column count' method implemented in data source" userInfo:nil];
 }
 
 //////////////////////////////////////////////////////////////
@@ -1511,8 +1545,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self setSubviewsCacheAsInvalid];
     
-    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];    
-    _itemSize = [self.dataSource GMGridView:self sizeForItemsInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    NSUInteger numberItems = [self.dataSource numberOfItemsInGMGridView:self];
+    _itemSize = [self itemSizeInInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     _numberTotalItems = numberItems;
     
     [self recomputeSizeAnimated:NO];

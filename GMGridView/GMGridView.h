@@ -86,6 +86,7 @@ typedef enum
 @property (nonatomic) BOOL showFullSizeViewWithAlphaWhenTransforming; // Default is YES - not working right now
 @property (nonatomic) BOOL enableEditOnLongPress;                     // Default is NO
 @property (nonatomic) BOOL disableEditOnEmptySpaceTap;                // Default is NO
+@property (nonatomic) float heightScaleFactor;						  // Default is 3:2; if data source GMGridView:sizeForItemsInInterfaceOrientation: is not implemented
 
 @property (nonatomic, readonly) UIScrollView *scrollView __attribute__((deprecated)); // The grid now inherits directly from UIScrollView
 
@@ -95,6 +96,7 @@ typedef enum
 
 // Cells
 - (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;           // Might return nil if cell not loaded yet
+- (CGSize)itemSizeInInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 
 // Actions
 - (void)reloadData;
@@ -123,12 +125,14 @@ typedef enum
 @required
 // Populating subview items 
 - (NSInteger)numberOfItemsInGMGridView:(GMGridView *)gridView;
-- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
 - (GMGridViewCell *)GMGridView:(GMGridView *)gridView cellForItemAtIndex:(NSInteger)index;
 
 @optional
+- (int)GMGridView:(GMGridView *)gridView numberOfColumnsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
+- (CGSize)GMGridView:(GMGridView *)gridView sizeForItemsInInterfaceOrientation:(UIInterfaceOrientation)orientation;
 // Allow a cell to be deletable. If not implemented, YES is assumed.
 - (BOOL)GMGridView:(GMGridView *)gridView canDeleteItemAtIndex:(NSInteger)index;
+- (float)GMGridView:(GMGridView *)gridView heightScaleFactorForOrientation:(UIInterfaceOrientation)orientation;
 
 @end
 
@@ -143,6 +147,7 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView didTapOnItemAtIndex:(NSInteger)position;
 
 @optional
+- (void)GMGridView:(GMGridView *)gridView didLongTouchOnItemAtIndex:(NSInteger)position;
 // Tap on space without any items
 - (void)GMGridViewDidTapOnEmptySpace:(GMGridView *)gridView;
 // Called when the delete-button has been pressed. Required to enable editing mode.
@@ -150,6 +155,8 @@ typedef enum
 - (void)GMGridView:(GMGridView *)gridView processDeleteActionForItemAtIndex:(NSInteger)index;
 
 - (void)GMGridView:(GMGridView *)gridView changedEdit:(BOOL)edit;
+
+- (BOOL)GMGridView:(GMGridView *)gridView shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
 
 @end
 
