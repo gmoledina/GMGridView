@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16A0361014A012E60062437D /* UIGestureRecognizer+GMGridViewAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 16A0360E14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.h */; };
+		16A0361014A012E60062437D /* UIGestureRecognizer+GMGridViewAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 16A0360E14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		16A0361114A012E60062437D /* UIGestureRecognizer+GMGridViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 16A0360F14A012E50062437D /* UIGestureRecognizer+GMGridViewAdditions.m */; };
-		16A0361514A012EF0062437D /* UIView+GMGridViewAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 16A0361314A012EF0062437D /* UIView+GMGridViewAdditions.h */; };
+		16A0361514A012EF0062437D /* UIView+GMGridViewAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 16A0361314A012EF0062437D /* UIView+GMGridViewAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		16A0361614A012EF0062437D /* UIView+GMGridViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 16A0361414A012EF0062437D /* UIView+GMGridViewAdditions.m */; };
 		78509316149FAC2E000787E4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78509315149FAC2E000787E4 /* Foundation.framework */; };
 		78509341149FAC61000787E4 /* GMGridView-Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 78509335149FAC61000787E4 /* GMGridView-Constants.h */; settings = {ATTRIBUTES = (Public, ); }; };

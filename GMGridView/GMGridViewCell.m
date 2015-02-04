@@ -27,7 +27,6 @@
 //
 
 #import "GMGridViewCell+Extended.h"
-#import "UIView+GMGridViewAdditions.h"
 
 //////////////////////////////////////////////////////////////
 #pragma mark - Interface Private
