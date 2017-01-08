@@ -254,7 +254,7 @@
 - (void)setHighlighted:(BOOL)aHighlighted {
     highlighted = aHighlighted;
 	
-	[self.contentView recursiveEnumerateSubviewsUsingBlock:^(UIView *view, BOOL *stop) {
+	[self recursiveEnumerateSubviewsUsingBlock:^(UIView *view, BOOL *stop) {
 		if ([view respondsToSelector:@selector(setHighlighted:)]) {
 			[(UIControl*)view setHighlighted:highlighted];
 		}

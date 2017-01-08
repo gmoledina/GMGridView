@@ -134,6 +134,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 @implementation GMGridView
 
+@synthesize didLongTouchOnItemBlock = _didLongTouchOnItemBlock;
+
 @synthesize sortingDelegate = _sortingDelegate, dataSource = _dataSource, transformDelegate = _transformDelegate, actionDelegate = _actionDelegate;
 @synthesize mainSuperView = _mainSuperView;
 @synthesize layoutStrategy = _layoutStrategy;
@@ -500,7 +502,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _longPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = (self.sortingDelegate || self.enableEditOnLongPress || _didLongTouchOnItemBlock) && !isScrolling && !self.isEditing;
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -550,7 +552,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         case UIGestureRecognizerStateBegan:
         {
-            if (!_sortMovingItem) 
+			if (_didLongTouchOnItemBlock != NULL)
+			{
+				CGPoint location = [longPressGesture locationInView:self];
+				
+				NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
+				
+				if (position != GMGV_INVALID_POSITION)
+					_didLongTouchOnItemBlock(position);
+			}
+			else if (!_sortMovingItem) 
             { 
                 CGPoint location = [longPressGesture locationInView:self];
                 
@@ -561,8 +572,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                     [self sortingMoveDidStartAtPoint:location];
                 }
             }
-            
-            break;
+			break;
         }
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:

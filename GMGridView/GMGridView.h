@@ -42,6 +42,8 @@ typedef enum
     GMGridViewStyleSwap
 } GMGridViewStyle;
 
+typedef void (^ DidLongTouchOnItemBlock)(int index);
+
 typedef enum
 {
 	GMGridViewScrollPositionNone,
@@ -62,6 +64,9 @@ typedef enum
 //////////////////////////////////////////////////////////////
 
 @interface GMGridView : UIScrollView
+
+// Blocks
+@property (nonatomic, copy) DidLongTouchOnItemBlock didLongTouchOnItemBlock;
 
 // Delegates
 @property (nonatomic, gm_weak) IBOutlet NSObject<GMGridViewDataSource> *dataSource;                    // Required
