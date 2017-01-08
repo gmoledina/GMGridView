@@ -45,7 +45,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     // Sorting Gestures
     UIPanGestureRecognizer       *_sortingPanGesture;
-    UILongPressGestureRecognizer *_longPressGesture;
+    UILongPressGestureRecognizer *_sortingLongPressGesture;
     
     // Moving gestures
     UIPinchGestureRecognizer     *_pinchGesture;
@@ -86,8 +86,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 // Gestures
 - (void)sortingPanGestureUpdated:(UIPanGestureRecognizer *)panGesture;
-- (void)longPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture;
-- (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture;
+- (void)sortingLongPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture;
 - (void)panGestureUpdated:(UIPanGestureRecognizer *)panGesture;
 - (void)pinchGestureUpdated:(UIPinchGestureRecognizer *)pinchGesture;
 - (void)rotationGestureUpdated:(UIRotationGestureRecognizer *)rotationGesture;
@@ -106,6 +105,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 // Helpers & more
 - (void)recomputeSizeAnimated:(BOOL)animated;
 - (void)relayoutItemsAnimated:(BOOL)animated;
+- (void)relayoutGridHeaderView:(BOOL)animated;
 - (NSArray *)itemSubviews;
 - (GMGridViewCell *)cellForItemAtIndex:(NSInteger)position;
 - (GMGridViewCell *)newItemSubViewForPosition:(NSInteger)position;
@@ -144,8 +144,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize minEdgeInsets = _minEdgeInsets;
 @synthesize showFullSizeViewWithAlphaWhenTransforming;
 @synthesize editing = _editing;
-@synthesize enableEditOnLongPress;
-@synthesize disableEditOnEmptySpaceTap;
+@synthesize gridHeaderView = _gridHeaderView;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
@@ -183,12 +182,12 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)commonInit
 {
-    _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
-    _tapGesture.delegate = self;
-    _tapGesture.numberOfTapsRequired = 1;
-    _tapGesture.numberOfTouchesRequired = 1;
-    _tapGesture.cancelsTouchesInView = NO;
-    [self addGestureRecognizer:_tapGesture];
+//_COMMENTED: To make the #tags and www.<sites>.com work
+//    _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureUpdated:)];
+//    _tapGesture.delegate = self;
+//    _tapGesture.numberOfTapsRequired = 1;
+//    _tapGesture.numberOfTouchesRequired = 1;
+//    [self addGestureRecognizer:_tapGesture];
     
     /////////////////////////////
     // Transformation gestures :
@@ -213,11 +212,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _sortingPanGesture.delegate = self;
     [self addGestureRecognizer:_sortingPanGesture];
     
-    _longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGestureUpdated:)];
-    _longPressGesture.numberOfTouchesRequired = 1;
-    _longPressGesture.delegate = self;
-    _longPressGesture.cancelsTouchesInView = NO;
-    [self addGestureRecognizer:_longPressGesture];
+    _sortingLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(sortingLongPressGestureUpdated:)];
+    _sortingLongPressGesture.numberOfTouchesRequired = 1;
+    _sortingLongPressGesture.delegate = self;
+    [self addGestureRecognizer:_sortingLongPressGesture];
     
     ////////////////////////
     // Gesture dependencies
@@ -249,6 +247,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     self.showFullSizeViewWithAlphaWhenTransforming = YES;
     self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
     self.clipsToBounds = NO;
+    self.gridHeaderView = nil;
     
     _sortFuturePosition = GMGV_INVALID_POSITION;
     _itemSize = CGSizeZero;
@@ -291,6 +290,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 {
     [self recomputeSizeAnimated:!(animation & GMGridViewItemAnimationNone)];
     [self relayoutItemsAnimated:animation & GMGridViewItemAnimationFade]; // only supported animation for now
+    [self relayoutGridHeaderView:!(animation & GMGridViewItemAnimationNone)];
     [self loadRequiredItems];
 }
 
@@ -300,7 +300,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     if (_rotationActive) 
     {
-         _rotationActive = NO;
+        _rotationActive = NO;
         
         // Updating all the items size
         
@@ -419,21 +419,28 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)setMinimumPressDuration:(CFTimeInterval)duration
 {
-    _longPressGesture.minimumPressDuration = duration;
+    _sortingLongPressGesture.minimumPressDuration = duration;
+}
+
+- (void)setGridHeaderView:(UIView *)gridHeaderView
+{
+    if (_gridHeaderView == gridHeaderView) return;
+
+    if (_gridHeaderView) [_gridHeaderView removeFromSuperview];
+    _gridHeaderView = gridHeaderView;
+    if (_gridHeaderView) [self addSubview:_gridHeaderView];
+
+    [self setNeedsLayout];
 }
 
 - (CFTimeInterval)minimumPressDuration
 {
-    return _longPressGesture.minimumPressDuration;
+    return _sortingLongPressGesture.minimumPressDuration;
 }
 
 - (void)setEditing:(BOOL)editing
 {
     [self setEditing:editing animated:NO];
-	
-    if ([self.actionDelegate respondsToSelector:@selector(GMGridView:changedEdit:)]) {
-        [self.actionDelegate GMGridView:self changedEdit:editing];
-    }
 }
 
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated
@@ -477,34 +484,31 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 #pragma mark GestureRecognizer delegate
 //////////////////////////////////////////////////////////////
 
+//_ADDED: the following fixes the
+//GMGridView/issues/194
+//issue
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
-    return YES;
+    return NO;
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
-{    
+{
     BOOL valid = YES;
     BOOL isScrolling = self.isDragging || self.isDecelerating;
     
     if (gestureRecognizer == _tapGesture) 
     {
-        if (self.editing && self.disableEditOnEmptySpaceTap) {
-            CGPoint locationTouch = [_tapGesture locationInView:self];
-            NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-            
-            valid = (position == GMGV_INVALID_POSITION);
-        } else {
-            valid = !isScrolling && !self.isEditing && ![_longPressGesture hasRecognizedValidGesture];
-        }
+//_COMMENTED: To make the #tags and www.<sites>.com work
+//        valid = !isScrolling && !self.isEditing && ![_sortingLongPressGesture hasRecognizedValidGesture];
     }
-    else if (gestureRecognizer == _longPressGesture)
+    else if (gestureRecognizer == _sortingLongPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = !isScrolling && !self.isEditing && (self.sortingDelegate != nil);
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
-        valid = (_sortMovingItem != nil && [_longPressGesture hasRecognizedValidGesture]);
+        valid = (_sortMovingItem != nil && [_sortingLongPressGesture hasRecognizedValidGesture]);
     }
     else if(gestureRecognizer == _rotationGesture || gestureRecognizer == _pinchGesture || gestureRecognizer == _panGesture)
     {
@@ -531,21 +535,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 #pragma mark Sorting gestures & logic
 //////////////////////////////////////////////////////////////
 
-- (void)longPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture
+- (void)sortingLongPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture
 {
-    if (self.enableEditOnLongPress && !self.editing) {
-        CGPoint locationTouch = [longPressGesture locationInView:self];
-        NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-        
-        if (position != GMGV_INVALID_POSITION) 
-        {
-            if (!self.editing) {
-                self.editing = YES;
-            }
-        }
-        return;
-    }
-    
     switch (longPressGesture.state) 
     {
         case UIGestureRecognizerStateBegan:
@@ -1138,30 +1129,21 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 #pragma mark Tap gesture
 //////////////////////////////////////////////////////////////
 
-- (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture
-{
-    CGPoint locationTouch = [_tapGesture locationInView:self];
-    NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
-    
-    if (position != GMGV_INVALID_POSITION) 
-    {
-        if (!self.editing) {
-            [self cellForItemAtIndex:position].highlighted = NO;
-            [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];
-        }
-    }
-    else
-    { 
-        if([self.actionDelegate respondsToSelector:@selector(GMGridViewDidTapOnEmptySpace:)])
-        {
-            [self.actionDelegate GMGridViewDidTapOnEmptySpace:self];
-        }
-        
-        if (self.disableEditOnEmptySpaceTap) {
-            self.editing = NO;
-        }
-    }
-}
+//_COMMENTED: To make the #tags and www.<sites>.com work
+//- (void)tapGestureUpdated:(UITapGestureRecognizer *)tapGesture
+//{
+//    CGPoint locationTouch = [_tapGesture locationInView:self];
+//    NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
+//    
+//    if (position != GMGV_INVALID_POSITION) 
+//    {
+//        [self.actionDelegate GMGridView:self didTapOnItemAtIndex:position];
+//    }
+//    else if([self.actionDelegate respondsToSelector:@selector(GMGridViewDidTapOnEmptySpace:)])
+//    {
+//        [self.actionDelegate GMGridViewDidTapOnEmptySpace:self];
+//    }
+//}
 
 //////////////////////////////////////////////////////////////
 #pragma mark private methods
@@ -1265,7 +1247,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)recomputeSizeAnimated:(BOOL)animated
 {
-    [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
+//    [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:self.minEdgeInsets andCenteredGrid:self.centerGrid];
+    UIEdgeInsets minEdgeInsets = self.minEdgeInsets;
+        if (self.gridHeaderView)
+        {
+            minEdgeInsets.top += self.gridHeaderView.bounds.size.height;
+        }
+    [self.layoutStrategy setupItemSize:_itemSize andItemSpacing:self.itemSpacing withMinEdgeInsets:minEdgeInsets andCenteredGrid:self.centerGrid];
+    
     [self.layoutStrategy rebaseWithItemCount:_numberTotalItems insideOfBounds:self.bounds];
     
     CGSize contentSize = [self.layoutStrategy contentSize];
@@ -1294,6 +1283,26 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         }
     }
     
+}
+
+- (void)relayoutGridHeaderView:(BOOL)animated;
+{
+    CGRect frame = CGRectMake(0, 0, self.bounds.size.width, self.gridHeaderView.bounds.size.height);
+    if (animated)
+    {
+      [UIView animateWithDuration:kDefaultAnimationDuration
+                      delay:0
+                    options:kDefaultAnimationOptions
+                    animations:
+       ^{
+            self.gridHeaderView.frame = frame;
+        }
+        completion:nil];
+    }
+    else 
+    {
+        self.gridHeaderView.frame = frame;
+    }
 }
 
 - (void)relayoutItemsAnimated:(BOOL)animated
@@ -1377,8 +1386,16 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)loadRequiredItems
 {
-    NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: self.contentOffset];
+    CGPoint offset = self.contentOffset;
+    offset.y -= self.gridHeaderView.frame.size.height;
+    NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: offset];
     NSRange loadedPositionsRange = NSMakeRange(self.firstPositionLoaded, self.lastPositionLoaded - self.firstPositionLoaded);
+   
+   if ((self.firstPositionLoaded != GMGV_INVALID_POSITION) &&
+               (self.lastPositionLoaded != GMGV_INVALID_POSITION) &&
+                      NSEqualRanges(rangeOfPositions, loadedPositionsRange) ) {
+               return; // No need to load anything... 
+   }
 
     // calculate new position range
     self.firstPositionLoaded = self.firstPositionLoaded == GMGV_INVALID_POSITION ? rangeOfPositions.location : MIN(self.firstPositionLoaded, (NSInteger)rangeOfPositions.location);
@@ -1409,7 +1426,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)cleanupUnseenItems
 {
-    NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: self.contentOffset];
+    CGPoint offset = self.contentOffset;
+    offset.y -= self.gridHeaderView.frame.size.height;
+    NSRange rangeOfPositions = [self.layoutStrategy rangeOfPositionsInBoundsFromOffset: offset];
     GMGridViewCell *cell;
     
     if ((NSInteger)rangeOfPositions.location > self.firstPositionLoaded) 
@@ -1632,14 +1651,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             oldView.tag = oldView.tag + 1;
         }
         
-        if (animation & GMGridViewItemAnimationFade) {
-            cell.alpha = 0;
-            [UIView beginAnimations:nil context:NULL];
-            [UIView setAnimationDelay:kDefaultAnimationDuration];
-            [UIView setAnimationDuration:kDefaultAnimationDuration];
-            cell.alpha = 1.0;
-            [UIView commitAnimations];
-        }
         [self addSubview:cell];
     }
     
