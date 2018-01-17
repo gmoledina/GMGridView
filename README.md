@@ -14,10 +14,6 @@ For any comments, ping [@gmoledina](http://twitter.com/gmoledina)
 
 ---
 
-<a target="_blank" href="http://www.gmoledina.ca/projects/gmgridview/">
-<img style="position: relative; width: 768px; margin: 0;" src="http://www.gmoledina.ca/wp-content/uploads/2012/04/GMGridView_iPad_promo1.png" alt="GMGridView"/>
-</a>
-
 
 An iOS Grid-View allowing the user to sort the views in the scrollView and also to see the views in full-size by pinching them. 
 This view is inspired by the UITableView and uses a datasource and delegates in order to get the data and interact with it.
