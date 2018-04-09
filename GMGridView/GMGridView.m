@@ -476,9 +476,22 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 //////////////////////////////////////////////////////////////
 #pragma mark GestureRecognizer delegate
 //////////////////////////////////////////////////////////////
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+    if ( gestureRecognizer == _tapGesture) {
+        if ( [touch.view isDescendantOfView:self] ) {
+            // Test if the touched view is a subview of a control
+            for ( UIView *view = touch.view ; view != self ; view = view.superview )
+                if ( [view isKindOfClass:[UIControl class]] )
+                    return NO;
+        }
+    }
+    
+    return YES;
+}
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
+{    
     return YES;
 }
 
@@ -1609,6 +1622,25 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      completion:^(BOOL finished){
                      }
      ];
+}
+
+- (void)scrollToPageIndex:(NSInteger)index animated:(BOOL)animated
+{    
+    int pages = [self.layoutStrategy numberOfPages];    
+    if(index >= 0 && index < pages)
+    {
+        int scrollToX = self.frame.size.width * index;
+        [UIView animateWithDuration:animated ? kDefaultAnimationDuration : 0
+                              delay:0
+                            options:kDefaultAnimationOptions
+                         animations:^{
+                             [self setContentOffset:CGPointMake(scrollToX, 0) animated:NO];
+                         }
+                         completion:^(BOOL finished){
+                         }
+         ];
+        
+    }
 }
 
 - (void)insertObjectAtIndex:(NSInteger)index animated:(BOOL)animated

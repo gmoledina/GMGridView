@@ -76,6 +76,9 @@ typedef enum {
 
 - (NSRange)rangeOfPositionsInBoundsFromOffset:(CGPoint)offset;
 
+@optional
+- (NSInteger)numberOfPages;
+
 @end
 
 
