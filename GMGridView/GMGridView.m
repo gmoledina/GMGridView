@@ -144,6 +144,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize minEdgeInsets = _minEdgeInsets;
 @synthesize showFullSizeViewWithAlphaWhenTransforming;
 @synthesize editing = _editing;
+@synthesize scaleOnPan=_scaleOnPan;
 @synthesize enableEditOnLongPress;
 @synthesize disableEditOnEmptySpaceTap;
 
@@ -245,6 +246,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     self.editing = NO;
     self.itemSpacing = 10;
     self.style = GMGridViewStyleSwap;
+    self.scaleOnPan = 1.1f;
     self.minimumPressDuration = 0.2;
     self.showFullSizeViewWithAlphaWhenTransforming = YES;
     self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
@@ -570,6 +572,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
         {
             [_sortingPanGesture end];
             
+            _sortMovingItem.transform = CGAffineTransformMakeScale(self.scaleOnPan, self.scaleOnPan);
+
             if (_sortMovingItem) 
             {                
                 CGPoint location = [longPressGesture locationInView:self];
@@ -607,7 +611,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             CGPoint offset = translation;
             CGPoint locationInScroll = [panGesture locationInView:self];
             
-            _sortMovingItem.transform = CGAffineTransformMakeTranslation(offset.x, offset.y);
+            _sortMovingItem.transform = CGAffineTransformConcat(CGAffineTransformMakeScale(self.scaleOnPan, self.scaleOnPan),
+                                                                CGAffineTransformMakeTranslation(offset.x, offset.y));
             [self sortingMoveDidContinueToPoint:locationInScroll];
             
             break;
@@ -709,6 +714,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [self bringSubviewToFront:item];
     _sortMovingItem = item;
+    _sortMovingItem.transform = CGAffineTransformMakeScale(self.scaleOnPan, self.scaleOnPan);
     
     CGRect frameInMainView = [self convertRect:_sortMovingItem.frame toView:self.mainSuperView];
     
