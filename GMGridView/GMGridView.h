@@ -172,6 +172,11 @@ typedef enum
 // Enable/Disable the shaking behavior of an item being moved
 - (BOOL)GMGridView:(GMGridView *)gridView shouldAllowShakingBehaviorWhenMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
 
+// Allow/Disallow moving of an item
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowMovingCell:(GMGridViewCell *)view atIndex:(NSInteger)index;
+// Allow/Disallow placing item at index
+- (BOOL)GMGridView:(GMGridView *)gridView shouldAllowMovingCell:(GMGridViewCell *)view toIndex:(NSInteger)index;
+
 @end
 
 //////////////////////////////////////////////////////////////

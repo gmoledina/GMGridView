@@ -31,6 +31,7 @@
 #import "GMGridViewCell+Extended.h"
 #import "GMGridViewLayoutStrategies.h"
 #import "UIGestureRecognizer+GMGridViewAdditions.h"
+#import "UIView+GMGridViewAdditions.h"
 
 static const NSInteger kTagOffset = 50;
 static const CGFloat kDefaultAnimationDuration = 0.3;
@@ -60,6 +61,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     // Moving (sorting) control vars
     GMGridViewCell *_sortMovingItem;
+	CGRect _sortOriginalFrame;
     NSInteger _sortFuturePosition;
     BOOL _autoScrollActive;
     
@@ -250,6 +252,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     self.minEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
     self.clipsToBounds = NO;
     
+	_sortOriginalFrame = CGRectZero;
     _sortFuturePosition = GMGV_INVALID_POSITION;
     _itemSize = CGSizeZero;
     _centerGrid = YES;
@@ -500,7 +503,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _longPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling;
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -533,19 +536,18 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)longPressGestureUpdated:(UILongPressGestureRecognizer *)longPressGesture
 {
-    if (self.enableEditOnLongPress && !self.editing) {
+	if (self.enableEditOnLongPress && !self.editing) {
         CGPoint locationTouch = [longPressGesture locationInView:self];
         NSInteger position = [self.layoutStrategy itemPositionFromLocation:locationTouch];
         
-        if (position != GMGV_INVALID_POSITION) 
+        if (position != GMGV_INVALID_POSITION)
         {
             if (!self.editing) {
                 self.editing = YES;
             }
         }
-        return;
     }
-    
+	
     switch (longPressGesture.state) 
     {
         case UIGestureRecognizerStateBegan:
@@ -556,6 +558,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                 
                 NSInteger position = [self.layoutStrategy itemPositionFromLocation:location];
                 
+				// Ask the delegate if moving is permitted
+                if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:atIndex:)])
+                {
+                    GMGridViewCell *item = [self cellForItemAtIndex:position];
+                    if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item atIndex:position])
+                        position = GMGV_INVALID_POSITION;
+                }
+				
                 if (position != GMGV_INVALID_POSITION) 
                 {
                     [self sortingMoveDidStartAtPoint:location];
@@ -607,7 +617,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             CGPoint offset = translation;
             CGPoint locationInScroll = [panGesture locationInView:self];
             
-            _sortMovingItem.transform = CGAffineTransformMakeTranslation(offset.x, offset.y);
+			_sortMovingItem.frame = CGRectMake(_sortOriginalFrame.origin.x + offset.x, _sortOriginalFrame.origin.y + offset.y, _sortOriginalFrame.size.width, _sortOriginalFrame.size.height);
+			
             [self sortingMoveDidContinueToPoint:locationInScroll];
             
             break;
@@ -623,8 +634,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     {
         CGPoint locationInMainView = [_sortingPanGesture locationInView:self];
         locationInMainView = CGPointMake(locationInMainView.x - self.contentOffset.x,
-                                         locationInMainView.y -self.contentOffset.y
-        );
+                                         locationInMainView.y - self.contentOffset.y);
         
         
         CGFloat threshhold = _itemSize.height;
@@ -706,6 +716,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     NSInteger position = [self.layoutStrategy itemPositionFromLocation:point];
     
     GMGridViewCell *item = [self cellForItemAtIndex:position];
+	[item shakeStatus:NO];
     
     [self bringSubviewToFront:item];
     _sortMovingItem = item;
@@ -714,7 +725,13 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     [_sortMovingItem removeFromSuperview];
     _sortMovingItem.frame = frameInMainView;
+	_sortOriginalFrame = frameInMainView;
     [self.mainSuperView addSubview:_sortMovingItem];
+	
+	[UIView animateWithDuration:0.2f
+					 animations:^{
+						 _sortMovingItem.transform = CGAffineTransformMakeScale(1.2f, 1.2f);
+					 }];
     
     _sortFuturePosition = _sortMovingItem.tag - kTagOffset;
     _sortMovingItem.tag = 0;
@@ -737,6 +754,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 - (void)sortingMoveDidStopAtPoint:(CGPoint)point
 {
     [_sortMovingItem shake:NO];
+	[UIView animateWithDuration:0.2f
+					 animations:^{
+						 _sortMovingItem.transform = CGAffineTransformIdentity;
+					 }];
     
     _sortMovingItem.tag = _sortFuturePosition + kTagOffset;
     
@@ -763,6 +784,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                          }
                          
                          _sortMovingItem = nil;
+						 _sortOriginalFrame = CGRectZero;
                          _sortFuturePosition = GMGV_INVALID_POSITION;
                          
                          [self setSubviewsCacheAsInvalid];
@@ -775,6 +797,14 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     int position = [self.layoutStrategy itemPositionFromLocation:point];
     int tag = position + kTagOffset;
     
+	// Ask the delegate if inserting item is permitted
+    if ([self.sortingDelegate respondsToSelector:@selector(GMGridView:shouldAllowMovingCell:toIndex:)])
+    {
+        GMGridViewCell *item = [self cellForItemAtIndex:position];
+        if (![self.sortingDelegate GMGridView:self shouldAllowMovingCell:item toIndex:position])
+            position = GMGV_INVALID_POSITION;
+    }
+	
     if (position != GMGV_INVALID_POSITION && position != _sortFuturePosition && position < _numberTotalItems) 
     {
         BOOL positionTaken = NO;

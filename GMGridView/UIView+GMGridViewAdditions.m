@@ -43,21 +43,24 @@
 {
     if (enabled) 
     {
-        CGFloat rotation = 0.03;
+        CGFloat rotation = 0.02;
         
         CABasicAnimation *shake = [CABasicAnimation animationWithKeyPath:@"transform"];
-        shake.duration = 0.13;
+        shake.duration = 0.09;
         shake.autoreverses = YES;
         shake.repeatCount  = MAXFLOAT;
         shake.removedOnCompletion = NO;
         shake.fromValue = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform,-rotation, 0.0 ,0.0 ,1.0)];
         shake.toValue   = [NSValue valueWithCATransform3D:CATransform3DRotate(self.layer.transform, rotation, 0.0 ,0.0 ,1.0)];
         
+		self.layer.shouldRasterize = YES;
+		self.layer.rasterizationScale = [[UIScreen mainScreen] scale];
         [self.layer addAnimation:shake forKey:@"shakeAnimation"];
     }
     else
     {
         [self.layer removeAnimationForKey:@"shakeAnimation"];
+		self.layer.shouldRasterize = NO;
     }
 }
 
