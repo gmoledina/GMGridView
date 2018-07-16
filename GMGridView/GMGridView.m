@@ -1735,10 +1735,6 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     CGPoint view1Origin = [self.layoutStrategy originForItemAtPosition:index2];
     CGPoint view2Origin = [self.layoutStrategy originForItemAtPosition:index1];
     
-    view1.frame = CGRectMake(view1Origin.x, view1Origin.y, _itemSize.width, _itemSize.height);
-    view2.frame = CGRectMake(view2Origin.x, view2Origin.y, _itemSize.width, _itemSize.height);
-    
-    
     CGRect visibleRect = CGRectMake(self.contentOffset.x,
                                     self.contentOffset.y, 
                                     self.contentSize.width, 
@@ -1750,6 +1746,10 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                           delay:0
                         options:kDefaultAnimationOptions
                      animations:^{
+                         
+                         view1.frame = CGRectMake(view1Origin.x, view1Origin.y, _itemSize.width, _itemSize.height);
+                         view2.frame = CGRectMake(view2Origin.x, view2Origin.y, _itemSize.width, _itemSize.height);                         
+                         
                          if (shouldScroll) {
                              if (!CGRectIntersectsRect(view2.frame, visibleRect)) 
                              {
@@ -1766,6 +1766,56 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
                      }];
 }
 
+- (void)moveObjectAtIndex:(NSInteger)index1 toIndex:(NSInteger)index2 {
+    NSAssert((index1 >= 0 && index1 < _numberTotalItems), @"Invalid index1 specified");
+    NSAssert((index2 >= 0 && index2 < _numberTotalItems), @"Invalid index2 specified");
+    
+    if (index1 == index2) {
+        return;
+    }
+    
+    if (abs(index1-index2) == 1 ) {
+        [self swapObjectAtIndex:index1 withObjectAtIndex:index2 animated:YES];
+        return;
+    }
+    
+    GMGridViewCell *cell = [self cellForItemAtIndex:index1];    
+    if (!cell) {
+        // model already updated
+        cell = [self newItemSubViewForPosition:index2];
+        CGPoint origin = [self.layoutStrategy originForItemAtPosition:index1];
+        CGRect frame = CGRectMake(origin.x, origin.y, _itemSize.width, _itemSize.height);        
+        [UIView animateWithDuration:0 animations:^{
+            cell.frame = frame;
+        }];
+        [self addSubview:cell];
+        [self setSubviewsCacheAsInvalid];        
+    }    
+    
+    if (index1 < index2) {
+        // shuffle all rows > index1 && < index2 down        
+        for (NSInteger i = index1; i<index2; i++) {
+            GMGridViewCell *view = [self cellForItemAtIndex:i+1]; 
+            if (view) {
+                view.tag = i+kTagOffset;
+                [self sendSubviewToBack:view];                
+            }
+        }
+    } else {
+        // shuffle all rows > index2 && < index1 up        
+        for (NSInteger i = index1; i>(index2-1); i--) {
+            GMGridViewCell *view = [self cellForItemAtIndex:i]; 
+            if (view) {
+                view.tag = i+kTagOffset+1;
+                [self sendSubviewToBack:view];
+            }
+        }                             
+    }
+    
+    cell.tag = index2+kTagOffset;
+    
+    [self relayoutItemsAnimated:YES];                         
+}
 
 //////////////////////////////////////////////////////////////
 #pragma mark depracated public methods
